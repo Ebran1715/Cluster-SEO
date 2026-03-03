@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How It Works — ClusterSEO Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, var(--navy), var(--navy-3));
+      padding: 72px 28px 64px; text-align: center; position: relative; overflow: hidden;
+    }
+    .page-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 70% at 50% 0%, rgba(14,165,233,0.12) 0%, transparent 65%); }
+    .page-hero h1 { font-size:clamp(2rem,4vw,3rem); font-weight:800; color:white; letter-spacing:-0.03em; line-height:1.15; margin-bottom:14px; position:relative; }
+    .page-hero p  { font-size:1.05rem; color:rgba(255,255,255,0.5); max-width:520px; margin:0 auto; line-height:1.7; position:relative; }
+
+    /* Steps */
+    .steps-section { padding:88px 28px; background:var(--white); }
+    .steps-inner { max-width:900px; margin:0 auto; }
+    .step-block {
+      display:grid; grid-template-columns:80px 1fr;
+      gap:0 32px; margin-bottom:52px; position:relative;
+    }
+    .step-block:not(:last-child)::after {
+      content:''; position:absolute;
+      left:39px; top:80px; bottom:-20px; width:2px;
+      background:linear-gradient(180deg, var(--teal), transparent);
+    }
+    .step-left { text-align:center; }
+    .step-circle {
+      width:72px; height:72px;
+      background:linear-gradient(135deg, var(--teal), #2563eb);
+      border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-size:1.6rem; font-weight:800; color:white;
+      box-shadow:0 6px 20px rgba(14,165,233,0.35); margin:0 auto;
+    }
+    .step-right { padding-top:12px; }
+    .step-right h3 { font-size:1.3rem; font-weight:800; color:var(--gray-900); margin-bottom:12px; letter-spacing:-0.02em; }
+    .step-right p  { font-size:14.5px; color:var(--gray-500); line-height:1.75; margin-bottom:14px; }
+    .step-tips { background:var(--teal-light); border:1px solid rgba(14,165,233,0.2); border-radius:var(--r); padding:14px 16px; }
+    .step-tips h4 { font-size:12px; font-weight:700; color:var(--teal-dark); letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px; }
+    .step-tips ul { list-style:none; }
+    .step-tips li { font-size:13px; color:var(--gray-600); line-height:1.6; padding:3px 0; display:flex; align-items:flex-start; gap:8px; }
+    .step-tips li::before { content:'→'; color:var(--teal); font-weight:700; flex-shrink:0; margin-top:1px; }
+
+    /* FAQ */
+    .faq-section { padding:80px 28px; background:var(--gray-50); }
+    .faq-inner { max-width:760px; margin:0 auto; }
+    .faq-header { text-align:center; margin-bottom:48px; }
+    .faq-item {
+      background:var(--white); border:1px solid var(--gray-200);
+      border-radius:var(--r-lg); margin-bottom:12px; overflow:hidden;
+      transition:border-color 0.2s;
+    }
+    .faq-item.open { border-color:var(--teal); }
+    .faq-q {
+      padding:18px 22px; cursor:pointer;
+      display:flex; align-items:center; justify-content:space-between; gap:14px;
+      font-size:15px; font-weight:700; color:var(--gray-900);
+      user-select:none;
+    }
+    .faq-q:hover { background:var(--gray-50); }
+    .faq-chevron { color:var(--gray-400); transition:transform 0.25s; flex-shrink:0; }
+    .faq-item.open .faq-chevron { transform:rotate(180deg); color:var(--teal); }
+    .faq-a { display:none; padding:0 22px 18px; font-size:14px; color:var(--gray-500); line-height:1.75; }
+    .faq-item.open .faq-a { display:block; }
+
+    /* CTA */
+    .hiw-cta { padding:80px 28px; background:linear-gradient(135deg,var(--navy-3),var(--navy)); text-align:center; }
+    .hiw-cta h2 { font-size:clamp(1.8rem,3vw,2.5rem); font-weight:800; color:white; letter-spacing:-0.03em; margin-bottom:14px; }
+    .hiw-cta p  { font-size:15px; color:rgba(255,255,255,0.5); margin-bottom:32px; max-width:480px; margin-left:auto; margin-right:auto; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <section class="page-hero">
+    <span class="section-label">Process</span>
+    <h1>How ClusterSEO Pro Works</h1>
+    <p>From a raw keyword list to a structured content strategy in four simple steps — no technical knowledge required.</p>
+  </section>
+
+  <!-- STEPS -->
+  <section class="steps-section">
+    <div class="steps-inner">
+
+      <div class="step-block">
+        <div class="step-left"><div class="step-circle">1</div></div>
+        <div class="step-right">
+          <h3>Upload or Paste Your Keywords</h3>
+          <p>Start by giving ClusterSEO Pro your raw keyword data. You can paste keywords directly into the manual input field — one per line — or upload a CSV or TXT file exported from any keyword research tool. If your keywords have search volume data, include it in the format <code>keyword, volume</code> and we'll use it in the analysis.</p>
+          <div class="step-tips">
+            <h4>Pro Tips</h4>
+            <ul>
+              <li>Export your full keyword list from Ahrefs, SEMrush, or Google Keyword Planner first</li>
+              <li>Include search volume data to get traffic estimates per cluster</li>
+              <li>You can paste a list of 500+ keywords at once — no limit</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-block">
+        <div class="step-left"><div class="step-circle">2</div></div>
+        <div class="step-right">
+          <h3>Adjust Clustering Sensitivity</h3>
+          <p>Use the sensitivity slider to control how strictly keywords are grouped together. Set it to <strong>Loose</strong> to create broad topical clusters — great for pillar pages and topic hubs. Set it to <strong>Tight</strong> to create very specific clusters — perfect for planning individual landing pages or blog posts.</p>
+          <div class="step-tips">
+            <h4>When to use each setting</h4>
+            <ul>
+              <li>Loose (20–40%): Building topical authority clusters and content pillars</li>
+              <li>Medium (45–55%): Standard keyword grouping for most blog/page planning</li>
+              <li>Tight (60–80%): Creating granular, highly-specific page targeting</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-block">
+        <div class="step-left"><div class="step-circle">3</div></div>
+        <div class="step-right">
+          <h3>Run the Clustering Analysis</h3>
+          <p>Click "Start Clustering Analysis" and our engine goes to work. Every keyword is analyzed for its underlying search intent using linguistic signals and SERP pattern recognition. The result is four clean groups: Informational, Transactional, Commercial, and Navigational — each one telling you exactly what content to create.</p>
+          <div class="step-tips">
+            <h4>What happens under the hood</h4>
+            <ul>
+              <li>Keywords are scanned for intent-signal words (how, buy, best, login, etc.)</li>
+              <li>SERP similarity patterns are matched to group related keywords</li>
+              <li>Volume data is aggregated per cluster automatically</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-block">
+        <div class="step-left"><div class="step-circle">4</div></div>
+        <div class="step-right">
+          <h3>Review, Filter & Export Results</h3>
+          <p>The results tab shows you all four intent clusters with keyword counts and total search volume. Click any intent type card to drill into its keywords and see the full list in a sortable table. When you're ready, export a clean CSV to share with your content team, or copy everything to your clipboard in one click.</p>
+          <div class="step-tips">
+            <h4>What to do next</h4>
+            <ul>
+              <li>Map each cluster to a specific page or content piece in your plan</li>
+              <li>Use Commercial clusters for comparison/review pages with high conversion potential</li>
+              <li>Use Informational clusters to build topic authority and answer key questions in your niche</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="faq-inner">
+      <div class="faq-header">
+        <span class="section-label">FAQ</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+      </div>
+
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Is ClusterSEO Pro really free? <i class="fas fa-chevron-down faq-chevron"></i></div>
+        <div class="faq-a">Yes, completely free. No account, no credit card, no hidden limits. You can analyze as many keywords as you need at no cost.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">How many keywords can I process at once? <i class="fas fa-chevron-down faq-chevron"></i></div>
+        <div class="faq-a">There is no hard limit. The tool handles lists of hundreds or even thousands of keywords in a single pass. For very large lists, uploading a CSV file is recommended over manual pasting.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">What file formats are supported for upload? <i class="fas fa-chevron-down faq-chevron"></i></div>
+        <div class="faq-a">CSV (.csv) and plain text (.txt) files are supported. The expected format is one keyword per line, with an optional comma-separated volume value. A header row like "keyword,volume" is automatically detected and skipped.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">How accurate is the intent classification? <i class="fas fa-chevron-down faq-chevron"></i></div>
+        <div class="faq-a">The classifier uses a combination of intent-signal keywords, SERP pattern matching, and linguistic analysis. For most standard keyword lists it performs very accurately. Complex or ambiguous keywords may occasionally be classified differently than a manual expert review — use it as a starting point and refine as needed.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Can I export the results? <i class="fas fa-chevron-down faq-chevron"></i></div>
+        <div class="faq-a">Yes. You can export a structured CSV containing each keyword, its search volume, and its intent category. You can also copy all results to your clipboard in a formatted text layout.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">Do I need technical knowledge to use this tool? <i class="fas fa-chevron-down faq-chevron"></i></div>
+        <div class="faq-a">Not at all. If you can copy and paste a list of keywords, you can use ClusterSEO Pro. The interface is designed to be intuitive for SEO beginners and professionals alike.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="hiw-cta">
+    <h2>Ready to Try It Yourself?</h2>
+    <p>The best way to understand the process is to run your own keywords through it. Takes less than 30 seconds.</p>
+    <a href="tool.html" class="btn-white"><i class="fas fa-play-circle"></i> Start Clustering Now</a>
+  </section>
+
+</div>
+<script src="shared-layout.js"></script>
+<script>
+function toggleFaq(el) {
+  el.classList.toggle('open');
+}
+</script>
+</body>
+</html>

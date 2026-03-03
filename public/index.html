@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClusterSEO Pro — Keyword Clustering & SERP Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* ── HERO ── */
+    .hero {
+      background: var(--navy);
+      padding: 100px 28px 90px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 0%, rgba(14,165,233,0.14) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(37,99,235,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-grid-overlay {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.25);
+      padding: 6px 16px; border-radius: 100px;
+      font-size: 12px; font-weight: 600; color: var(--teal);
+      letter-spacing: 0.04em; margin-bottom: 28px; position: relative;
+    }
+    .badge-pulse {
+      width: 7px; height: 7px; background: var(--teal);
+      border-radius: 50%; animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      font-weight: 800; color: var(--white);
+      letter-spacing: -0.04em; line-height: 1.1;
+      max-width: 860px; margin: 0 auto 22px;
+      position: relative;
+    }
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--teal), #60a5fa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.1rem; color: rgba(255,255,255,0.55);
+      max-width: 560px; margin: 0 auto 40px; line-height: 1.75;
+      position: relative;
+    }
+    .hero-actions {
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px; flex-wrap: wrap; position: relative;
+    }
+    .hero-stats {
+      display: flex; align-items: center; justify-content: center;
+      gap: 48px; flex-wrap: wrap;
+      margin-top: 72px; padding-top: 56px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      position: relative;
+    }
+    .hero-stat strong {
+      display: block; font-size: 2.2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--white), rgba(255,255,255,0.7));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -0.04em; line-height: 1;
+    }
+    .hero-stat span { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 500; margin-top: 5px; display: block; }
+
+    /* ── FEATURES STRIP ── */
+    .strip {
+      background:gray;
+      padding: 22px 28px;
+    }
+    .strip-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: center;
+      gap: 40px; flex-wrap: wrap;
+    }
+    .strip-item {
+      display: flex; align-items: center; gap: 10px;
+      color: rgba(255,255,255,0.85); font-size: 13.5px; font-weight: 500;
+    }
+    .strip-item i { color: rgba(255,255,255,0.7); }
+
+    /* ── HOW IT WORKS PREVIEW ── */
+    .preview-section { padding: 90px 28px; background: var(--white); }
+    .preview-inner { max-width: 1200px; margin: 0 auto; }
+    .preview-header { text-align: center; margin-bottom: 60px; }
+    .steps-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2px; position: relative;
+    }
+    .step-item {
+      padding: 36px 28px; background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      text-align: center; position: relative; transition: all 0.2s;
+    }
+    .step-item:first-child { border-radius: var(--r-lg) 0 0 var(--r-lg); }
+    .step-item:last-child  { border-radius: 0 var(--r-lg) var(--r-lg) 0; }
+    .step-item:hover { background: var(--teal-light); border-color: var(--teal); z-index: 1; }
+    .step-num {
+      width: 50px; height: 50px; margin: 0 auto 18px;
+      background: linear-gradient(135deg, var(--teal), #2563eb);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 800; color: white;
+      box-shadow: 0 4px 16px rgba(14,165,233,0.3);
+    }
+    .step-item h3 { font-size: 15px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+    .step-item p { font-size: 13px; color: var(--gray-500); line-height: 1.65; }
+
+    /* ── FEATURE CARDS ── */
+    .feat-section { padding: 90px 28px; background: var(--gray-50); }
+    .feat-inner { max-width: 1200px; margin: 0 auto; }
+    .feat-header { text-align: center; margin-bottom: 56px; }
+    .feat-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 20px;
+    }
+    .feat-card {
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: var(--r-lg); padding: 30px; transition: all 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .feat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--teal), #2563eb);
+      opacity: 0; transition: opacity 0.25s;
+    }
+    .feat-card:hover { border-color: var(--teal); box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .feat-card:hover::before { opacity: 1; }
+    .feat-icon {
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, var(--teal-light), #dbeafe);
+      border-radius: var(--r); display: flex; align-items: center;
+      justify-content: center; font-size: 18px; color: var(--teal-dark);
+      margin-bottom: 18px;
+    }
+    .feat-card h3 { font-size: 15px; font-weight: 700; color: var(--gray-900); margin-bottom: 9px; }
+    .feat-card p { font-size: 13px; color: var(--gray-500); line-height: 1.7; }
+
+    /* ── BLOG PREVIEW ── */
+    .blog-prev { padding: 90px 28px; background: var(--white); }
+    .blog-prev-inner { max-width: 1200px; margin: 0 auto; }
+    .blog-prev-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 40px; flex-wrap: wrap; gap: 16px;
+    }
+    .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+    .blog-card {
+      border: 1px solid var(--gray-200); border-radius: var(--r-lg);
+      overflow: hidden; background: var(--white); transition: all 0.2s;
+      display: flex; flex-direction: column;
+    }
+    .blog-card:hover { border-color: var(--teal); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+    .blog-thumb {
+      height: 158px; display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; position: relative;
+    }
+    .blog-thumb.t1 { background: linear-gradient(135deg,#e0f2fe,#bfdbfe); }
+    .blog-thumb.t2 { background: linear-gradient(135deg,#d1fae5,#a7f3d0); }
+    .blog-thumb.t3 { background: linear-gradient(135deg,#fef3c7,#fde68a); }
+    .blog-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .blog-tag {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 100px; margin-bottom: 10px;
+    }
+    .tag-guide { background: var(--teal-light); color: var(--teal-dark); }
+    .tag-seo   { background: #dbeafe; color: #1d4ed8; }
+    .tag-tips  { background: var(--gold-light); color: #92400e; }
+    .blog-card h3 { font-size: 15px; font-weight: 700; color: var(--gray-900); line-height: 1.4; margin-bottom: 8px; }
+    .blog-card p { font-size: 13px; color: var(--gray-500); line-height: 1.65; flex: 1; }
+    .blog-meta { display: flex; gap: 14px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--gray-100); font-size: 12px; color: var(--gray-400); }
+    .blog-meta span { display: flex; align-items: center; gap: 4px; }
+    .read-more {
+      margin-top: 12px; color: var(--teal-dark); font-size: 13px; font-weight: 600;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+      transition: gap 0.2s;
+    }
+    .read-more:hover { gap: 9px; }
+
+    /* ── CTA BAND ── */
+    .cta-band {
+      background: linear-gradient(135deg, var(--navy-3), var(--navy));
+      padding: 90px 28px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-band::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 50% 0%, rgba(14,165,233,0.12) 0%, transparent 70%);
+    }
+    .cta-band h2 {
+      font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+      font-weight: 800; color: white; letter-spacing: -0.03em;
+      line-height: 1.2; margin-bottom: 16px; position: relative;
+    }
+    .cta-band p { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.7; margin-bottom: 36px; position: relative; max-width: 520px; margin-left: auto; margin-right: auto; }
+    .cta-band-actions { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; position: relative; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid-overlay"></div>
+    <div style="position:relative;">
+      <div class="hero-badge"><span class="badge-pulse"></span> Free · No Signup Required</div>
+      <h1>Cluster Keywords Smarter,<br><span class="highlight">Rank Pages Faster.</span></h1>
+      <p>ClusterSEO Pro groups your keywords by search intent using advanced SERP analysis — so you can build perfectly targeted content that Google rewards.</p>
+      <div class="hero-actions">
+        <a href="tool.html" class="btn-primary"><i class="fas fa-play-circle"></i> Try It Free Now</a>
+        <a href="how-it-works.html" class="btn-outline" style="color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.15)"><i class="fas fa-book-open"></i> How It Works</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><strong>50K+</strong><span>Keywords Clustered</span></div>
+        <div class="hero-stat"><strong>4</strong><span>Intent Categories</span></div>
+        <div class="hero-stat"><strong>100%</strong><span>Free Forever</span></div>
+        <div class="hero-stat"><strong>CSV</strong><span>Export Ready</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRIP -->
+  <div class="strip">
+    <div class="strip-inner">
+      <div class="strip-item"><i class="fas fa-check-circle"></i> Informational Intent</div>
+      <div class="strip-item"><i class="fas fa-check-circle"></i> Transactional Intent</div>
+      <div class="strip-item"><i class="fas fa-check-circle"></i> Commercial Intent</div>
+      <div class="strip-item"><i class="fas fa-check-circle"></i> Navigational Intent</div>
+      <div class="strip-item"><i class="fas fa-check-circle"></i> CSV Upload & Export</div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS PREVIEW -->
+  <section class="preview-section">
+    <div class="preview-inner">
+      <div class="preview-header">
+        <span class="section-label">Simple Process</span>
+        <h2 class="section-title">From Keywords to Strategy<br>in 4 Steps</h2>
+        <p class="section-desc" style="margin:0 auto;">No complicated setup. Paste your list, hit analyze, and get a structured content plan instantly.</p>
+      </div>
+      <div class="steps-row">
+        <div class="step-item"><div class="step-num">1</div><h3>Upload Keywords</h3><p>Paste a list or upload a CSV from Ahrefs, SEMrush, or Google Keyword Planner.</p></div>
+        <div class="step-item"><div class="step-num">2</div><h3>Set Sensitivity</h3><p>Adjust the clustering slider — loose for broad topics, tight for specific pages.</p></div>
+        <div class="step-item"><div class="step-num">3</div><h3>Run Analysis</h3><p>Our engine classifies every keyword by search intent in milliseconds.</p></div>
+        <div class="step-item"><div class="step-num">4</div><h3>Export & Build</h3><p>Download a clean CSV or copy results to power your content calendar.</p></div>
+      </div>
+      <div style="text-align:center;margin-top:36px;">
+        <a href="how-it-works.html" class="btn-outline">Learn More <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="feat-section">
+    <div class="feat-inner">
+      <div class="feat-header">
+        <span class="section-label">Why ClusterSEO Pro</span>
+        <h2 class="section-title">Built for Real SEO Workflows</h2>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card"><div class="feat-icon"><i class="fas fa-brain"></i></div><h3>Intent Classification</h3><p>Classifies keywords into 4 intent types so you know exactly what content format and page type to create for each cluster.</p></div>
+        <div class="feat-card"><div class="feat-icon"><i class="fas fa-file-csv"></i></div><h3>CSV Upload & Export</h3><p>Upload thousands of keywords from any research tool and export clean, structured CSV results ready for your content team.</p></div>
+        <div class="feat-card"><div class="feat-icon"><i class="fas fa-sliders-h"></i></div><h3>Adjustable Clustering</h3><p>A single sensitivity slider lets you control grouping tightness — perfect for both broad topic research and granular page planning.</p></div>
+        <div class="feat-card"><div class="feat-icon"><i class="fas fa-bolt"></i></div><h3>Instant Results</h3><p>No sign-up, no waiting. Analyze thousands of keywords in seconds and get structured results immediately.</p></div>
+        <div class="feat-card"><div class="feat-icon"><i class="fas fa-chart-pie"></i></div><h3>Volume Analytics</h3><p>See total and average search volume per intent cluster to prioritize your content roadmap by actual demand.</p></div>
+        <div class="feat-card"><div class="feat-icon"><i class="fas fa-copy"></i></div><h3>One-Click Copy</h3><p>Copy your full analysis to the clipboard in a structured text format — ready to paste into Notion, Sheets, or any planning tool.</p></div>
+      </div>
+      <div style="text-align:center;margin-top:36px;">
+        <a href="features.html" class="btn-outline">Explore All Features <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOG PREVIEW -->
+  <section class="blog-prev">
+    <div class="blog-prev-inner">
+      <div class="blog-prev-header">
+        <div>
+          <span class="section-label">From the Blog</span>
+          <h2 class="section-title">SEO Knowledge Hub</h2>
+        </div>
+        <a href="blog.html" class="btn-outline">All Articles <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="blog-grid">
+        <div class="blog-card">
+          <div class="blog-thumb t1">🔍</div>
+          <div class="blog-content">
+            <span class="blog-tag tag-guide">Guide</span>
+            <h3>What Is Keyword Clustering and Why It Matters for SEO in 2025</h3>
+            <p>Learn why grouping keywords into semantic clusters is the foundation of any modern content strategy.</p>
+            <div class="blog-meta"><span><i class="fas fa-calendar"></i> Jan 15, 2025</span><span><i class="fas fa-clock"></i> 8 min</span></div>
+            <a href="blog.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="blog-card">
+          <div class="blog-thumb t2">🎯</div>
+          <div class="blog-content">
+            <span class="blog-tag tag-seo">SEO</span>
+            <h3>Search Intent: The Complete Guide to All 4 Keyword Types</h3>
+            <p>Understand the four types of search intent and how to match your content format to rank and convert better.</p>
+            <div class="blog-meta"><span><i class="fas fa-calendar"></i> Feb 3, 2025</span><span><i class="fas fa-clock"></i> 12 min</span></div>
+            <a href="blog.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="blog-card">
+          <div class="blog-thumb t3">📊</div>
+          <div class="blog-content">
+            <span class="blog-tag tag-tips">Tips</span>
+            <h3>How to Build a Content Silo Strategy Using Keyword Clusters</h3>
+            <p>A step-by-step walkthrough of using clustered keywords to build topic authority and pillar page hierarchies.</p>
+            <div class="blog-meta"><span><i class="fas fa-calendar"></i> Feb 20, 2025</span><span><i class="fas fa-clock"></i> 10 min</span></div>
+            <a href="blog.html" class="read-more">Read Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-band">
+    <h2>Ready to Build Smarter<br>Content? Start Now.</h2>
+    <p>No account. No credit card. Paste your keywords and get intent-classified clusters in seconds.</p>
+    <div class="cta-band-actions">
+      <a href="tool.html" class="btn-white"><i class="fas fa-play-circle"></i> Start Clustering Free</a>
+      <a href="features.html" class="btn-outline" style="color:rgba(255,255,255,0.65);border-color:rgba(255,255,255,0.15)">See All Features</a>
+    </div>
+  </section>
+
+</div>
+<script src="shared-layout.js"></script>
+</body>
+</html>

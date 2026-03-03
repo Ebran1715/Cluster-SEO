@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — ClusterSEO Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .page-hero {
+      background:linear-gradient(135deg,var(--navy),var(--navy-3));
+      padding:72px 28px 64px; text-align:center; position:relative; overflow:hidden;
+    }
+    .page-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 70% at 50% 0%, rgba(14,165,233,0.12) 0%, transparent 65%); }
+    .page-hero h1 { font-size:clamp(2rem,4vw,3rem); font-weight:800; color:white; letter-spacing:-0.03em; margin-bottom:14px; position:relative; }
+    .page-hero p  { font-size:1.05rem; color:rgba(255,255,255,0.5); max-width:520px; margin:0 auto; line-height:1.7; position:relative; }
+
+    .blog-section { padding:72px 28px; background:var(--white); }
+    .blog-inner { max-width:1200px; margin:0 auto; }
+
+    /* Category filter */
+    .filter-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:40px; }
+    .filter-btn {
+      padding:7px 18px; border-radius:100px;
+      border:1px solid var(--gray-200); background:var(--white);
+      font-size:13px; font-weight:600; color:var(--gray-500);
+      cursor:pointer; font-family:var(--font); transition:all 0.2s;
+    }
+    .filter-btn:hover { border-color:var(--teal); color:var(--teal); }
+    .filter-btn.active { background:var(--teal); border-color:var(--teal); color:white; }
+
+    /* Blog grid */
+    .blog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:24px; }
+
+    /* Featured post (full width) */
+    .blog-featured {
+      grid-column:1/-1;
+      display:grid; grid-template-columns:1fr 1fr;
+      border:1px solid var(--gray-200); border-radius:var(--r-xl); overflow:hidden;
+      background:var(--white); transition:all 0.25s;
+    }
+    @media(max-width:700px){ .blog-featured{grid-template-columns:1fr;} }
+    .blog-featured:hover { border-color:var(--teal); box-shadow:var(--shadow-xl); }
+    .feat-thumb {
+      min-height:300px; display:flex; align-items:center; justify-content:center;
+      font-size:5rem; position:relative;
+    }
+    .feat-thumb.t1 { background:linear-gradient(135deg,#e0f2fe,#bfdbfe); }
+    .feat-content { padding:40px; display:flex; flex-direction:column; justify-content:center; }
+    .feat-badge {
+      display:inline-block; font-size:10px; font-weight:700;
+      letter-spacing:.08em; text-transform:uppercase;
+      padding:4px 10px; border-radius:100px; margin-bottom:14px;
+      background:var(--teal); color:white;
+    }
+    .feat-content h2 { font-size:1.5rem; font-weight:800; color:var(--gray-900); line-height:1.3; margin-bottom:12px; letter-spacing:-0.02em; }
+    .feat-content p  { font-size:14px; color:var(--gray-500); line-height:1.75; flex:1; margin-bottom:20px; }
+    .feat-meta { display:flex; gap:16px; font-size:12px; color:var(--gray-400); margin-bottom:20px; }
+    .feat-meta span { display:flex; align-items:center; gap:4px; }
+    .read-link {
+      display:inline-flex; align-items:center; gap:7px;
+      font-size:14px; font-weight:700; color:var(--teal-dark);
+      text-decoration:none; transition:gap 0.2s;
+    }
+    .read-link:hover { gap:12px; }
+
+    /* Normal card */
+    .b-card {
+      border:1px solid var(--gray-200); border-radius:var(--r-xl); overflow:hidden;
+      background:var(--white); transition:all 0.25s; display:flex; flex-direction:column;
+    }
+    .b-card:hover { border-color:var(--teal); box-shadow:var(--shadow-lg); transform:translateY(-4px); }
+    .b-thumb { height:168px; display:flex; align-items:center; justify-content:center; font-size:3.2rem; }
+    .b-thumb.t1 { background:linear-gradient(135deg,#e0f2fe,#bfdbfe); }
+    .b-thumb.t2 { background:linear-gradient(135deg,#d1fae5,#a7f3d0); }
+    .b-thumb.t3 { background:linear-gradient(135deg,#fef3c7,#fde68a); }
+    .b-thumb.t4 { background:linear-gradient(135deg,#ede9fe,#ddd6fe); }
+    .b-thumb.t5 { background:linear-gradient(135deg,#fee2e2,#fecaca); }
+    .b-content { padding:22px; flex:1; display:flex; flex-direction:column; }
+    .b-tag {
+      display:inline-block; font-size:10px; font-weight:700;
+      letter-spacing:.06em; text-transform:uppercase;
+      padding:3px 9px; border-radius:100px; margin-bottom:10px;
+    }
+    .tag-guide { background:var(--teal-light); color:var(--teal-dark); }
+    .tag-seo   { background:#dbeafe; color:#1d4ed8; }
+    .tag-tips  { background:var(--gold-light); color:#92400e; }
+    .tag-tools { background:var(--gray-100); color:var(--gray-600); }
+    .tag-adv   { background:#ede9fe; color:#6d28d9; }
+    .tag-case  { background:var(--green-light); color:#065f46; }
+    .b-card h3 { font-size:15px; font-weight:800; color:var(--gray-900); line-height:1.4; margin-bottom:8px; }
+    .b-card p  { font-size:13px; color:var(--gray-500); line-height:1.67; flex:1; }
+    .b-meta { display:flex; gap:12px; margin-top:14px; padding-top:12px; border-top:1px solid var(--gray-100); font-size:12px; color:var(--gray-400); }
+    .b-meta span { display:flex; align-items:center; gap:4px; }
+    .b-read {
+      margin-top:12px; color:var(--teal-dark); font-size:13px; font-weight:700;
+      text-decoration:none; display:inline-flex; align-items:center; gap:5px; transition:gap 0.2s;
+    }
+    .b-read:hover { gap:9px; }
+
+    /* Newsletter */
+    .newsletter { padding:72px 28px; background:var(--gray-50); }
+    .nl-inner { max-width:600px; margin:0 auto; text-align:center; }
+    .nl-inner h2 { font-size:1.8rem; font-weight:800; color:var(--gray-900); letter-spacing:-0.02em; margin-bottom:12px; }
+    .nl-inner p  { font-size:14px; color:var(--gray-500); margin-bottom:28px; line-height:1.7; }
+    .nl-form { display:flex; gap:10px; max-width:420px; margin:0 auto; }
+    .nl-input {
+      flex:1; padding:12px 16px; border:1.5px solid var(--gray-200);
+      border-radius:var(--r); font-size:14px; font-family:var(--font);
+      color:var(--gray-700); outline:none; background:var(--white); transition:border-color 0.2s;
+    }
+    .nl-input:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(14,165,233,0.1); }
+    .nl-btn {
+      padding:12px 22px; background:linear-gradient(135deg,var(--teal),#2563eb);
+      color:white; border:none; border-radius:var(--r); font-size:14px; font-weight:700;
+      cursor:pointer; font-family:var(--font); white-space:nowrap;
+      box-shadow:0 4px 14px rgba(14,165,233,0.3); transition:all 0.2s;
+    }
+    .nl-btn:hover { opacity:.88; }
+    .nl-note { font-size:12px; color:var(--gray-400); margin-top:12px; }
+    @media(max-width:480px){ .nl-form{flex-direction:column;} }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <section class="page-hero">
+    <span class="section-label">Blog</span>
+    <h1>SEO Knowledge Hub</h1>
+    <p>Guides, tutorials, and strategies to help you master keyword research, content clustering, and search intent.</p>
+  </section>
+
+  <section class="blog-section">
+    <div class="blog-inner">
+
+      <!-- Filter -->
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterPosts(this,'all')">All Posts</button>
+        <button class="filter-btn" onclick="filterPosts(this,'guide')">Guides</button>
+        <button class="filter-btn" onclick="filterPosts(this,'seo')">SEO</button>
+        <button class="filter-btn" onclick="filterPosts(this,'tips')">Tips & Tricks</button>
+        <button class="filter-btn" onclick="filterPosts(this,'tools')">Tools</button>
+      </div>
+
+      <div class="blog-grid" id="blogGrid">
+
+        <!-- FEATURED -->
+        <div class="blog-featured" data-cat="guide">
+          <div class="feat-thumb t1">🔍</div>
+          <div class="feat-content">
+            <span class="feat-badge">Featured Guide</span>
+            <h2>What Is Keyword Clustering and Why It's the Foundation of Modern SEO</h2>
+            <p>Keyword clustering is the practice of grouping semantically related keywords so you can target them with a single, highly-relevant piece of content. In 2025, it's not optional — it's how you win. This comprehensive guide explains everything from the basics to advanced clustering strategies.</p>
+            <div class="feat-meta">
+              <span><i class="fas fa-calendar"></i> Jan 15, 2025</span>
+              <span><i class="fas fa-clock"></i> 12 min read</span>
+              <span><i class="fas fa-user"></i> SEO Team</span>
+            </div>
+            <a href="#" class="read-link">Read Full Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- POST 1 -->
+        <div class="b-card" data-cat="seo">
+          <div class="b-thumb t2">🎯</div>
+          <div class="b-content">
+            <span class="b-tag tag-seo">SEO</span>
+            <h3>Search Intent: The Complete Guide to All 4 Keyword Types</h3>
+            <p>Learn how to identify informational, transactional, commercial, and navigational intent — and match your content to what users actually want.</p>
+            <div class="b-meta"><span><i class="fas fa-calendar"></i> Feb 3, 2025</span><span><i class="fas fa-clock"></i> 10 min</span></div>
+            <a href="#" class="b-read">Read Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- POST 2 -->
+        <div class="b-card" data-cat="tips">
+          <div class="b-thumb t3">📊</div>
+          <div class="b-content">
+            <span class="b-tag tag-tips">Tips</span>
+            <h3>How to Build a Content Silo Strategy Using Keyword Clusters</h3>
+            <p>A step-by-step walkthrough of using clustered keywords to build topic authority, pillar pages, and a winning internal linking structure.</p>
+            <div class="b-meta"><span><i class="fas fa-calendar"></i> Feb 20, 2025</span><span><i class="fas fa-clock"></i> 9 min</span></div>
+            <a href="#" class="b-read">Read Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- POST 3 -->
+        <div class="b-card" data-cat="tools">
+          <div class="b-thumb t4">🛠️</div>
+          <div class="b-content">
+            <span class="b-tag tag-tools">Tools</span>
+            <h3>Top 7 Free SEO Tools Every Content Marketer Should Use in 2025</h3>
+            <p>A curated list of the best free SEO tools for keyword research, clustering, rank tracking, and content optimization.</p>
+            <div class="b-meta"><span><i class="fas fa-calendar"></i> Mar 1, 2025</span><span><i class="fas fa-clock"></i> 6 min</span></div>
+            <a href="#" class="b-read">Read Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- POST 4 -->
+        <div class="b-card" data-cat="guide">
+          <div class="b-thumb t1">📝</div>
+          <div class="b-content">
+            <span class="b-tag tag-guide">Guide</span>
+            <h3>How to Export Keywords from Ahrefs and Cluster Them in Minutes</h3>
+            <p>A practical walkthrough of exporting keyword data from Ahrefs and running it through ClusterSEO Pro for instant intent-based grouping.</p>
+            <div class="b-meta"><span><i class="fas fa-calendar"></i> Mar 14, 2025</span><span><i class="fas fa-clock"></i> 7 min</span></div>
+            <a href="#" class="b-read">Read Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- POST 5 -->
+        <div class="b-card" data-cat="seo">
+          <div class="b-thumb t5">📈</div>
+          <div class="b-content">
+            <span class="b-tag tag-seo">SEO</span>
+            <h3>Keyword Cannibalization: How to Find It and Fix It With Clustering</h3>
+            <p>Keyword cannibalization kills rankings. Learn how to identify overlapping pages on your site and use clusters to consolidate and win.</p>
+            <div class="b-meta"><span><i class="fas fa-calendar"></i> Apr 2, 2025</span><span><i class="fas fa-clock"></i> 11 min</span></div>
+            <a href="#" class="b-read">Read Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- POST 6 -->
+        <div class="b-card" data-cat="tips">
+          <div class="b-thumb t2">💡</div>
+          <div class="b-content">
+            <span class="b-tag tag-tips">Tips</span>
+            <h3>5 Ways to Use Commercial Intent Keywords to Drive More Revenue</h3>
+            <p>Commercial intent keywords are gold for conversions. Here's how to find them, cluster them, and create content that turns browsers into buyers.</p>
+            <div class="b-meta"><span><i class="fas fa-calendar"></i> Apr 18, 2025</span><span><i class="fas fa-clock"></i> 8 min</span></div>
+            <a href="#" class="b-read">Read Article <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+      </div><!-- /blog-grid -->
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="newsletter">
+    <div class="nl-inner">
+      <span class="section-label">Newsletter</span>
+      <h2>Stay Ahead in SEO</h2>
+      <p>Get our latest keyword strategy guides, tool updates, and SEO tips delivered to your inbox weekly. No spam, unsubscribe anytime.</p>
+      <div class="nl-form">
+        <input class="nl-input" type="email" placeholder="Enter your email address">
+        <button class="nl-btn">Subscribe</button>
+      </div>
+      <p class="nl-note">Join 2,400+ SEO professionals. No spam, ever.</p>
+    </div>
+  </section>
+
+</div>
+<script src="shared-layout.js"></script>
+<script>
+function filterPosts(btn, cat) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#blogGrid > *').forEach(card => {
+    if (cat === 'all') {
+      card.style.display = '';
+    } else {
+      card.style.display = (card.dataset.cat === cat) ? '' : 'none';
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyword Clustering Tool — ClusterSEO Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .tool-hero {
+      background: linear-gradient(135deg, var(--navy), var(--navy-3));
+      padding: 52px 28px 40px; text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .tool-hero h1 { font-size: 2rem; font-weight: 800; color: var(--white); letter-spacing: -0.03em; margin-bottom: 8px; }
+    .tool-hero p  { font-size: 14px; color: rgba(255,255,255,0.5); }
+
+    .tool-section { padding: 40px 28px 72px; }
+    .tool-inner   { max-width: 1100px; margin: 0 auto; }
+
+    /* Browser chrome */
+    .browser-chrome {
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--shadow-xl);
+    }
+    .browser-bar {
+      background: var(--gray-100); border-bottom: 1px solid var(--gray-200);
+      padding: 12px 18px; display: flex; align-items: center; gap: 12px;
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c840; }
+    .browser-url {
+      flex: 1; background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: var(--r-sm); padding: 5px 12px;
+      font-size: 12px; color: var(--gray-400); font-family: var(--mono);
+    }
+    .browser-help-btn {
+      background: none; border: 1px solid var(--gray-200); padding: 5px 12px;
+      border-radius: var(--r-sm); font-size: 12px; color: var(--gray-500);
+      cursor: pointer; font-family: var(--font); display: flex; align-items: center; gap: 5px;
+      transition: all 0.2s;
+    }
+    .browser-help-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* App inside */
+    .app-inside { padding: 28px; }
+
+    /* App brand row */
+    .app-brand-row {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; padding-bottom: 20px;
+      border-bottom: 1px solid var(--gray-200); margin-bottom: 22px;
+    }
+    .app-brand { display: flex; align-items: center; gap: 12px; }
+    .app-brand-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--teal), #2563eb);
+      border-radius: var(--r-sm); display: flex; align-items: center;
+      justify-content: center; color: white; font-size: 15px;
+    }
+    .app-brand-name { font-size: 1.05rem; font-weight: 800; color: var(--gray-900); }
+    .app-brand-name span {
+      background: var(--teal); color: white;
+      font-size: 9px; padding: 2px 6px; border-radius: 3px;
+      font-weight: 700; letter-spacing: 0.05em; margin-left: 5px; vertical-align: middle;
+    }
+    .app-brand-sub { font-size: 12px; color: var(--gray-400); }
+
+    /* Tabs */
+    .app-tabs {
+      display: flex; gap: 2px;
+      background: var(--gray-100); border-radius: var(--r);
+      padding: 4px; margin-bottom: 24px;
+    }
+    .app-tab {
+      flex: 1; padding: 9px 16px;
+      background: transparent; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--gray-400);
+      border-radius: var(--r-sm); transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      font-family: var(--font);
+    }
+    .app-tab:hover { color: var(--gray-700); }
+    .app-tab.active {
+      background: var(--white); color: var(--gray-900);
+      font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .app-tab:disabled { opacity: 0.35; cursor: not-allowed; }
+    .app-panel { display: none; }
+    .app-panel.active { display: block; animation: fadeUp 0.25s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--gray-300); border-radius: var(--r-lg);
+      padding: 52px 24px; text-align: center; cursor: pointer;
+      transition: all 0.2s; background: var(--gray-50);
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--teal); background: var(--teal-light);
+    }
+    .upload-icon-box {
+      width: 58px; height: 58px; background: var(--white);
+      border: 1px solid var(--gray-200); border-radius: var(--r);
+      margin: 0 auto 18px; display: flex; align-items: center;
+      justify-content: center; font-size: 22px; color: var(--teal-dark);
+      box-shadow: var(--shadow-sm);
+    }
+    .upload-zone h3 { font-size: 16px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px; }
+    .upload-zone p  { font-size: 13px; color: var(--gray-500); margin-bottom: 4px; }
+    .upload-code {
+      display: inline-block; font-family: var(--mono);
+      font-size: 12px; padding: 4px 10px;
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: var(--r-sm); color: var(--gray-600); margin: 10px 0;
+    }
+    .btn-browse {
+      margin-top: 16px; padding: 10px 24px;
+      background: linear-gradient(135deg, var(--teal), #2563eb);
+      color: white; border: none; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: var(--font); display: inline-flex; align-items: center; gap: 7px;
+      box-shadow: 0 4px 14px rgba(14,165,233,0.3); transition: all 0.2s;
+    }
+    .btn-browse:hover { opacity: 0.88; transform: translateY(-1px); }
+    .file-bar {
+      display: none; align-items: center; justify-content: space-between;
+      padding: 12px 16px; margin-top: 14px;
+      background: var(--teal-light); border: 1px solid rgba(14,165,233,0.2);
+      border-radius: var(--r); gap: 12px;
+    }
+    .file-bar.show { display: flex; }
+    .file-bar-info { display: flex; align-items: center; gap: 10px; }
+    .file-bar-info i { color: var(--teal-dark); font-size: 18px; }
+    .file-bar-info h4 { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+    .file-bar-info p  { font-size: 12px; color: var(--gray-500); }
+    .btn-rm {
+      background: none; border: 1px solid rgba(14,165,233,0.25);
+      padding: 5px 12px; border-radius: var(--r-sm);
+      font-size: 12px; font-weight: 500; color: var(--gray-600);
+      cursor: pointer; font-family: var(--font); transition: all 0.2s;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .btn-rm:hover { border-color: var(--red); color: var(--red); }
+    .btn-process {
+      width: 100%; margin-top: 16px; padding: 13px;
+      background: linear-gradient(135deg, var(--green), #059669);
+      color: white; border: none; border-radius: var(--r);
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      font-family: var(--font);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 14px rgba(16,185,129,0.3); transition: all 0.2s;
+    }
+    .btn-process:hover { opacity: 0.88; }
+    .btn-process:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+
+    /* Manual grid */
+    .manual-grid { display: grid; grid-template-columns: 1fr 260px; gap: 22px; }
+    @media(max-width:700px){ .manual-grid{grid-template-columns:1fr;} }
+    .input-lbl {
+      font-size: 13px; font-weight: 600; color: var(--gray-700);
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    }
+    textarea.kw-box {
+      width: 100%; min-height: 218px;
+      border: 1px solid var(--gray-200); border-radius: var(--r);
+      padding: 13px; font-size: 13px; font-family: var(--mono);
+      color: var(--gray-700); background: var(--white); resize: vertical; line-height: 1.6;
+      transition: border-color 0.2s;
+    }
+    textarea.kw-box:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+    .input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+    .kw-counter { font-size: 12px; color: var(--gray-400); }
+    .btn-clr {
+      background: none; border: 1px solid var(--gray-200);
+      padding: 4px 10px; border-radius: var(--r-sm);
+      font-size: 12px; color: var(--gray-400); cursor: pointer;
+      font-family: var(--font); display: flex; align-items: center; gap: 4px; transition: all 0.2s;
+    }
+    .btn-clr:hover { border-color: var(--red); color: var(--red); }
+
+    /* Settings sidebar */
+    .setting-lbl { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    input[type=range] {
+      width: 100%; height: 4px; background: var(--gray-200);
+      border-radius: 2px; outline: none; -webkit-appearance: none; cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px;
+      background: linear-gradient(135deg, var(--teal), #2563eb);
+      border-radius: 50%; border: 2px solid white;
+      box-shadow: 0 2px 8px rgba(14,165,233,0.4); cursor: pointer;
+    }
+    .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--gray-400); margin-top: 6px; }
+    .slider-val { color: var(--teal) !important; font-weight: 700; }
+    .btn-analyze {
+      width: 100%; margin-top: 10px; padding: 13px;
+      background: linear-gradient(135deg, var(--teal), #2563eb);
+      color: white; border: none; border-radius: var(--r);
+      font-size: 14px; font-weight: 700; cursor: pointer; font-family: var(--font);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 18px rgba(14,165,233,0.3); transition: all 0.2s;
+    }
+    .btn-analyze:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* Results */
+    .r-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 18px; }
+    .r-stat {
+      background: var(--gray-50); border: 1px solid var(--gray-200);
+      border-radius: var(--r); padding: 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .r-stat-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--teal), #2563eb);
+      border-radius: var(--r-sm); display: flex; align-items: center;
+      justify-content: center; color: white; font-size: 14px; flex-shrink: 0;
+    }
+    .r-stat h4 { font-size: 1.35rem; font-weight: 800; line-height: 1; color: var(--gray-900); }
+    .r-stat p  { font-size: 11px; color: var(--gray-400); margin-top: 2px; font-weight: 500; }
+
+    .intent-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px; }
+    @media(max-width:560px){ .intent-grid{grid-template-columns:repeat(2,1fr);} }
+    .intent-box {
+      border: 1px solid var(--gray-200); border-radius: var(--r); padding: 14px 10px;
+      text-align: center; cursor: pointer; transition: all 0.2s; background: var(--white);
+      position: relative; overflow: hidden;
+    }
+    .intent-box::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; }
+    .intent-box.info::before  { background: var(--teal); }
+    .intent-box.trans::before { background: var(--gold); }
+    .intent-box.comm::before  { background: var(--green); }
+    .intent-box.nav::before   { background: #7c3aed; }
+    .intent-box:hover { border-color: var(--gray-400); transform: translateY(-2px); box-shadow: var(--shadow); }
+    .intent-box.active { border-color: var(--teal); box-shadow: 0 0 0 2px rgba(14,165,233,0.15); }
+    .intent-box-icon {
+      width: 34px; height: 34px; border-radius: var(--r-sm);
+      margin: 0 auto 8px; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .intent-box.info  .intent-box-icon { background: var(--teal-light); color: var(--teal-dark); }
+    .intent-box.trans .intent-box-icon { background: var(--gold-light); color: #92400e; }
+    .intent-box.comm  .intent-box-icon { background: var(--green-light); color: #065f46; }
+    .intent-box.nav   .intent-box-icon { background: #ede9fe; color: #6d28d9; }
+    .intent-box-count { font-size: 1.4rem; font-weight: 800; color: var(--gray-900); line-height: 1; }
+    .intent-box-label { font-size: 11px; color: var(--gray-400); font-weight: 500; margin-top: 2px; }
+
+    .r-actions { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--gray-200); }
+    .btn-act {
+      padding: 8px 16px; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: var(--font); display: flex; align-items: center; gap: 6px;
+      border: 1px solid var(--gray-200); background: var(--white); color: var(--gray-600);
+      transition: all 0.2s;
+    }
+    .btn-act:hover { border-color: var(--teal); color: var(--teal); }
+    .btn-act.primary { background: linear-gradient(135deg,var(--teal),#2563eb); color: white; border-color: var(--teal); box-shadow: 0 2px 8px rgba(14,165,233,0.2); }
+    .btn-act.primary:hover { opacity: 0.88; }
+
+    /* Cluster output container */
+    .clusters-out {
+      background: var(--gray-50); border: 1px solid var(--gray-200);
+      border-radius: var(--r-lg); overflow: hidden;
+    }
+    .clusters-out-head {
+      padding: 16px 20px; background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .clusters-out-head h3 { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+    .clusters-out-head p  { font-size: 12px; color: var(--gray-400); margin-top: 3px; }
+    .clusters-body-inner { padding: 16px; }
+
+    /* intent row */
+    .intent-row {
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: var(--r); margin-bottom: 10px; overflow: hidden; transition: all 0.2s;
+    }
+    .intent-row:hover { border-color: var(--teal); box-shadow: var(--shadow); }
+    .intent-row-hdr {
+      padding: 14px 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      border-left: 3px solid transparent;
+    }
+    .intent-row.info  .intent-row-hdr { border-left-color: var(--teal); }
+    .intent-row.trans .intent-row-hdr { border-left-color: var(--gold); }
+    .intent-row.comm  .intent-row-hdr { border-left-color: var(--green); }
+    .intent-row.nav   .intent-row-hdr { border-left-color: #7c3aed; }
+    .intent-row-left  { display: flex; align-items: center; gap: 12px; }
+    .intent-row-ico   { width: 30px; height: 30px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .intent-row.info  .intent-row-ico { background: var(--teal-light); color: var(--teal-dark); }
+    .intent-row.trans .intent-row-ico { background: var(--gold-light); color: #92400e; }
+    .intent-row.comm  .intent-row-ico { background: var(--green-light); color: #065f46; }
+    .intent-row.nav   .intent-row-ico { background: #ede9fe; color: #6d28d9; }
+    .intent-row-name  { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+    .intent-row-meta  { display: flex; gap: 12px; font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+    .intent-row-right { display: flex; align-items: center; gap: 8px; }
+    .btn-view { background:none; border:1px solid var(--gray-200); padding:5px 12px; border-radius:var(--r-sm); font-size:12px; font-weight:600; color:var(--gray-500); cursor:pointer; font-family:var(--font); display:flex; align-items:center; gap:4px; transition:all 0.2s; }
+    .btn-view:hover { border-color: var(--teal); color: var(--teal); }
+    .chevron { color: var(--gray-300); font-size: 11px; }
+    .intent-row-prev { padding: 10px 16px 14px; border-top: 1px solid var(--gray-100); background: var(--gray-50); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .prev-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .prev-tag  { background: var(--white); border: 1px solid var(--gray-200); padding: 4px 10px; border-radius: var(--r-sm); font-size: 12px; color: var(--gray-700); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    .prev-vol  { font-family: var(--mono); font-size: 10px; color: var(--gray-400); }
+    .prev-more { font-size: 11px; color: var(--gray-400); font-style: italic; }
+
+    /* kw table */
+    .kw-tbl { width:100%; border-collapse:collapse; font-size:13px; background:var(--white); border:1px solid var(--gray-200); border-radius:var(--r); overflow:hidden; }
+    .kw-tbl thead { background: var(--gray-50); border-bottom: 2px solid var(--gray-200); }
+    .kw-tbl th { padding:10px 14px; text-align:left; font-size:11px; font-weight:700; color:var(--gray-500); letter-spacing:.06em; text-transform:uppercase; }
+    .kw-tbl th:first-child,.kw-tbl td:first-child { width:50px; text-align:center; }
+    .kw-tbl th:last-child,.kw-tbl td:last-child   { width:90px; text-align:center; }
+    .kw-tbl td { padding:10px 14px; border-bottom:1px solid var(--gray-100); color:var(--gray-800); font-weight:500; }
+    .kw-tbl td:first-child { font-family:var(--mono); font-size:11px; color:var(--gray-400); }
+    .kw-tbl td:last-child  { font-family:var(--mono); font-weight:700; color:var(--teal-dark); }
+    .kw-tbl tr:last-child td { border-bottom:none; }
+    .kw-tbl tr:hover { background: var(--gray-50); }
+
+    /* back header */
+    .back-hdr { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+    .btn-back { background:none; border:1px solid var(--gray-200); padding:7px 14px; border-radius:var(--r-sm); font-size:13px; font-weight:600; color:var(--gray-500); cursor:pointer; font-family:var(--font); display:flex; align-items:center; gap:6px; transition:all 0.2s; }
+    .btn-back:hover { border-color:var(--teal); color:var(--teal); }
+    .back-title { font-size:1.1rem; font-weight:800; color:var(--gray-900); }
+    .back-meta { display:flex; gap:8px; font-size:12px; flex-wrap:wrap; margin-top:4px; }
+    .back-meta span { background:var(--teal-light); color:var(--teal-dark); padding:3px 9px; border-radius:var(--r-sm); font-weight:600; }
+
+    /* empty */
+    .empty-inner { text-align:center; padding:48px 24px; color:var(--gray-400); }
+    .empty-inner i { font-size:2.5rem; color:var(--gray-200); margin-bottom:12px; display:block; }
+    .empty-inner h3 { font-size:16px; font-weight:700; color:var(--gray-600); margin-bottom:6px; }
+
+    /* loading */
+    .loading-overlay {
+      position:fixed; inset:0; z-index:9999;
+      background:rgba(248,250,252,0.92); backdrop-filter:blur(8px);
+      display:none; align-items:center; justify-content:center;
+    }
+    .loading-overlay.show { display:flex; }
+    .loading-card {
+      background:var(--white); border:1px solid var(--gray-200);
+      border-radius:var(--r-xl); padding:36px 44px;
+      text-align:center; box-shadow:var(--shadow-xl); max-width:290px;
+    }
+    .ring {
+      width:46px; height:46px; margin:0 auto 20px;
+      border:3px solid var(--gray-200); border-top-color:var(--teal);
+      border-radius:50%; animation:spin .8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-card h3 { font-size:16px; font-weight:800; color:var(--gray-900); margin-bottom:6px; }
+    .loading-card p  { font-size:13px; color:var(--gray-400); margin-bottom:18px; }
+    .prog-track { height:3px; background:var(--gray-200); border-radius:2px; overflow:hidden; }
+    .prog-fill  { height:100%; background:linear-gradient(90deg,var(--teal),#2563eb); width:40%; animation:prg 1.8s ease-in-out infinite; }
+    @keyframes prg{0%{transform:translateX(-120%)} 100%{transform:translateX(300%)}}
+
+    /* modal */
+    .modal-over { position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; padding:16px; }
+    .modal-over.show { display:flex; }
+    .modal-box { background:var(--white); border-radius:var(--r-xl); max-width:480px; width:100%; overflow:hidden; box-shadow:var(--shadow-xl); }
+    .modal-hd { padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--gray-200); background:var(--gray-50); }
+    .modal-hd h3 { font-size:15px; font-weight:700; color:var(--gray-900); display:flex; align-items:center; gap:8px; }
+    .modal-x { background:none; border:none; font-size:18px; color:var(--gray-400); cursor:pointer; width:28px; height:28px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .modal-x:hover { background:var(--gray-200); color:var(--gray-900); }
+    .modal-bd { padding:20px; overflow-y:auto; max-height:60vh; }
+    .modal-bd h4 { font-size:13px; font-weight:700; color:var(--navy); margin:14px 0 6px; }
+    .modal-bd h4:first-child { margin-top:0; }
+    .modal-bd p,.modal-bd li { font-size:13px; color:var(--gray-500); line-height:1.65; }
+    .modal-bd ol,.modal-bd ul { margin-left:18px; margin-bottom:10px; }
+    .modal-bd li { margin-bottom:4px; }
+    .modal-ft { padding:14px 20px; border-top:1px solid var(--gray-200); display:flex; justify-content:flex-end; background:var(--gray-50); }
+    .btn-ok { background:linear-gradient(135deg,var(--teal),#2563eb); color:white; border:none; padding:9px 22px; border-radius:var(--r-sm); font-size:13px; font-weight:700; cursor:pointer; font-family:var(--font); }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Tool Hero Banner -->
+  <section class="tool-hero">
+    <h1><i class="fas fa-project-diagram" style="color:var(--teal);margin-right:10px;"></i> Keyword Clustering Tool</h1>
+    <p>Upload or paste keywords — get intent-classified clusters instantly</p>
+  </section>
+
+  <!-- Tool Section -->
+  <section class="tool-section">
+    <div class="tool-inner">
+      <div class="browser-chrome">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+          </div>
+          <div class="browser-url">clusterseo.pro/tool — Keyword Clustering Analysis</div>
+          <button class="browser-help-btn" onclick="document.getElementById('helpModal').classList.add('show')">
+            <i class="fas fa-question-circle"></i> Help
+          </button>
+        </div>
+
+        <div class="app-inside">
+          <!-- Brand -->
+          <div class="app-brand-row">
+            <div class="app-brand">
+              <div class="app-brand-icon"><i class="fas fa-project-diagram"></i></div>
+              <div>
+                <div class="app-brand-name">ClusterSEO<span>PRO</span></div>
+                <div class="app-brand-sub">Advanced Keyword Clustering & SERP Analysis</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="app-tabs">
+            <button class="app-tab active" data-tab="upload" onclick="switchTab('upload')">
+              <i class="fas fa-upload"></i> Upload File
+            </button>
+            <button class="app-tab" data-tab="manual" onclick="switchTab('manual')">
+              <i class="fas fa-keyboard"></i> Manual Input
+            </button>
+            <button class="app-tab" data-tab="results" id="resultsTabBtn" disabled>
+              <i class="fas fa-chart-bar"></i> Results
+            </button>
+          </div>
+
+          <!-- UPLOAD PANEL -->
+          <div class="app-panel active" id="panel-upload">
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+              <input type="file" id="fileInput" accept=".csv,.txt" hidden onchange="handleFileSelect(event)">
+              <div class="upload-icon-box"><i class="fas fa-file-csv"></i></div>
+              <h3>Drag & Drop Your File Here</h3>
+              <p>Supported formats: CSV, TXT (max 10MB)</p>
+              <div class="upload-code">keyword, volume</div>
+              <p style="font-size:12px;color:var(--gray-400);">or one keyword per line</p>
+              <button class="btn-browse" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+                <i class="fas fa-folder-open"></i> Browse Files
+              </button>
+            </div>
+            <div class="file-bar" id="fileBar">
+              <div class="file-bar-info">
+                <i class="fas fa-file-alt"></i>
+                <div><h4 id="fileName">—</h4><p id="fileStats">0 keywords</p></div>
+              </div>
+              <button class="btn-rm" onclick="removeFile()"><i class="fas fa-times"></i> Remove</button>
+            </div>
+            <button class="btn-process" id="processBtn" disabled onclick="processUploadedFile()">
+              <i class="fas fa-cogs"></i> Process File & Analyze
+            </button>
+          </div>
+
+          <!-- MANUAL PANEL -->
+          <div class="app-panel" id="panel-manual">
+            <div class="manual-grid">
+              <div>
+                <div class="input-lbl"><i class="fas fa-key"></i> Keywords — one per line or keyword, volume</div>
+                <textarea class="kw-box" id="keywordsInput" placeholder="best running shoes&#10;buy nike shoes online, 2400&#10;running shoes review&#10;how to choose running shoes, 1200&#10;nike official website" oninput="updateCount()"></textarea>
+                <div class="input-footer">
+                  <span class="kw-counter" id="kwCount">0 keywords</span>
+                  <button class="btn-clr" onclick="clearKw()"><i class="fas fa-trash"></i> Clear</button>
+                </div>
+              </div>
+              <div>
+                <div class="setting-lbl"><i class="fas fa-sliders-h"></i> Clustering Sensitivity</div>
+                <div style="margin-bottom:20px;">
+                  <input type="range" id="clusterThreshold" min="0" max="1" value="0.5" step="0.05" oninput="updateSlider(this)">
+                  <div class="slider-labels">
+                    <span>Loose</span>
+                    <span class="slider-val" id="thresholdValue">50%</span>
+                    <span>Tight</span>
+                  </div>
+                </div>
+                <button class="btn-analyze" onclick="analyzeKeywords()">
+                  <i class="fas fa-play-circle"></i> Start Clustering Analysis
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESULTS PANEL -->
+          <div class="app-panel" id="panel-results">
+            <div class="r-stats">
+              <div class="r-stat"><div class="r-stat-icon"><i class="fas fa-layer-group"></i></div><div><h4 id="totalClusters">0</h4><p>Total Clusters</p></div></div>
+              <div class="r-stat"><div class="r-stat-icon"><i class="fas fa-key"></i></div><div><h4 id="totalKeywords">0</h4><p>Keywords</p></div></div>
+              <div class="r-stat"><div class="r-stat-icon"><i class="fas fa-chart-bar"></i></div><div><h4 id="totalVolume">0</h4><p>Total Volume</p></div></div>
+            </div>
+            <div class="intent-grid">
+              <div class="intent-box info" data-intent="Informational" onclick="showIntentKw('Informational')">
+                <div class="intent-box-icon"><i class="fas fa-info-circle"></i></div>
+                <div class="intent-box-count" id="infoCount">0</div>
+                <div class="intent-box-label">Informational</div>
+              </div>
+              <div class="intent-box trans" data-intent="Transactional" onclick="showIntentKw('Transactional')">
+                <div class="intent-box-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="intent-box-count" id="transCount">0</div>
+                <div class="intent-box-label">Transactional</div>
+              </div>
+              <div class="intent-box comm" data-intent="Commercial" onclick="showIntentKw('Commercial')">
+                <div class="intent-box-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="intent-box-count" id="commCount">0</div>
+                <div class="intent-box-label">Commercial</div>
+              </div>
+              <div class="intent-box nav" data-intent="Navigational" onclick="showIntentKw('Navigational')">
+                <div class="intent-box-icon"><i class="fas fa-compass"></i></div>
+                <div class="intent-box-count" id="navCount">0</div>
+                <div class="intent-box-label">Navigational</div>
+              </div>
+            </div>
+            <div class="r-actions">
+              <button class="btn-act primary" onclick="copyResults()"><i class="fas fa-copy"></i> Copy Results</button>
+              <button class="btn-act" onclick="exportResults()"><i class="fas fa-download"></i> Export CSV</button>
+            </div>
+            <div class="clusters-out">
+              <div class="clusters-out-head">
+                <h3>Keyword Analysis Results</h3>
+                <p>Click an intent type above or expand a row to explore keywords</p>
+              </div>
+              <div class="clusters-body-inner" id="clustersBody">
+                <div class="empty-inner"><i class="fas fa-inbox"></i><h3>No data yet</h3><p>Analyze keywords to see results here</p></div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /app-inside -->
+      </div><!-- /browser-chrome -->
+    </div>
+  </section>
+
+</div><!-- /page-wrap -->
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-card">
+    <div class="ring"></div>
+    <h3>Analyzing Keywords</h3>
+    <p id="loadingMsg">Computing intent clusters...</p>
+    <div class="prog-track"><div class="prog-fill"></div></div>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal-over" id="errorModal">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <h3><i class="fas fa-exclamation-triangle" style="color:var(--red)"></i> Error</h3>
+      <button class="modal-x" onclick="closeModal('errorModal')">×</button>
+    </div>
+    <div class="modal-bd"><p id="errorMsg">An error occurred.</p></div>
+    <div class="modal-ft"><button class="btn-ok" onclick="closeModal('errorModal')">OK</button></div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal-over" id="helpModal">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <h3><i class="fas fa-question-circle" style="color:var(--teal)"></i> Help & Instructions</h3>
+      <button class="modal-x" onclick="closeModal('helpModal')">×</button>
+    </div>
+    <div class="modal-bd">
+      <h4>How to use ClusterSEO Pro</h4>
+      <ol>
+        <li><strong>Upload a CSV/TXT file</strong> with keywords and optional volumes</li>
+        <li><strong>Or manually input</strong> keywords in the Manual Input tab</li>
+        <li><strong>Adjust clustering sensitivity</strong> to control grouping tightness</li>
+        <li><strong>Click "Start Clustering Analysis"</strong> to process</li>
+        <li><strong>View and export</strong> your intent-classified keyword clusters</li>
+      </ol>
+      <h4>Intent Classification</h4>
+      <ul>
+        <li><strong>Informational:</strong> how, what, why, guide, tutorial</li>
+        <li><strong>Transactional:</strong> buy, price, order, shop, cost</li>
+        <li><strong>Commercial:</strong> best, review, compare, vs, top</li>
+        <li><strong>Navigational:</strong> login, website, official, app</li>
+      </ul>
+      <h4>CSV Format</h4>
+      <p>Header row: <code>keyword,volume</code> — then one keyword per row. Volume is optional.</p>
+    </div>
+    <div class="modal-ft"><button class="btn-ok" onclick="closeModal('helpModal')">Got it!</button></div>
+  </div>
+</div>
+
+<script src="shared-layout.js"></script>
+<script>
+let kwByIntent = {}, appStats = {};
+
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function showLoading(msg){ document.getElementById('loadingMsg').textContent=msg; document.getElementById('loadingOverlay').classList.add('show'); }
+function hideLoading(){ document.getElementById('loadingOverlay').classList.remove('show'); }
+function showError(msg){ document.getElementById('errorMsg').textContent=msg; document.getElementById('errorModal').classList.add('show'); }
+
+function switchTab(tab){
+  document.querySelectorAll('.app-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
+}
+function updateSlider(el){ document.getElementById('thresholdValue').textContent=Math.round(el.value*100)+'%'; }
+function updateCount(){
+  const n=document.getElementById('keywordsInput').value.split('\n').filter(l=>l.trim()).length;
+  document.getElementById('kwCount').textContent=n+' keywords';
+}
+function clearKw(){ document.getElementById('keywordsInput').value=''; updateCount(); }
+
+function handleDragOver(e){ e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
+function handleDragLeave(e){ e.preventDefault(); document.getElementById('uploadZone').classList.remove('drag-over'); }
+function handleDrop(e){ e.preventDefault(); document.getElementById('uploadZone').classList.remove('drag-over'); if(e.dataTransfer.files.length) handleFileSelect({target:{files:e.dataTransfer.files}}); }
+async function handleFileSelect(e){
+  const f=e.target.files[0]; if(!f) return;
+  const txt=await f.text();
+  const lines=txt.split('\n').filter(l=>l.trim());
+  document.getElementById('fileName').textContent=f.name;
+  document.getElementById('fileStats').textContent=Math.max(0,lines.length-1)+' keywords';
+  document.getElementById('fileBar').classList.add('show');
+  document.getElementById('processBtn').disabled=false;
+}
+function removeFile(){ document.getElementById('fileInput').value=''; document.getElementById('fileBar').classList.remove('show'); document.getElementById('processBtn').disabled=true; }
+
+async function analyzeKeywords(){
+  const text=document.getElementById('keywordsInput').value.trim();
+  if(!text){ showError('Please enter some keywords first.'); return; }
+  showLoading('Analyzing keywords...');
+  try {
+    const lines=text.split('\n').filter(l=>l.trim());
+    const keywords=[],volumes=[];
+    lines.forEach(line=>{ const p=line.split(',').map(x=>x.trim()); if(p[0]){keywords.push(p[0]);volumes.push(p[1]?parseInt(p[1])||0:0);} });
+    const res=await fetch('/api/process-keywords',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keywords,volumes})});
+    const data=await res.json();
+    data.success ? processResults(data) : showError(data.error||'Analysis failed');
+  } catch(e){ showError('Network error: '+e.message); }
+  finally{ hideLoading(); }
+}
+async function processUploadedFile(){
+  const fi=document.getElementById('fileInput');
+  if(!fi.files||!fi.files[0]){ showError('Please select a file first'); return; }
+  showLoading('Processing file...');
+  try {
+    const fd=new FormData(); fd.append('file',fi.files[0]);
+    const res=await fetch('/api/process-csv',{method:'POST',body:fd});
+    const data=await res.json();
+    data.success ? processResults(data) : showError(data.error||'Failed to process file');
+  } catch(e){ showError('Network error: '+e.message); }
+  finally{ hideLoading(); }
+}
+function fmt(n){ if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return String(n); }
+function processResults(data){
+  kwByIntent=data.keywordsByIntent||{}; appStats=data.stats||{};
+  document.getElementById('totalClusters').textContent=appStats.totalClusters||0;
+  document.getElementById('totalKeywords').textContent=appStats.totalKeywords||0;
+  document.getElementById('totalVolume').textContent=fmt(appStats.totalVolume||0);
+  const d=appStats.intentDistribution||{};
+  document.getElementById('infoCount').textContent=d.Informational||0;
+  document.getElementById('transCount').textContent=d.Transactional||0;
+  document.getElementById('commCount').textContent=d.Commercial||0;
+  document.getElementById('navCount').textContent=d.Navigational||0;
+  document.getElementById('resultsTabBtn').disabled=false;
+  switchTab('results');
+  showAllKw();
+}
+function getClass(i){ return {Informational:'info',Transactional:'trans',Commercial:'comm',Navigational:'nav'}[i]||''; }
+function getIcon(i){ return {Informational:'fa-info-circle',Transactional:'fa-shopping-cart',Commercial:'fa-chart-line',Navigational:'fa-compass'}[i]||'fa-circle'; }
+
+function showAllKw(){
+  document.querySelectorAll('.intent-box').forEach(b=>b.classList.remove('active'));
+  const body=document.getElementById('clustersBody');
+  const intents=['Informational','Transactional','Commercial','Navigational'];
+  const has=intents.filter(i=>(kwByIntent[i]||[]).length>0);
+  if(!has.length){ body.innerHTML='<div class="empty-inner"><i class="fas fa-inbox"></i><h3>No data yet</h3><p>Analyze keywords to see results.</p></div>'; return; }
+  body.innerHTML=has.map(intent=>{
+    const kws=kwByIntent[intent]||[];
+    const vol=kws.reduce((s,k)=>s+(k.volume||0),0);
+    const cls=getClass(intent);
+    const tags=kws.slice(0,3).map(k=>`<div class="prev-tag"><span>${k.keyword}</span><span class="prev-vol">${k.volume}</span></div>`).join('');
+    const more=kws.length>3?`<span class="prev-more">+${kws.length-3} more</span>`:'';
+    return `<div class="intent-row ${cls}">
+      <div class="intent-row-hdr" onclick="showIntentKw('${intent}')">
+        <div class="intent-row-left">
+          <div class="intent-row-ico"><i class="fas ${getIcon(intent)}"></i></div>
+          <div>
+            <div class="intent-row-name">${intent}</div>
+            <div class="intent-row-meta"><span><i class="fas fa-key"></i> ${kws.length} keywords</span><span><i class="fas fa-chart-bar"></i> ${fmt(vol)} volume</span></div>
+          </div>
+        </div>
+        <div class="intent-row-right">
+          <button class="btn-view" onclick="event.stopPropagation();showIntentKw('${intent}')">View All <i class="fas fa-arrow-right"></i></button>
+          <i class="fas fa-chevron-right chevron"></i>
+        </div>
+      </div>
+      <div class="intent-row-prev"><div class="prev-tags">${tags}${more}</div></div>
+    </div>`;
+  }).join('');
+}
+function showIntentKw(intent){
+  document.querySelectorAll('.intent-box').forEach(b=>b.classList.toggle('active',b.dataset.intent===intent));
+  const kws=kwByIntent[intent]||[];
+  const body=document.getElementById('clustersBody');
+  const vol=kws.reduce((s,k)=>s+(k.volume||0),0);
+  const avg=kws.length?Math.round(vol/kws.length):0;
+  if(!kws.length){
+    body.innerHTML=`<div class="back-hdr"><button class="btn-back" onclick="showAllKw()"><i class="fas fa-arrow-left"></i> Back</button><span class="back-title">${intent} Keywords</span></div><div class="empty-inner"><i class="fas fa-search"></i><h3>No ${intent} keywords</h3><p>None matched this intent type.</p></div>`;
+    return;
+  }
+  body.innerHTML=`<div class="back-hdr"><button class="btn-back" onclick="showAllKw()"><i class="fas fa-arrow-left"></i> Back to All</button><div><span class="back-title">${intent} Keywords</span><div class="back-meta"><span><i class="fas fa-key"></i> ${kws.length} keywords</span><span><i class="fas fa-chart-bar"></i> ${fmt(vol)} volume</span><span><i class="fas fa-calculator"></i> Avg: ${fmt(avg)}</span></div></div></div>
+  <table class="kw-tbl"><thead><tr><th>S.N.</th><th>Keyword</th><th>Volume</th></tr></thead><tbody>${kws.map((k,i)=>`<tr><td>${i+1}</td><td>${k.keyword}</td><td>${fmt(k.volume)}</td></tr>`).join('')}</tbody></table>`;
+}
+function copyResults(){
+  if(!Object.keys(kwByIntent).length){alert('No results');return;}
+  let t='Keyword Analysis Results\n=====================\n\n';
+  ['Informational','Transactional','Commercial','Navigational'].forEach(i=>{
+    const kws=kwByIntent[i]||[];
+    if(kws.length){t+=`${i} (${kws.length}):\n`;kws.forEach((k,j)=>{t+=`  ${j+1}. ${k.keyword} - ${k.volume}\n`;});t+='\n';}
+  });
+  navigator.clipboard.writeText(t).then(()=>alert('Copied!')).catch(e=>alert('Failed: '+e));
+}
+function exportResults(){
+  if(!Object.keys(kwByIntent).length){alert('No results');return;}
+  let csv='S.N.,Keyword,Volume,Intent\n';
+  ['Informational','Transactional','Commercial','Navigational'].forEach(i=>{
+    (kwByIntent[i]||[]).forEach((k,j)=>{csv+=`${j+1},"${k.keyword}",${k.volume},"${i}"\n`;});
+  });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`keywords-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  alert('CSV downloaded!');
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const s=document.getElementById('clusterThreshold');
+  if(s) document.getElementById('thresholdValue').textContent=Math.round(s.value*100)+'%';
+});
+</script>
+</body>
+</html>

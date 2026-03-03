@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Features — ClusterSEO Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .page-hero {
+      background: linear-gradient(135deg, var(--navy), var(--navy-3));
+      padding: 72px 28px 64px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .page-hero::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse 60% 70% at 50% 0%, rgba(14,165,233,0.12) 0%, transparent 65%);
+    }
+    .page-hero .section-label { color: var(--teal); }
+    .page-hero h1 { font-size: clamp(2rem,4vw,3.2rem); font-weight:800; color:var(--white); letter-spacing:-0.03em; line-height:1.15; margin-bottom:14px; position:relative; }
+    .page-hero p  { font-size:1.05rem; color:rgba(255,255,255,0.5); max-width:520px; margin:0 auto; line-height:1.7; position:relative; }
+
+    /* Main features */
+    .main-features { padding: 80px 28px; background: var(--white); }
+    .mf-inner { max-width: 1200px; margin: 0 auto; }
+    .mf-grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px,1fr)); gap: 24px; }
+    .mf-card {
+      border: 1px solid var(--gray-200); border-radius: var(--r-xl);
+      padding: 32px; background: var(--white); transition: all 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .mf-card::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+      background: linear-gradient(90deg, var(--teal), #2563eb); opacity:0; transition:.25s;
+    }
+    .mf-card:hover { border-color:var(--teal); box-shadow:var(--shadow-lg); transform:translateY(-4px); }
+    .mf-card:hover::after { opacity:1; }
+    .mf-icon {
+      width:52px; height:52px;
+      background: linear-gradient(135deg, var(--teal-light), #dbeafe);
+      border-radius:var(--r-lg); display:flex; align-items:center; justify-content:center;
+      font-size:20px; color:var(--teal-dark); margin-bottom:20px;
+    }
+    .mf-card h3 { font-size:16px; font-weight:800; color:var(--gray-900); margin-bottom:10px; }
+    .mf-card p  { font-size:13.5px; color:var(--gray-500); line-height:1.72; margin-bottom:16px; }
+    .mf-tag {
+      display:inline-flex; align-items:center; gap:5px;
+      font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+      padding:4px 10px; border-radius:100px;
+      background: var(--teal-light); color: var(--teal-dark);
+    }
+
+    /* Intent section */
+    .intent-section { padding: 80px 28px; background: var(--gray-50); }
+    .intent-inner { max-width: 1200px; margin: 0 auto; }
+    .intent-header { text-align:center; margin-bottom:52px; }
+    .intent-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
+    .intent-card {
+      background:var(--white); border:1px solid var(--gray-200);
+      border-radius:var(--r-xl); padding:30px; text-align:center;
+      transition:all 0.25s; position:relative; overflow:hidden;
+    }
+    .intent-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; }
+    .intent-card.ic-info::before  { background:linear-gradient(90deg,var(--teal),#60a5fa); }
+    .intent-card.ic-trans::before { background:linear-gradient(90deg,var(--gold),#fbbf24); }
+    .intent-card.ic-comm::before  { background:linear-gradient(90deg,var(--green),#34d399); }
+    .intent-card.ic-nav::before   { background:linear-gradient(90deg,#7c3aed,#a78bfa); }
+    .intent-card:hover { box-shadow:var(--shadow-lg); transform:translateY(-4px); }
+    .ic-icon {
+      width:56px; height:56px; border-radius:50%;
+      margin:0 auto 18px; font-size:22px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .ic-info  .ic-icon { background:var(--teal-light); color:var(--teal-dark); }
+    .ic-trans .ic-icon { background:var(--gold-light); color:#92400e; }
+    .ic-comm  .ic-icon { background:var(--green-light); color:#065f46; }
+    .ic-nav   .ic-icon { background:#ede9fe; color:#6d28d9; }
+    .intent-card h3 { font-size:16px; font-weight:800; color:var(--gray-900); margin-bottom:8px; }
+    .intent-card p  { font-size:13px; color:var(--gray-500); line-height:1.7; margin-bottom:16px; }
+    .intent-examples { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }
+    .ex-pill {
+      font-size:11px; font-family:var(--mono); padding:3px 9px;
+      border-radius:100px; border:1px solid var(--gray-200); color:var(--gray-500);
+      background:var(--gray-50);
+    }
+
+    /* Comparison table */
+    .compare-section { padding:80px 28px; background:var(--white); }
+    .compare-inner { max-width:860px; margin:0 auto; }
+    .compare-header { text-align:center; margin-bottom:44px; }
+    .cmp-table { width:100%; border-collapse:collapse; border:1px solid var(--gray-200); border-radius:var(--r-xl); overflow:hidden; }
+    .cmp-table th { padding:14px 18px; text-align:left; font-size:12px; font-weight:700; color:var(--gray-500); letter-spacing:.06em; text-transform:uppercase; background:var(--gray-50); border-bottom:1px solid var(--gray-200); }
+    .cmp-table td { padding:14px 18px; border-bottom:1px solid var(--gray-100); font-size:14px; color:var(--gray-700); }
+    .cmp-table tr:last-child td { border-bottom:none; }
+    .cmp-table tr:hover td { background:var(--gray-50); }
+    .check { color:var(--green); font-size:16px; }
+    .cross { color:var(--red); font-size:16px; }
+    .feat-name { font-weight:600; color:var(--gray-900); }
+
+    /* CTA */
+    .feat-cta { padding:80px 28px; background:linear-gradient(135deg,var(--navy-3),var(--navy)); text-align:center; }
+    .feat-cta h2 { font-size:clamp(1.8rem,3vw,2.5rem); font-weight:800; color:white; letter-spacing:-0.03em; margin-bottom:14px; }
+    .feat-cta p  { font-size:15px; color:rgba(255,255,255,0.5); margin-bottom:32px; max-width:480px; margin-left:auto; margin-right:auto; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <section class="page-hero">
+    <span class="section-label">Features</span>
+    <h1>Everything You Need for<br>Professional Keyword Strategy</h1>
+    <p>ClusterSEO Pro gives you all the tools to analyze, classify, and cluster any keyword list with precision.</p>
+  </section>
+
+  <!-- MAIN FEATURES -->
+  <section class="main-features">
+    <div class="mf-inner">
+      <div style="text-align:center;margin-bottom:52px;">
+        <span class="section-label">Core Features</span>
+        <h2 class="section-title">Built for Real SEO Work</h2>
+      </div>
+      <div class="mf-grid">
+        <div class="mf-card">
+          <div class="mf-icon"><i class="fas fa-brain"></i></div>
+          <h3>Smart Intent Classification</h3>
+          <p>Every keyword is automatically analyzed and sorted into one of four search intent categories. Our classification engine uses linguistic signals and SERP patterns to deliver accurate results, not guesses.</p>
+          <span class="mf-tag"><i class="fas fa-star"></i> Core Feature</span>
+        </div>
+        <div class="mf-card">
+          <div class="mf-icon"><i class="fas fa-file-csv"></i></div>
+          <h3>CSV & TXT Upload</h3>
+          <p>Upload keyword exports directly from Ahrefs, SEMrush, Google Keyword Planner, or Moz. Our parser handles both simple lists and structured CSV files with volume data automatically.</p>
+          <span class="mf-tag"><i class="fas fa-upload"></i> Input</span>
+        </div>
+        <div class="mf-card">
+          <div class="mf-icon"><i class="fas fa-sliders-h"></i></div>
+          <h3>Adjustable Clustering Sensitivity</h3>
+          <p>A simple slider lets you control how tightly or loosely keywords are grouped. Set it loose for broad topical clusters, tight for granular page-level targeting. Dial it in exactly how your content strategy requires.</p>
+          <span class="mf-tag"><i class="fas fa-cog"></i> Control</span>
+        </div>
+        <div class="mf-card">
+          <div class="mf-icon"><i class="fas fa-bolt"></i></div>
+          <h3>Instant Processing — No Limits</h3>
+          <p>Get results in seconds. No account needed, no processing queue, no keyword limits to worry about. Analyze your full keyword universe in a single pass with real-time progress feedback.</p>
+          <span class="mf-tag"><i class="fas fa-zap"></i> Speed</span>
+        </div>
+        <div class="mf-card">
+          <div class="mf-icon"><i class="fas fa-chart-pie"></i></div>
+          <h3>Search Volume Analytics</h3>
+          <p>See the total and average monthly search volume per intent cluster. Instantly understand where the biggest traffic opportunity lies and prioritize your content roadmap by real demand data.</p>
+          <span class="mf-tag"><i class="fas fa-chart-bar"></i> Analytics</span>
+        </div>
+        <div class="mf-card">
+          <div class="mf-icon"><i class="fas fa-download"></i></div>
+          <h3>CSV Export & Clipboard Copy</h3>
+          <p>Export your full analysis as a clean, structured CSV ready for your content calendar, Notion, Airtable, or Google Sheets. Or copy everything to your clipboard in one click.</p>
+          <span class="mf-tag"><i class="fas fa-export"></i> Output</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTENT DEEP DIVE -->
+  <section class="intent-section">
+    <div class="intent-inner">
+      <div class="intent-header">
+        <span class="section-label">Intent Types</span>
+        <h2 class="section-title">4 Intent Categories Explained</h2>
+        <p class="section-desc" style="margin:0 auto;text-align:center;">Understanding which intent type a keyword belongs to tells you exactly what content to create and what the user truly wants.</p>
+      </div>
+      <div class="intent-cards">
+        <div class="intent-card ic-info">
+          <div class="ic-icon"><i class="fas fa-info-circle"></i></div>
+          <h3>Informational</h3>
+          <p>Users want to learn something. Best served with blog posts, guides, tutorials, how-to articles, and FAQs.</p>
+          <div class="intent-examples">
+            <span class="ex-pill">how to...</span>
+            <span class="ex-pill">what is...</span>
+            <span class="ex-pill">guide</span>
+            <span class="ex-pill">tutorial</span>
+            <span class="ex-pill">why does...</span>
+          </div>
+        </div>
+        <div class="intent-card ic-trans">
+          <div class="ic-icon"><i class="fas fa-shopping-cart"></i></div>
+          <h3>Transactional</h3>
+          <p>Users are ready to take action or make a purchase. Target with product pages, landing pages, and offers.</p>
+          <div class="intent-examples">
+            <span class="ex-pill">buy</span>
+            <span class="ex-pill">price</span>
+            <span class="ex-pill">order</span>
+            <span class="ex-pill">cheap</span>
+            <span class="ex-pill">discount</span>
+          </div>
+        </div>
+        <div class="intent-card ic-comm">
+          <div class="ic-icon"><i class="fas fa-chart-line"></i></div>
+          <h3>Commercial</h3>
+          <p>Users are researching options before deciding. Best served with comparison pages, reviews, and roundups.</p>
+          <div class="intent-examples">
+            <span class="ex-pill">best</span>
+            <span class="ex-pill">review</span>
+            <span class="ex-pill">vs</span>
+            <span class="ex-pill">compare</span>
+            <span class="ex-pill">top 10</span>
+          </div>
+        </div>
+        <div class="intent-card ic-nav">
+          <div class="ic-icon"><i class="fas fa-compass"></i></div>
+          <h3>Navigational</h3>
+          <p>Users are looking for a specific brand, website, or page. Capture with branded pages and direct landing pages.</p>
+          <div class="intent-examples">
+            <span class="ex-pill">login</span>
+            <span class="ex-pill">official site</span>
+            <span class="ex-pill">website</span>
+            <span class="ex-pill">app</span>
+            <span class="ex-pill">brand name</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="compare-section">
+    <div class="compare-inner">
+      <div class="compare-header">
+        <span class="section-label">Comparison</span>
+        <h2 class="section-title">ClusterSEO Pro vs Others</h2>
+      </div>
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>ClusterSEO Pro</th>
+            <th>Manual Excel</th>
+            <th>Paid Tools</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="feat-name">Instant Intent Classification</td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-check check"></i></td></tr>
+          <tr><td class="feat-name">CSV Upload & Export</td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-check check"></i></td></tr>
+          <tr><td class="feat-name">Volume Analytics</td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-check check"></i></td></tr>
+          <tr><td class="feat-name">No Signup Required</td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-times cross"></i></td></tr>
+          <tr><td class="feat-name">100% Free</td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-times cross"></i></td></tr>
+          <tr><td class="feat-name">Adjustable Sensitivity</td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-times cross"></i></td><td>Sometimes</td></tr>
+          <tr><td class="feat-name">One-Click Copy</td><td><i class="fas fa-check check"></i></td><td><i class="fas fa-times cross"></i></td><td><i class="fas fa-check check"></i></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="feat-cta">
+    <h2>Try All Features Free</h2>
+    <p>No credit card, no account. Start clustering your keywords right now and see the difference in your content strategy.</p>
+    <a href="tool.html" class="btn-white"><i class="fas fa-play-circle"></i> Open the Tool</a>
+  </section>
+
+</div>
+<script src="shared-layout.js"></script>
+</body>
+</html>
