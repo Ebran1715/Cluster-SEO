@@ -4,6 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Keyword Clustering Tool — ClusterSEO Pro</title>
+  <meta name="description" content="Cluster your keywords by search intent in seconds. Upload a CSV or paste keywords manually. Free keyword clustering tool — no account needed.">
+  <meta name="keywords" content="keyword clustering tool, keyword grouping, search intent tool, CSV keyword upload, keyword analysis">
+  <meta name="author" content="ClusterSEO Pro">
+  <meta name="robots" content="index, follow">
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="ClusterSEO Pro">
+  <meta property="og:title"       content="Keyword Clustering Tool — ClusterSEO Pro">
+  <meta property="og:description" content="Cluster your keywords by search intent in seconds. Upload a CSV or paste keywords manually. Free keyword clustering tool — no account needed.">
+  <meta property="og:image"       content="og-image.png">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:title"      content="Keyword Clustering Tool — ClusterSEO Pro">
+  <meta name="twitter:description" content="Cluster your keywords by search intent in seconds. Upload a CSV or paste keywords manually. Free keyword clustering tool — no account needed.">
+  <meta name="twitter:image"      content="og-image.png">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="favicon-180.png">
+  <!-- Google Analytics — replace GA_MEASUREMENT_ID with your real ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'GA_MEASUREMENT_ID');
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -373,6 +399,166 @@
     .modal-bd li { margin-bottom:4px; }
     .modal-ft { padding:14px 20px; border-top:1px solid var(--gray-200); display:flex; justify-content:flex-end; background:var(--gray-50); }
     .btn-ok { background:linear-gradient(135deg,var(--teal),#2563eb); color:white; border:none; padding:9px 22px; border-radius:var(--r-sm); font-size:13px; font-weight:700; cursor:pointer; font-family:var(--font); }
+
+    /* ── KEYWORD RESEARCH PANEL ── */
+    .research-box {
+      background: var(--gray-50); border: 1px solid var(--gray-200);
+      border-radius: var(--r-lg); padding: 24px; margin-bottom: 20px;
+    }
+    .research-input-row {
+      display: flex; gap: 10px; margin-bottom: 10px;
+    }
+    .research-input {
+      flex: 1; padding: 13px 16px;
+      border: 1.5px solid var(--gray-200); border-radius: var(--r);
+      font-size: 15px; font-family: var(--font); color: var(--gray-800);
+      background: var(--white); outline: none; transition: all 0.2s;
+    }
+    .research-input:focus {
+      border-color: var(--teal); box-shadow: 0 0 0 3px rgba(14,165,233,0.1);
+    }
+    .research-input::placeholder { color: var(--gray-400); }
+    .btn-research {
+      padding: 13px 26px;
+      background: linear-gradient(135deg, var(--teal), #2563eb);
+      color: white; border: none; border-radius: var(--r);
+      font-size: 14px; font-weight: 700; cursor: pointer; font-family: var(--font);
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(14,165,233,0.3); transition: all 0.2s;
+    }
+    .btn-research:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-research:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .research-hint {
+      font-size: 12px; color: var(--gray-400);
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    /* Country selector */
+    .research-options { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .opt-label { font-size: 12px; font-weight: 600; color: var(--gray-500); }
+    .opt-select {
+      padding: 7px 12px; border: 1px solid var(--gray-200); border-radius: var(--r-sm);
+      font-size: 13px; font-family: var(--font); color: var(--gray-700);
+      background: var(--white); cursor: pointer; outline: none;
+    }
+    .opt-select:focus { border-color: var(--teal); }
+
+    /* Suggestions grid */
+    .suggestions-area { margin-top: 20px; }
+    .suggestions-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+    }
+    .suggestions-header h3 { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+    .suggestions-header p  { font-size: 12px; color: var(--gray-400); }
+    .btn-cluster-all {
+      padding: 8px 18px;
+      background: linear-gradient(135deg, var(--green), #059669);
+      color: white; border: none; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 700; cursor: pointer; font-family: var(--font);
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 3px 10px rgba(16,185,129,0.25); transition: all 0.2s;
+    }
+    .btn-cluster-all:hover { opacity: 0.88; }
+
+    /* Keyword pills grid */
+    .kw-pills-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 8px;
+    }
+    .kw-pill {
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: var(--r); padding: 10px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; transition: all 0.2s; cursor: pointer;
+    }
+    .kw-pill:hover { border-color: var(--teal); background: var(--teal-light); }
+    .kw-pill.selected { border-color: var(--teal); background: var(--teal-light); }
+    .kw-pill-text { font-size: 13px; font-weight: 500; color: var(--gray-800); flex: 1; }
+    .kw-pill-actions { display: flex; align-items: center; gap: 6px; }
+    .kw-pill-type {
+      font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+      padding: 2px 7px; border-radius: 100px;
+    }
+    .type-info  { background: var(--teal-light); color: var(--teal-dark); }
+    .type-trans { background: var(--gold-light);  color: #92400e; }
+    .type-comm  { background: var(--green-light); color: #065f46; }
+    .type-nav   { background: #ede9fe; color: #6d28d9; }
+    .kw-pill-check {
+      width: 20px; height: 20px; border: 1.5px solid var(--gray-300);
+      border-radius: 4px; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: transparent; transition: all 0.15s; flex-shrink: 0;
+    }
+    .kw-pill.selected .kw-pill-check {
+      background: var(--teal); border-color: var(--teal); color: white;
+    }
+
+    /* Source groups */
+    .source-group { margin-bottom: 18px; }
+    .source-group-title {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--gray-400); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .source-group-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--gray-200);
+    }
+
+    /* Selected bar */
+    .selected-bar {
+      display: none; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: var(--navy);
+      border-radius: var(--r); margin-bottom: 14px; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .selected-bar.show { display: flex; }
+    .selected-bar p { font-size: 13px; color: rgba(255,255,255,0.8); font-weight: 500; }
+    .selected-bar p strong { color: var(--teal); }
+    .selected-bar-btns { display: flex; gap: 8px; }
+    .btn-cluster-sel {
+      padding: 7px 16px; background: var(--teal); color: white;
+      border: none; border-radius: var(--r-sm); font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: var(--font); display: flex; align-items: center; gap: 5px;
+      transition: all 0.15s;
+    }
+    .btn-cluster-sel:hover { background: var(--teal-dark); }
+    .btn-clear-sel {
+      padding: 7px 14px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .btn-clear-sel:hover { background: rgba(255,255,255,0.18); }
+
+    /* Empty / loading states */
+    .research-empty {
+      text-align: center; padding: 48px 24px; color: var(--gray-400);
+    }
+    .research-empty i { font-size: 2.8rem; color: var(--gray-200); display: block; margin-bottom: 14px; }
+    .research-empty h3 { font-size: 15px; font-weight: 700; color: var(--gray-600); margin-bottom: 6px; }
+    .research-empty p  { font-size: 13px; line-height: 1.6; }
+    .research-spinner {
+      text-align: center; padding: 40px;
+    }
+    .research-spinner .ring {
+      width: 36px; height: 36px; margin: 0 auto 14px;
+      border: 3px solid var(--gray-200); border-top-color: var(--teal);
+      border-radius: 50%; animation: spin .8s linear infinite;
+    }
+    .research-spinner p { font-size: 13px; color: var(--gray-400); }
+
+    /* Modifier tags */
+    .modifier-chips { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 18px; }
+    .mod-chip {
+      padding: 5px 12px; border: 1px solid var(--gray-200);
+      border-radius: 100px; font-size: 12px; font-weight: 600;
+      color: var(--gray-500); cursor: pointer; background: var(--white);
+      font-family: var(--font); transition: all 0.15s;
+    }
+    .mod-chip:hover, .mod-chip.active {
+      background: var(--teal); border-color: var(--teal); color: white;
+    }
+    .mod-chip-label { font-size: 11px; color: var(--gray-400); font-weight: 600; align-self: center; }
   </style>
 </head>
 <body>
@@ -417,6 +603,9 @@
             </button>
             <button class="app-tab" data-tab="manual" onclick="switchTab('manual')">
               <i class="fas fa-keyboard"></i> Manual Input
+            </button>
+            <button class="app-tab" data-tab="research" onclick="switchTab('research')">
+              <i class="fas fa-search"></i> Keyword Research
             </button>
             <button class="app-tab" data-tab="results" id="resultsTabBtn" disabled>
               <i class="fas fa-chart-bar"></i> Results
@@ -475,6 +664,74 @@
               </div>
             </div>
           </div>
+
+          
+          <!-- RESEARCH PANEL -->
+          <div class="app-panel" id="panel-research">
+
+            <div class="research-box">
+              <!-- Search row -->
+              <div class="research-input-row">
+                <input class="research-input" type="text" id="researchInput"
+                  placeholder="Enter a seed keyword e.g. running shoes, coffee machine..."
+                  onkeydown="if(event.key==='Enter') doResearch()">
+                <button class="btn-research" id="researchBtn" onclick="doResearch()">
+                  <i class="fas fa-search"></i> Find Keywords
+                </button>
+              </div>
+
+              <!-- Options row -->
+              <div class="research-options">
+                <span class="opt-label">Country:</span>
+                <select class="opt-select" id="researchCountry">
+                  <option value="us">🇺🇸 United States</option>
+                  <option value="gb">🇬🇧 United Kingdom</option>
+                  <option value="au">🇦🇺 Australia</option>
+                  <option value="ca">🇨🇦 Canada</option>
+                  <option value="in">🇮🇳 India</option>
+                  <option value="np">🇳🇵 Nepal</option>
+                  <option value="global" selected>🌍 Global</option>
+                </select>
+                <span class="opt-label" style="margin-left:8px;">Modifiers:</span>
+                <span class="mod-chip-label">Quick add:</span>
+                <button class="mod-chip" onclick="addModifier(this,'best')">best</button>
+                <button class="mod-chip" onclick="addModifier(this,'how to')">how to</button>
+                <button class="mod-chip" onclick="addModifier(this,'buy')">buy</button>
+                <button class="mod-chip" onclick="addModifier(this,'review')">review</button>
+                <button class="mod-chip" onclick="addModifier(this,'cheap')">cheap</button>
+                <button class="mod-chip" onclick="addModifier(this,'vs')">vs</button>
+                <button class="mod-chip" onclick="addModifier(this,'for beginners')">for beginners</button>
+              </div>
+
+              <p class="research-hint">
+                <i class="fas fa-info-circle"></i>
+                Powered by Google Suggest — returns real autocomplete suggestions. Select keywords then cluster them.
+              </p>
+            </div>
+
+            <!-- Selected bar -->
+            <div class="selected-bar" id="selectedBar">
+              <p>🎯 <strong id="selectedCount">0</strong> keywords selected</p>
+              <div class="selected-bar-btns">
+                <button class="btn-cluster-sel" onclick="clusterSelected()">
+                  <i class="fas fa-layer-group"></i> Cluster Selected
+                </button>
+                <button class="btn-clear-sel" onclick="clearSelected()">Clear</button>
+              </div>
+            </div>
+
+            <!-- Results area -->
+            <div class="suggestions-area" id="suggestionsArea">
+              <div class="research-empty">
+                <i class="fas fa-search"></i>
+                <h3>Start Your Keyword Research</h3>
+                <p>Enter a seed keyword above and click <strong>Find Keywords</strong><br>
+                to discover real Google autocomplete suggestions.</p>
+              </div>
+            </div>
+
+          </div>
+          <!-- /RESEARCH PANEL -->
 
           <!-- RESULTS PANEL -->
           <div class="app-panel" id="panel-results">
@@ -725,6 +982,209 @@ document.addEventListener('DOMContentLoaded',()=>{
   const s=document.getElementById('clusterThreshold');
   if(s) document.getElementById('thresholdValue').textContent=Math.round(s.value*100)+'%';
 });
+
+
+/* ═══════════════════════════════
+   KEYWORD RESEARCH — Google Suggest
+═══════════════════════════════ */
+let selectedKws = new Set();
+let allSuggestions = [];
+
+async function doResearch() {
+  const query = document.getElementById('researchInput').value.trim();
+  if (!query) { alert('Please enter a seed keyword first.'); return; }
+
+  const btn = document.getElementById('researchBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+
+  document.getElementById('suggestionsArea').innerHTML = `
+    <div class="research-spinner">
+      <div class="ring"></div>
+      <p>Fetching Google suggestions for "<strong>${query}</strong>"...</p>
+    </div>`;
+
+  selectedKws.clear();
+  updateSelectedBar();
+
+  try {
+    const results = await fetchAllSuggestions(query);
+    allSuggestions = results;
+    renderSuggestions(query, results);
+  } catch(e) {
+    document.getElementById('suggestionsArea').innerHTML = `
+      <div class="research-empty">
+        <i class="fas fa-exclamation-circle" style="color:var(--red)"></i>
+        <h3>Could not fetch suggestions</h3>
+        <p>This may be a network or CORS issue.<br>Try running the tool on your live server (not file://).</p>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-search"></i> Find Keywords';
+  }
+}
+
+/* Fetch suggestions from Google Suggest via a CORS proxy */
+async function fetchSuggestions(query) {
+  // Use allorigins as CORS proxy for Google Suggest
+  const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+    `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`
+  )}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return Array.isArray(data[1]) ? data[1] : [];
+}
+
+/* Build multiple query variants for richer results */
+async function fetchAllSuggestions(seed) {
+  const res = await fetch(`/api/suggest?q=${encodeURIComponent(seed)}`);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return data.keywords;
+}
+
+
+/* Classify intent quickly (reuses same logic as backend) */
+function quickIntent(kw) {
+  const k = kw.toLowerCase();
+  if (k.includes('best') || k.includes('review') || k.includes(' vs ') || k.includes('top ') || k.includes('compare')) return 'Commercial';
+  if (k.includes('buy') || k.includes('price') || k.includes('cheap') || k.includes('order') || k.includes('purchase') || k.includes('cost') || k.includes('deal') || k.includes('discount')) return 'Transactional';
+  if (k.includes('login') || k.includes('website') || k.includes('official') || k.includes('app') || k.includes('sign in')) return 'Navigational';
+  return 'Informational';
+}
+
+function intentClass(intent) {
+  return { Informational:'type-info', Transactional:'type-trans', Commercial:'type-comm', Navigational:'type-nav' }[intent] || 'type-info';
+}
+
+/* Render all suggestions grouped by source query */
+function renderSuggestions(seed, suggestions) {
+  const area = document.getElementById('suggestionsArea');
+
+  if (!suggestions.length) {
+    area.innerHTML = `<div class="research-empty"><i class="fas fa-empty-set"></i><h3>No suggestions found</h3><p>Try a different or broader seed keyword.</p></div>`;
+    return;
+  }
+
+  // Group by source
+  const groups = {};
+  suggestions.forEach(item => {
+    if (!groups[item.source]) groups[item.source] = [];
+    groups[item.source].push(item);
+  });
+
+  let html = `
+    <div class="suggestions-header">
+      <div>
+        <h3><i class="fas fa-lightbulb" style="color:var(--teal);margin-right:6px;"></i>
+        ${suggestions.length} keyword suggestions found</h3>
+        <p>Click keywords to select, then cluster them — or cluster all at once</p>
+      </div>
+      <button class="btn-cluster-all" onclick="clusterAll()">
+        <i class="fas fa-layer-group"></i> Cluster All (${suggestions.length})
+      </button>
+    </div>`;
+
+  // Render each group
+  Object.entries(groups).forEach(([src, kws]) => {
+    html += `<div class="source-group">
+      <div class="source-group-title"><i class="fas fa-search" style="font-size:10px;"></i> Suggestions for "${src}"</div>
+      <div class="kw-pills-grid">`;
+
+    kws.forEach(item => {
+      const intent = quickIntent(item.keyword);
+      const cls    = intentClass(intent);
+      html += `
+        <div class="kw-pill" id="pill-${CSS.escape(item.keyword)}" onclick="toggleKw('${item.keyword.replace(/'/g,"\'")}', this)">
+          <span class="kw-pill-text">${item.keyword}</span>
+          <div class="kw-pill-actions">
+            <span class="kw-pill-type ${cls}">${intent}</span>
+            <div class="kw-pill-check"><i class="fas fa-check"></i></div>
+          </div>
+        </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  area.innerHTML = html;
+}
+
+/* Toggle a keyword pill selected/unselected */
+function toggleKw(kw, el) {
+  if (selectedKws.has(kw)) {
+    selectedKws.delete(kw);
+    el.classList.remove('selected');
+  } else {
+    selectedKws.add(kw);
+    el.classList.add('selected');
+  }
+  updateSelectedBar();
+}
+
+function updateSelectedBar() {
+  const bar = document.getElementById('selectedBar');
+  const count = selectedKws.size;
+  document.getElementById('selectedCount').textContent = count;
+  bar.classList.toggle('show', count > 0);
+}
+
+function clearSelected() {
+  selectedKws.clear();
+  document.querySelectorAll('.kw-pill.selected').forEach(el => el.classList.remove('selected'));
+  updateSelectedBar();
+}
+
+/* Cluster selected keywords — feeds into existing cluster engine */
+async function clusterSelected() {
+  if (!selectedKws.size) return;
+  const keywords = [...selectedKws];
+  await runCluster(keywords);
+}
+
+/* Cluster ALL suggestions */
+async function clusterAll() {
+  if (!allSuggestions.length) return;
+  const keywords = allSuggestions.map(s => s.keyword);
+  await runCluster(keywords);
+}
+
+/* Feed keywords into existing /api/process-keywords */
+async function runCluster(keywords) {
+  showLoading('Clustering ' + keywords.length + ' keywords...');
+  try {
+    const res = await fetch('/api/process-keywords', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keywords, volumes: new Array(keywords.length).fill(0) })
+    });
+    const data = await res.json();
+    if (data.success) {
+      processResults(data);
+    } else {
+      showError(data.error || 'Clustering failed');
+    }
+  } catch(e) {
+    showError('Network error: ' + e.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+/* Modifier chip — appends word to search input */
+function addModifier(el, word) {
+  const input = document.getElementById('researchInput');
+  const current = input.value.trim();
+  if (current) {
+    input.value = word + ' ' + current;
+  } else {
+    input.value = word + ' ';
+  }
+  input.focus();
+  el.classList.toggle('active');
+  setTimeout(() => el.classList.remove('active'), 600);
+}
+
 </script>
 </body>
 </html>

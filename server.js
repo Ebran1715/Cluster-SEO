@@ -44,7 +44,7 @@ const upload = multer({
 function detectIntent(keyword) {
   const kw = keyword.toLowerCase().trim();
 
-  if (kw.includes('best')) return 'Commercial';
+  if (kw.includes('best') || kw.includes('review') || kw.includes(' vs ') || kw.includes('top ') || kw.includes('compare')) return 'Commercial';
 
   if (
     kw.includes('buy') ||
@@ -52,7 +52,10 @@ function detectIntent(keyword) {
     kw.includes('purchase') ||
     kw.includes('order') ||
     kw.includes('shop') ||
-    kw.includes('cost')
+    kw.includes('cost') ||
+    kw.includes('cheap') ||
+    kw.includes('discount') ||
+    kw.includes('deal')
   ) return 'Transactional';
 
   if (
@@ -61,10 +64,10 @@ function detectIntent(keyword) {
     kw.includes('site') ||
     kw.includes('official') ||
     kw.includes('app') ||
-    kw.includes('web')
+    kw.includes('web') ||
+    kw.includes('sign in')
   ) return 'Navigational';
 
-  // Default for anything else
   return 'Informational';
 }
 
@@ -104,7 +107,6 @@ app.post('/api/process-keywords', async (req, res) => {
       Navigational: []
     };
 
-    // Assign keywords to their intent categories
     keywordObjects.forEach(item => {
       keywordsByIntent[item.intent].push(item);
     });
@@ -121,12 +123,7 @@ app.post('/api/process-keywords', async (req, res) => {
       }
     };
 
-    res.json({
-      success: true,
-      keywordsByIntent,
-      stats,
-      allKeywords: keywordObjects
-    });
+    res.json({ success: true, keywordsByIntent, stats, allKeywords: keywordObjects });
 
   } catch (err) {
     console.error('Error:', err);
@@ -152,11 +149,10 @@ app.post('/api/process-csv', upload.single('file'), async (req, res) => {
     fs.unlinkSync(req.file.path);
 
     const keywords = [];
-    const volumes = [];
+    const volumes  = [];
 
     lines.forEach((line, index) => {
       if (index === 0 && /keyword/i.test(line)) return;
-
       const parts = line.split(',').map(p => p.trim());
       if (parts[0] && isNaN(parts[0])) {
         keywords.push(parts[0]);
@@ -200,6 +196,107 @@ app.post('/api/process-csv', upload.single('file'), async (req, res) => {
 });
 
 /* =====================
+   API: KEYWORD SUGGESTIONS
+   Uses Google Suggest — response is text/javascript like:
+   window.google.ac.h(["query",["sug1","sug2",...]])
+   We fetch as text and parse with regex.
+===================== */
+async function fetchGoogleSuggest(query) {
+  const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; ClusterSEOBot/1.0)'
+      }
+    });
+
+    // Google returns JSON array when client=firefox: ["query", ["sug1","sug2",...]]
+    const text = await response.text();
+
+    // Parse: could be JSON array or JSONP
+    let suggestions = [];
+
+    try {
+      // Try direct JSON parse first (client=firefox returns clean JSON)
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed) && Array.isArray(parsed[1])) {
+        suggestions = parsed[1];
+      }
+    } catch {
+      // Fallback: extract array via regex for JSONP format
+      const match = text.match(/\[.*?\[([^\]]+)\]/);
+      if (match) {
+        suggestions = match[1]
+          .split(',')
+          .map(s => s.trim().replace(/^"|"$/g, ''))
+          .filter(s => s.length > 0);
+      }
+    }
+
+    return suggestions.filter(s => typeof s === 'string' && s.trim().length > 0);
+
+  } catch (err) {
+    console.error(`Suggest fetch failed for "${query}":`, err.message);
+    return [];
+  }
+}
+
+app.get('/api/suggest', async (req, res) => {
+  try {
+    const query = req.query.q;
+    if (!query || !query.trim()) {
+      return res.status(400).json({ success: false, error: 'No query provided' });
+    }
+
+    const q = query.trim();
+
+    // 8 variants — more variety = more keywords returned
+    const variants = [
+      q,
+      q + ' ',
+      'best ' + q,
+      'how to ' + q,
+      'buy '   + q,
+      q + ' review',
+      q + ' vs',
+      q + ' for beginners',
+    ];
+
+    console.log(`[Suggest] Fetching for: "${q}"`);
+
+    // Run all in parallel
+    const results = await Promise.allSettled(
+      variants.map(v => fetchGoogleSuggest(v).then(sugs => ({ variant: v, suggestions: sugs })))
+    );
+
+    const seen     = new Set();
+    const keywords = [];
+
+    results.forEach(r => {
+      if (r.status === 'fulfilled') {
+        const { variant, suggestions } = r.value;
+        console.log(`  variant "${variant}" → ${suggestions.length} suggestions`);
+        suggestions.forEach(kw => {
+          const key = kw.toLowerCase().trim();
+          if (!seen.has(key) && key.length > 1) {
+            seen.add(key);
+            keywords.push({ keyword: kw.trim(), source: variant });
+          }
+        });
+      }
+    });
+
+    console.log(`[Suggest] Total unique keywords: ${keywords.length}`);
+
+    res.json({ success: true, keywords, total: keywords.length });
+
+  } catch (err) {
+    console.error('Suggest route error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/* =====================
    ERROR HANDLING
 ===================== */
 app.use((req, res) => {
@@ -209,7 +306,7 @@ app.use((req, res) => {
 /* =====================
    START SERVER
 ===================== */
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8007;
 
 ['uploads', 'public'].forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
