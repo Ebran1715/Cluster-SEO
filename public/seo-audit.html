@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEO Audit Tool — ClusterSEO Pro</title>
+  <meta name="description" content="Paste page HTML for an instant on-page SEO health check.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .tool-hero {background:linear-gradient(135deg, #059669, #047857);padding:52px 28px 40px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
+    .tool-hero h1 {font-size:2rem;font-weight:800;color:var(--white);letter-spacing:-0.03em;margin-bottom:8px;}
+    .tool-hero p {font-size:14px;color:rgba(255,255,255,0.5);}
+    .tool-back {display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.2s;}
+    .tool-back:hover {background:rgba(255,255,255,0.18);}
+    .tool-section {padding:40px 28px 72px;}
+    .tool-inner {max-width:1100px;margin:0 auto;}
+    .browser-chrome {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xl);}
+    .browser-bar {background:var(--gray-100);border-bottom:1px solid var(--gray-200);padding:12px 18px;display:flex;align-items:center;gap:12px;}
+    .browser-dots {display:flex;gap:6px;}
+    .browser-dots span {width:12px;height:12px;border-radius:50%;}
+    .dot-r{background:#ff5f57;}.dot-y{background:#ffbd2e;}.dot-g{background:#28c840;}
+    .browser-url {flex:1;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 12px;font-size:12px;color:var(--gray-400);font-family:var(--mono);}
+    .app-inside {padding:28px;}
+    .input-lbl {font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    textarea.kw-box {width:100%;border:1px solid var(--gray-200);border-radius:var(--r);padding:13px;font-size:13px;font-family:var(--mono);color:var(--gray-700);background:var(--white);resize:vertical;line-height:1.6;transition:border-color 0.2s;outline:none;}
+    textarea.kw-box:focus {border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
+    .btn-run {padding:12px 28px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;color:white;transition:all 0.2s;}
+    .btn-run:hover {opacity:0.88;transform:translateY(-1px);}
+    .btn-secondary {padding:10px 20px;border:1px solid var(--gray-200);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--gray-600);background:var(--white);transition:all 0.2s;}
+    .btn-secondary:hover {border-color:var(--teal);color:var(--teal);}
+    .result-section {margin-top:24px;}
+    .result-card {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);overflow:hidden;}
+    .result-card-head {padding:14px 18px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
+    .result-card-head h3 {font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
+    .result-card-body {padding:18px;}
+    .empty-state {text-align:center;padding:48px 24px;color:var(--gray-400);}
+    .empty-state i {font-size:2.5rem;color:var(--gray-200);display:block;margin-bottom:12px;}
+    .empty-state h3 {font-size:15px;font-weight:700;color:var(--gray-600);margin-bottom:6px;}
+    .stat-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+    .stat-box {background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;}
+    .stat-box-num {font-size:1.5rem;font-weight:800;color:var(--gray-900);line-height:1;}
+    .stat-box-label {font-size:11px;color:var(--gray-400);font-weight:500;margin-top:4px;}
+    .tag-cloud {display:flex;flex-wrap:wrap;gap:8px;}
+    .entity-tag {display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid transparent;}
+    .et-person {background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,0.2);}
+    .et-org {background:var(--teal-light);color:var(--teal-dark);border-color:rgba(14,165,233,0.2);}
+    .et-place {background:var(--green-light);color:#065f46;border-color:rgba(16,185,129,0.2);}
+    .et-brand {background:#ede9fe;color:#6d28d9;border-color:rgba(124,58,237,0.2);}
+    .et-concept {background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-200);}
+    .score-bar {height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-top:6px;}
+    .score-fill {height:100%;border-radius:4px;transition:width 0.6s ease;}
+    .score-good {background:linear-gradient(90deg,var(--green),#34d399);}
+    .score-med  {background:linear-gradient(90deg,var(--gold),#fbbf24);}
+    .score-bad  {background:linear-gradient(90deg,var(--red),#f87171);}
+    .audit-item {display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);}
+    .audit-item:last-child {border-bottom:none;}
+    .audit-icon {width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;}
+    .ai-pass {background:#d1fae5;color:#065f46;}
+    .ai-warn {background:#fef3c7;color:#92400e;}
+    .ai-fail {background:#fee2e2;color:#991b1b;}
+    .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
+    .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
+    
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <section class="tool-hero">
+    <h1><i class="fas fa-stethoscope" style="margin-right:10px;"></i> SEO Audit Tool</h1>
+    <p>Paste your page HTML for an instant on-page SEO health check and scoring</p>
+    <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
+  </section>
+  <section class="tool-section">
+    <div class="tool-inner">
+      <div class="browser-chrome">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">clusterseo.pro — SEO Audit Tool</div>
+        </div>
+        <div class="app-inside">
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div>
+              <div class="input-lbl"><i class="fas fa-link"></i> Page URL (optional)</div>
+              <input type="text" id="auditUrl" placeholder="https://yoursite.com/page" style="width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'">
+            </div>
+            <div>
+              <div class="input-lbl"><i class="fas fa-key"></i> Target Keyword (optional)</div>
+              <input type="text" id="auditKeyword" placeholder="e.g. running shoes" style="width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'">
+            </div>
+          </div>
+          <div class="input-lbl"><i class="fas fa-code"></i> Paste Page HTML Source</div>
+          <textarea class="kw-box" id="auditHtml" rows="10" placeholder="Paste the full HTML source of your page here (Ctrl+U in browser, then Ctrl+A, Ctrl+C)..."></textarea>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <button class="btn-run" style="background:linear-gradient(135deg,#059669,#047857);" onclick="runSeoAudit()"><i class="fas fa-stethoscope"></i> Run SEO Audit</button>
+            <button class="btn-secondary" onclick="clearAudit()"><i class="fas fa-trash"></i> Clear</button>
+            <button class="btn-secondary" id="btnExportAudit" style="display:none;" onclick="exportAuditCSV()"><i class="fas fa-download"></i> Export CSV</button>
+          </div>
+          <div id="auditResults" class="result-section">
+            <div class="empty-state"><i class="fas fa-stethoscope"></i><h3>Ready to audit</h3><p>Paste your page HTML and click Run SEO Audit</p></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="shared-layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+
+let auditChecks = [];
+
+function runSeoAudit() {
+  const html = document.getElementById('auditHtml').value.trim();
+  if (!html) { alert('Please paste your page HTML first.'); return; }
+  const keyword = document.getElementById('auditKeyword').value.trim().toLowerCase();
+  const url     = document.getElementById('auditUrl').value.trim();
+
+  const parser = new DOMParser();
+  const doc    = parser.parseFromString(html, 'text/html');
+
+  const checks = [];
+  let score = 0, maxScore = 0;
+
+  function addCheck(label, status, detail, points, max) {
+    checks.push({ label, status, detail, points, max });
+    score += points; maxScore += max;
+  }
+
+  // Title tag
+  const title = doc.querySelector('title');
+  const titleText = title ? title.textContent.trim() : '';
+  const tLen = titleText.length;
+  if (!titleText) addCheck('Title Tag', 'fail', 'No title tag found. Add a descriptive title (50-60 chars).', 0, 10);
+  else if (tLen < 30) addCheck('Title Tag', 'warn', 'Title too short (' + tLen + ' chars). Aim for 50-60 characters.', 5, 10);
+  else if (tLen > 70) addCheck('Title Tag', 'warn', 'Title too long (' + tLen + ' chars). May be truncated in SERPs. Keep under 60.', 6, 10);
+  else addCheck('Title Tag', 'pass', 'Good length (' + tLen + ' chars): "' + titleText.substring(0,60) + '"', 10, 10);
+
+  if (keyword && titleText && !titleText.toLowerCase().includes(keyword))
+    addCheck('Keyword in Title', 'warn', 'Target keyword "' + keyword + '" not found in title tag.', 3, 8);
+  else if (keyword && titleText && titleText.toLowerCase().includes(keyword))
+    addCheck('Keyword in Title', 'pass', 'Target keyword found in title tag.', 8, 8);
+
+  // Meta description
+  const metaDesc = doc.querySelector('meta[name="description"]');
+  const metaText = metaDesc ? metaDesc.getAttribute('content') || '' : '';
+  const mLen = metaText.length;
+  if (!metaText) addCheck('Meta Description', 'fail', 'No meta description found. Add one (140-160 chars).', 0, 8);
+  else if (mLen < 70) addCheck('Meta Description', 'warn', 'Meta description too short (' + mLen + ' chars). Aim for 140-160.', 4, 8);
+  else if (mLen > 170) addCheck('Meta Description', 'warn', 'Meta description too long (' + mLen + ' chars). May be truncated.', 5, 8);
+  else addCheck('Meta Description', 'pass', 'Good length (' + mLen + ' chars).', 8, 8);
+
+  // H1
+  const h1s = doc.querySelectorAll('h1');
+  if (h1s.length === 0) addCheck('H1 Tag', 'fail', 'No H1 tag found. Every page needs exactly one H1.', 0, 8);
+  else if (h1s.length > 1) addCheck('H1 Tag', 'warn', 'Multiple H1 tags (' + h1s.length + '). Use only one H1 per page.', 4, 8);
+  else addCheck('H1 Tag', 'pass', 'One H1 found: "' + h1s[0].textContent.trim().substring(0,50) + '"', 8, 8);
+
+  if (keyword && h1s.length > 0 && !h1s[0].textContent.toLowerCase().includes(keyword))
+    addCheck('Keyword in H1', 'warn', 'Target keyword "' + keyword + '" not in H1. Add it naturally.', 3, 6);
+  else if (keyword && h1s.length > 0)
+    addCheck('Keyword in H1', 'pass', 'Target keyword found in H1.', 6, 6);
+
+  // Headings structure
+  const h2s = doc.querySelectorAll('h2');
+  const h3s = doc.querySelectorAll('h3');
+  if (h2s.length === 0) addCheck('Heading Structure', 'warn', 'No H2 tags found. Use H2s to structure content sections.', 3, 6);
+  else addCheck('Heading Structure', 'pass', h2s.length + ' H2s and ' + h3s.length + ' H3s found — good structure.', 6, 6);
+
+  // Word count
+  const bodyText = doc.body ? doc.body.innerText || doc.body.textContent : '';
+  const wordCount = bodyText.trim().split(/\s+/).filter(w => w.length > 1).length;
+  if (wordCount < 300) addCheck('Word Count', 'fail', 'Very thin content (' + wordCount + ' words). Aim for 800+ for blog posts.', 0, 8);
+  else if (wordCount < 600) addCheck('Word Count', 'warn', 'Content is short (' + wordCount + ' words). Consider expanding.', 4, 8);
+  else addCheck('Word Count', 'pass', 'Good content length: ' + wordCount.toLocaleString() + ' words.', 8, 8);
+
+  // Images & alt text
+  const imgs = doc.querySelectorAll('img');
+  const missingAlt = [...imgs].filter(img => !img.getAttribute('alt') || img.getAttribute('alt').trim() === '');
+  if (imgs.length === 0) addCheck('Images', 'warn', 'No images found. Visual content improves engagement.', 3, 6);
+  else if (missingAlt.length > 0) addCheck('Image Alt Text', 'warn', missingAlt.length + ' of ' + imgs.length + ' images missing alt text. Add descriptive alt attributes.', 3, 6);
+  else addCheck('Image Alt Text', 'pass', 'All ' + imgs.length + ' images have alt text.', 6, 6);
+
+  // Canonical
+  const canonical = doc.querySelector('link[rel="canonical"]');
+  if (!canonical) addCheck('Canonical Tag', 'warn', 'No canonical tag found. Add one to prevent duplicate content issues.', 2, 5);
+  else addCheck('Canonical Tag', 'pass', 'Canonical: ' + (canonical.getAttribute('href')||'').substring(0,50), 5, 5);
+
+  // Open Graph
+  const ogTitle = doc.querySelector('meta[property="og:title"]');
+  if (!ogTitle) addCheck('Open Graph Tags', 'warn', 'No og:title found. Add Open Graph tags for better social sharing.', 2, 5);
+  else addCheck('Open Graph Tags', 'pass', 'Open Graph tags present.', 5, 5);
+
+  // Internal links
+  const links = doc.querySelectorAll('a[href]');
+  const internalLinks = [...links].filter(a => { const h = a.getAttribute('href')||''; return h.startsWith('/') || h.startsWith('#') || (url && h.includes(new URL(url.startsWith('http')?url:'https://'+url).hostname)); });
+  if (internalLinks.length < 2) addCheck('Internal Links', 'warn', 'Only ' + internalLinks.length + ' internal links found. Add more to help crawlers and users navigate.', 3, 6);
+  else addCheck('Internal Links', 'pass', internalLinks.length + ' internal links found.', 6, 6);
+
+  // Viewport meta
+  const viewport = doc.querySelector('meta[name="viewport"]');
+  if (!viewport) addCheck('Mobile Viewport', 'fail', 'No viewport meta tag. Page may not be mobile-friendly.', 0, 5);
+  else addCheck('Mobile Viewport', 'pass', 'Viewport meta tag present — mobile ready.', 5, 5);
+
+  auditChecks = checks;
+  renderAudit(checks, score, maxScore);
+  document.getElementById('btnExportAudit').style.display = 'flex';
+}
+
+function renderAudit(checks, score, maxScore) {
+  const pct = Math.round((score/maxScore)*100);
+  const scoreColor = pct >= 80 ? '#059669' : pct >= 60 ? '#f59e0b' : '#ef4444';
+  const scoreLabel = pct >= 80 ? 'Excellent' : pct >= 60 ? 'Needs Work' : 'Poor';
+  const scoreCls   = pct >= 80 ? 'score-good' : pct >= 60 ? 'score-med' : 'score-bad';
+
+  const pass = checks.filter(c=>c.status==='pass').length;
+  const warn = checks.filter(c=>c.status==='warn').length;
+  const fail = checks.filter(c=>c.status==='fail').length;
+
+  let html = '<div class="stat-grid">';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:'+scoreColor+'">'+pct+'%</div><div class="stat-box-label">SEO Score — '+scoreLabel+'</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">'+pass+'</div><div class="stat-box-label">Passed</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#f59e0b">'+warn+'</div><div class="stat-box-label">Warnings</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">'+fail+'</div><div class="stat-box-label">Failed</div></div>';
+  html += '</div>';
+  html += '<div style="margin-bottom:20px;"><div class="score-bar"><div class="score-fill '+scoreCls+'" style="width:'+pct+'%"></div></div></div>';
+
+  html += '<div class="result-card"><div class="result-card-head"><h3><i class="fas fa-list-check"></i> Audit Checks</h3></div><div class="result-card-body">';
+  // Show fails first, then warns, then passes
+  const sorted = [...checks].sort((a,b) => {
+    const order = {fail:0,warn:1,pass:2};
+    return order[a.status]-order[b.status];
+  });
+  sorted.forEach(function(c) {
+    const iconMap = {pass:'fa-check',warn:'fa-exclamation',fail:'fa-times'};
+    const clsMap  = {pass:'ai-pass',warn:'ai-warn',fail:'ai-fail'};
+    html += '<div class="audit-item">';
+    html += '<div class="audit-icon '+clsMap[c.status]+'"><i class="fas '+iconMap[c.status]+'"></i></div>';
+    html += '<div><div class="audit-title">'+c.label+'</div><div class="audit-detail">'+c.detail+'</div></div>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+  document.getElementById('auditResults').innerHTML = html;
+}
+
+function clearAudit() {
+  document.getElementById('auditHtml').value='';
+  document.getElementById('auditUrl').value='';
+  document.getElementById('auditKeyword').value='';
+  document.getElementById('auditResults').innerHTML='<div class="empty-state"><i class="fas fa-stethoscope"></i><h3>Ready to audit</h3><p>Paste your page HTML and click Run SEO Audit</p></div>';
+  document.getElementById('btnExportAudit').style.display='none';
+  auditChecks=[];
+}
+
+function exportAuditCSV() {
+  const rows = ['Check,Status,Detail'];
+  auditChecks.forEach(function(c) {
+    rows.push('"' + c.label + '","' + c.status + '","' + c.detail.replace(/"/g, '""') + '"');
+  });
+  const csv = rows.join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+  a.download = 'seo-audit-' + new Date().toISOString().split('T')[0] + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+</script>
+</body>
+</html>

@@ -1,61 +1,363 @@
 /* shared-layout.js — injects navbar + footer on every page */
 (function() {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  function isActive(page) { return currentPage === page ? 'active' : ''; }
-  const isToolPage = (currentPage === 'tool.html' || currentPage === 'research.html');
+  function isActive(page) { 
+    return currentPage === page ? 'active' : ''; 
+  }
+  
+  const isToolPage = [
+    'tool.html', 
+    'research.html', 
+    'tools.html', 
+    'entity-finder.html', 
+    'seo-audit.html', 
+    'backlinks.html', 
+    'keyword-tracking.html', 
+    'competitor.html', 
+    'keyword-gap.html', 
+    'wikipedia-entity.html'
+  ].includes(currentPage);
+  
   const year = new Date().getFullYear();
 
+  // COMPLETE NAVBAR WITH SIMPLE TOOLS LINK
   const navbar = `
+  <style>
+    /* Topbar styles */
+    .topbar {
+      background: var(--navy, #0f172a);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 12px 28px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+    }
+    .topbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--teal, #0ea5e9), #2563eb);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+    }
+    .logo-text {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--white, #ffffff);
+      letter-spacing: -0.02em;
+    }
+    .logo-text span {
+      color: var(--teal, #0ea5e9);
+      margin-left: 2px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-links li {
+      margin: 0;
+      padding: 0;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 0;
+    }
+    .nav-links a:hover {
+      color: white;
+    }
+    .nav-links a.active {
+      color: white;
+      border-bottom: 2px solid var(--teal, #0ea5e9);
+    }
+    .nav-links a i {
+      color: var(--teal, #0ea5e9);
+      font-size: 13px;
+    }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--teal, #0ea5e9), #2563eb);
+      color: white !important;
+      padding: 8px 18px !important;
+      border-radius: 30px;
+      font-weight: 700;
+      margin-left: 8px;
+      border: none;
+    }
+    .nav-cta:hover {
+      opacity: 0.9;
+      color: white !important;
+      border-bottom: none !important;
+    }
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+    }
+    .hamburger span {
+      width: 22px;
+      height: 2px;
+      background: white;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .mobile-menu {
+      display: none;
+      background: var(--navy-2, #1e293b);
+      padding: 16px 20px;
+      flex-direction: column;
+      gap: 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .mobile-menu.open {
+      display: flex;
+    }
+    .mobile-menu a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mobile-menu a i {
+      color: var(--teal, #0ea5e9);
+      width: 20px;
+    }
+    .mobile-menu a.active {
+      color: white;
+    }
+    @media (max-width: 800px) {
+      .nav-links {
+        display: none;
+      }
+      .hamburger {
+        display: flex;
+      }
+    }
+
+    /* Footer styles */
+    footer {
+      background: var(--navy, #0f172a);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 48px 28px 24px;
+      color: rgba(255,255,255,0.6);
+      margin-top: auto;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 40px;
+      margin-bottom: 48px;
+    }
+    @media (max-width: 800px) {
+      .footer-top {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+      }
+    }
+    @media (max-width: 500px) {
+      .footer-top {
+        grid-template-columns: 1fr;
+      }
+    }
+    .footer-brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .footer-brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--teal, #0ea5e9), #2563eb);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+    }
+    .footer-brand-name {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--white, #ffffff);
+    }
+    .footer-brand p {
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.5);
+      max-width: 260px;
+      margin-bottom: 20px;
+    }
+    .social-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .social-link {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .social-link:hover {
+      background: var(--teal, #0ea5e9);
+      border-color: var(--teal, #0ea5e9);
+      color: white;
+    }
+    .footer-col h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 20px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .footer-col ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .footer-col li {
+      margin-bottom: 12px;
+    }
+    .footer-col a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .footer-col a:hover {
+      color: white;
+    }
+    .footer-col a i {
+      font-size: 10px;
+      color: var(--teal, #0ea5e9);
+      opacity: 0.5;
+    }
+    .footer-bottom {
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+    }
+    .footer-badges {
+      display: flex;
+      gap: 12px;
+    }
+    .f-badge {
+      padding: 3px 9px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+  </style>
+
   <nav class="topbar">
     <div class="topbar-inner">
       <a href="index.html" class="logo">
         <div class="logo-icon"><i class="fas fa-project-diagram"></i></div>
         <div class="logo-text">ClusterSEO<span>PRO</span></div>
       </a>
+      
       <ul class="nav-links">
         <li><a href="index.html" class="${isActive('index.html')}">Home</a></li>
-        <li class="nav-dropdown ${isToolPage?'active':''}">
-          <a href="#" class="nav-dropdown-trigger ${isToolPage?'active':''}">
-            Tools <i class="fas fa-chevron-down" style="font-size:10px;margin-left:3px;"></i>
-          </a>
-          <div class="nav-dropdown-menu">
-            <a href="tool.html" class="nav-dropdown-item ${isActive('tool.html')}">
-              <div class="nav-dd-icon"><i class="fas fa-layer-group"></i></div>
-              <div>
-                <div class="nav-dd-title">Keyword Clustering</div>
-                <div class="nav-dd-sub">Upload CSV or paste keywords</div>
-              </div>
-            </a>
-            <a href="research.html" class="nav-dropdown-item ${isActive('research.html')}">
-              <div class="nav-dd-icon"><i class="fas fa-search"></i></div>
-              <div>
-                <div class="nav-dd-title">Keyword Research</div>
-                <div class="nav-dd-sub">Discover keywords from Google</div>
-              </div>
-            </a>
-          </div>
-        </li>
-        <li><a href="features.html"     class="${isActive('features.html')}">Features</a></li>
+        
+        <!-- SIMPLE TOOLS LINK - CLICK GOES TO TOOLS.HTML -->
+        <li><a href="tools.html" class="${isActive('tools.html')}">
+          <i class="fas fa-tools"></i> Tools
+        </a></li>
+        
+        <li><a href="features.html" class="${isActive('features.html')}">Features</a></li>
         <li><a href="how-it-works.html" class="${isActive('how-it-works.html')}">How It Works</a></li>
-        <li><a href="blog.html"         class="${isActive('blog.html')}">Blog</a></li>
-        <li><a href="contact.html"      class="${isActive('contact.html')}">Contact</a></li>
+        <li><a href="blog.html" class="${isActive('blog.html')}">Blog</a></li>
+        <li><a href="contact.html" class="${isActive('contact.html')}">Contact</a></li>
         <li><a href="tool.html" class="nav-cta">Start Free →</a></li>
       </ul>
+      
       <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')" aria-label="Menu">
-        <span></span><span></span><span></span>
+        <span></span>
+        <span></span>
+        <span></span>
       </button>
     </div>
   </nav>
+  
+  <!-- Mobile menu with all tools -->
   <div class="mobile-menu" id="mobileMenu">
-    <a href="index.html">Home</a>
-    <a href="tool.html"><i class="fas fa-layer-group" style="width:16px;"></i> Keyword Clustering</a>
-    <a href="research.html"><i class="fas fa-search" style="width:16px;"></i> Keyword Research</a>
-    <a href="features.html">Features</a>
-    <a href="how-it-works.html">How It Works</a>
-    <a href="blog.html">Blog</a>
-    <a href="contact.html">Contact</a>
+    <a href="index.html" class="${isActive('index.html')}"><i class="fas fa-home"></i> Home</a>
+    <a href="tools.html" class="${isActive('tools.html')}"><i class="fas fa-th-large"></i> All Tools</a>
+    <a href="tool.html" class="${isActive('tool.html')}"><i class="fas fa-layer-group"></i> Keyword Clustering</a>
+    <a href="research.html" class="${isActive('research.html')}"><i class="fas fa-search"></i> Keyword Research</a>
+    <a href="entity-finder.html" class="${isActive('entity-finder.html')}"><i class="fas fa-tags"></i> Entity Finder</a>
+    <a href="seo-audit.html" class="${isActive('seo-audit.html')}"><i class="fas fa-stethoscope"></i> SEO Audit</a>
+    <a href="keyword-tracking.html" class="${isActive('keyword-tracking.html')}"><i class="fas fa-chart-line"></i> Keyword Tracking</a>
+    <a href="competitor.html" class="${isActive('competitor.html')}"><i class="fas fa-chess"></i> Competitor Analysis</a>
+    <a href="keyword-gap.html" class="${isActive('keyword-gap.html')}"><i class="fas fa-not-equal"></i> Keyword Gap</a>
+    <a href="wikipedia-entity.html" class="${isActive('wikipedia-entity.html')}"><i class="fab fa-wikipedia-w"></i> Wikipedia Entities</a>
+    <a href="backlinks.html" class="${isActive('backlinks.html')}"><i class="fas fa-link"></i> Backlinks Overview</a>
+    <a href="features.html" class="${isActive('features.html')}"><i class="fas fa-star"></i> Features</a>
+    <a href="how-it-works.html" class="${isActive('how-it-works.html')}"><i class="fas fa-question-circle"></i> How It Works</a>
+    <a href="blog.html" class="${isActive('blog.html')}"><i class="fas fa-blog"></i> Blog</a>
+    <a href="contact.html" class="${isActive('contact.html')}"><i class="fas fa-envelope"></i> Contact</a>
   </div>`;
 
+  // FOOTER - REMOVED ALL "SOON" AND "PREVIEW" TEXT
   const footer = `
   <footer>
     <div class="footer-inner">
@@ -65,68 +367,89 @@
             <div class="footer-brand-icon"><i class="fas fa-project-diagram"></i></div>
             <div class="footer-brand-name">ClusterSEO Pro</div>
           </div>
-          <p>The free keyword clustering tool built for modern SEO professionals. Group, classify, and rank smarter with intent-based analysis.</p>
+          <p>The free SEO toolkit built for modern professionals. Cluster, research, audit and track — no signup, no cost, no limits.</p>
           <div class="social-links">
-            <a href="https://twitter.com/clusterseopro"            target="_blank" rel="noopener" class="social-link twitter"   title="Follow on X / Twitter"><i class="fab fa-x-twitter"></i></a>
-            <a href="https://facebook.com/clusterseopro"           target="_blank" rel="noopener" class="social-link facebook"  title="Follow on Facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://linkedin.com/company/clusterseopro"   target="_blank" rel="noopener" class="social-link linkedin"  title="Follow on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-            <a href="https://youtube.com/@clusterseopro"           target="_blank" rel="noopener" class="social-link youtube"   title="Subscribe on YouTube"><i class="fab fa-youtube"></i></a>
-            <a href="https://instagram.com/clusterseopro"          target="_blank" rel="noopener" class="social-link instagram" title="Follow on Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="https://github.com/clusterseopro"             target="_blank" rel="noopener" class="social-link github"    title="View on GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://twitter.com/clusterseopro" target="_blank" rel="noopener" class="social-link twitter" title="Follow on X / Twitter"><i class="fab fa-x-twitter"></i></a>
+            <a href="https://facebook.com/clusterseopro" target="_blank" rel="noopener" class="social-link facebook" title="Follow on Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://linkedin.com/company/clusterseopro" target="_blank" rel="noopener" class="social-link linkedin" title="Follow on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://youtube.com/@clusterseopro" target="_blank" rel="noopener" class="social-link youtube" title="Subscribe on YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://instagram.com/clusterseopro" target="_blank" rel="noopener" class="social-link instagram" title="Follow on Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://github.com/clusterseopro" target="_blank" rel="noopener" class="social-link github" title="View on GitHub"><i class="fab fa-github"></i></a>
           </div>
         </div>
+        
         <div class="footer-col">
           <h4>Tools</h4>
           <ul>
-            <li><a href="tool.html">Keyword Clustering</a></li>
-            <li><a href="research.html">Keyword Research</a></li>
-            <li><a href="tool.html">Upload CSV</a></li>
-            <li><a href="tool.html">Manual Input</a></li>
-            <li><a href="features.html">All Features</a></li>
+            <li><a href="tools.html"><i class="fas fa-chevron-right"></i> All Tools</a></li>
+            <li><a href="tool.html"><i class="fas fa-chevron-right"></i> Keyword Clustering</a></li>
+            <li><a href="research.html"><i class="fas fa-chevron-right"></i> Keyword Research</a></li>
+            <li><a href="entity-finder.html"><i class="fas fa-chevron-right"></i> Entity Finder</a></li>
+            <li><a href="seo-audit.html"><i class="fas fa-chevron-right"></i> SEO Audit</a></li>
           </ul>
         </div>
+        
         <div class="footer-col">
-          <h4>Learn</h4>
+          <h4>More Tools</h4>
           <ul>
-            <li><a href="blog.html">Blog</a></li>
-            <li><a href="how-it-works.html">How It Works</a></li>
-            <li><a href="features.html">Features</a></li>
-            <li><a href="blog.html">Keyword Clustering Guide</a></li>
-            <li><a href="blog.html">Search Intent Guide</a></li>
+            <li><a href="keyword-tracking.html"><i class="fas fa-chevron-right"></i> Keyword Tracking</a></li>
+            <li><a href="competitor.html"><i class="fas fa-chevron-right"></i> Competitor Analysis</a></li>
+            <li><a href="keyword-gap.html"><i class="fas fa-chevron-right"></i> Keyword Gap</a></li>
+            <li><a href="wikipedia-entity.html"><i class="fas fa-chevron-right"></i> Wikipedia Entity</a></li>
+            <li><a href="backlinks.html"><i class="fas fa-chevron-right"></i> Backlinks Overview</a></li>
           </ul>
         </div>
+        
         <div class="footer-col">
-          <h4>Company</h4>
+          <h4>Resources</h4>
           <ul>
-            <li><a href="contact.html">Contact Us</a></li>
-            <li><a href="privacy.html">Privacy Policy</a></li>
-            <li><a href="terms.html">Terms of Use</a></li>
-            <li><a href="blog.html">Blog</a></li>
+            <li><a href="blog.html"><i class="fas fa-chevron-right"></i> Blog</a></li>
+            <li><a href="how-it-works.html"><i class="fas fa-chevron-right"></i> How It Works</a></li>
+            <li><a href="features.html"><i class="fas fa-chevron-right"></i> Features</a></li>
+            <li><a href="privacy.html"><i class="fas fa-chevron-right"></i> Privacy</a></li>
+            <li><a href="terms.html"><i class="fas fa-chevron-right"></i> Terms</a></li>
           </ul>
         </div>
       </div>
+      
       <div class="footer-bottom">
-        <p>© ${year} ClusterSEO Pro. All rights reserved. Built for SEO professionals worldwide.</p>
+        <p>© ${year} ClusterSEO Pro. Free forever — no signup required.</p>
         <div class="footer-badges">
-          <span class="f-badge">Free Tool</span>
-          <span class="f-badge">No Signup</span>
-          <span class="f-badge">v4.0</span>
+          <span class="f-badge">✨ 9 Free Tools</span>
+          <span class="f-badge">🚀 No Signup</span>
+          <span class="f-badge">⚡ v4.0</span>
         </div>
       </div>
     </div>
   </footer>`;
 
+  // Inject navbar and footer
   document.body.insertAdjacentHTML('afterbegin', navbar);
   document.body.insertAdjacentHTML('beforeend', footer);
 
-  // Dropdown hover/click logic
+  // Set active class on current page link
   document.addEventListener('DOMContentLoaded', function() {
-    const dd = document.querySelector('.nav-dropdown');
-    if (!dd) return;
-    dd.addEventListener('mouseenter', function() { dd.classList.add('open'); });
-    dd.addEventListener('mouseleave', function() { dd.classList.remove('open'); });
-    dd.querySelector('.nav-dropdown-trigger').addEventListener('click', function(e) {
-      e.preventDefault(); dd.classList.toggle('open');
+    // Desktop nav active state
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href === currentPage) {
+        link.classList.add('active');
+      }
+    });
+    
+    // Mobile menu active state
+    document.querySelectorAll('.mobile-menu a').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href === currentPage) {
+        link.classList.add('active');
+      }
+    });
+
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('.mobile-menu a').forEach(link => {
+      link.addEventListener('click', function() {
+        document.getElementById('mobileMenu').classList.remove('open');
+      });
     });
   });
 })();

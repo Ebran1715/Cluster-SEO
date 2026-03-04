@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All SEO Tools — ClusterSEO Pro</title>
+  <meta name="description" content="Free SEO tools — keyword clustering, keyword research, entity finder, SEO audit, keyword tracking, competitor analysis, keyword gap, Wikipedia entity finder.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .hub-hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #1e293b 60%, #0f172a 100%);
+      padding: 72px 28px 60px; text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06); position: relative; overflow: hidden;
+    }
+    .hub-hero::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse 800px 400px at 50% 0%, rgba(14,165,233,0.12), transparent);
+      pointer-events:none;
+    }
+    .hub-hero-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(14,165,233,0.12); border:1px solid rgba(14,165,233,0.25);
+      color:var(--teal); padding:5px 14px; border-radius:100px;
+      font-size:12px; font-weight:700; margin-bottom:20px; letter-spacing:.04em;
+    }
+    .hub-hero h1 {
+      font-size:clamp(2rem,5vw,3.2rem); font-weight:800; color:var(--white);
+      letter-spacing:-0.03em; margin-bottom:16px; line-height:1.15;
+    }
+    .hub-hero h1 span { color:var(--teal); }
+    .hub-hero p { font-size:1.05rem; color:rgba(255,255,255,0.55); max-width:520px; margin:0 auto; line-height:1.7; }
+    .hub-stats {
+      display:flex; justify-content:center; gap:32px; margin-top:32px; flex-wrap:wrap;
+    }
+    .hub-stat { text-align:center; }
+    .hub-stat-num { font-size:1.8rem; font-weight:800; color:var(--white); line-height:1; }
+    .hub-stat-label { font-size:12px; color:rgba(255,255,255,0.4); margin-top:4px; font-weight:500; }
+
+    .tools-section { padding:52px 28px 80px; }
+    .tools-inner { max-width:1100px; margin:0 auto; }
+
+    .tools-filter {
+      display:flex; gap:8px; flex-wrap:wrap; margin-bottom:36px; align-items:center;
+    }
+    .filter-label { font-size:13px; font-weight:600; color:var(--gray-500); margin-right:4px; }
+    .filter-chip {
+      padding:6px 16px; border:1px solid var(--gray-200); border-radius:100px;
+      font-size:13px; font-weight:600; color:var(--gray-500); cursor:pointer;
+      background:var(--white); font-family:var(--font); transition:all 0.15s;
+    }
+    .filter-chip:hover { border-color:var(--teal); color:var(--teal); }
+    .filter-chip.active { background:var(--teal); border-color:var(--teal); color:white; }
+
+    .tools-grid {
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(310px,1fr)); gap:20px;
+    }
+
+    .tool-card {
+      background:var(--white); border:1px solid var(--gray-200); border-radius:var(--r-xl);
+      overflow:hidden; transition:all 0.25s; cursor:pointer; text-decoration:none;
+      display:flex; flex-direction:column;
+    }
+    .tool-card:hover { transform:translateY(-5px); box-shadow:0 20px 48px rgba(0,0,0,0.1); border-color:transparent; }
+    .tool-card-top {
+      height:120px; display:flex; align-items:center; justify-content:center;
+      position:relative; overflow:hidden;
+    }
+    .tool-card-top::after {
+      content:''; position:absolute; inset:0;
+      background:rgba(0,0,0,0.08); opacity:0; transition:opacity 0.2s;
+    }
+    .tool-card:hover .tool-card-top::after { opacity:1; }
+    .tool-card-icon {
+      width:64px; height:64px; background:rgba(255,255,255,0.15);
+      border:1px solid rgba(255,255,255,0.2); border-radius:var(--r-lg);
+      display:flex; align-items:center; justify-content:center;
+      font-size:26px; color:white; position:relative; z-index:1;
+      backdrop-filter:blur(8px);
+    }
+    .tool-card-badge {
+      position:absolute; top:12px; right:12px; z-index:2;
+      padding:3px 9px; border-radius:100px; font-size:10px; font-weight:700;
+      letter-spacing:.04em; backdrop-filter:blur(8px);
+    }
+    .badge-free    { background:rgba(16,185,129,0.25); color:#6ee7b7; border:1px solid rgba(16,185,129,0.3); }
+    .badge-popular { background:rgba(245,158,11,0.25); color:#fcd34d; border:1px solid rgba(245,158,11,0.3); }
+    .badge-new     { background:rgba(14,165,233,0.25); color:#7dd3fc; border:1px solid rgba(14,165,233,0.3); }
+
+    .tool-card-body { padding:20px 22px 22px; flex:1; display:flex; flex-direction:column; }
+    .tool-card-name { font-size:1.05rem; font-weight:800; color:var(--gray-900); margin-bottom:6px; }
+    .tool-card-desc { font-size:13px; color:var(--gray-500); line-height:1.6; flex:1; }
+    .tool-card-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; }
+    .tool-tag {
+      padding:3px 9px; background:var(--gray-100); border-radius:100px;
+      font-size:11px; font-weight:600; color:var(--gray-500);
+    }
+    .tool-card-footer {
+      padding:14px 22px; border-top:1px solid var(--gray-100);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .tool-card-footer span { font-size:12px; color:var(--gray-400); }
+    .tool-open-btn {
+      display:flex; align-items:center; gap:6px; padding:7px 16px;
+      border-radius:var(--r-sm); font-size:13px; font-weight:700; color:white;
+      border:none; cursor:pointer; font-family:var(--font); transition:all 0.15s;
+    }
+
+    /* Section divider */
+    .tools-section-hdr {
+      font-size:12px; font-weight:700; color:var(--gray-400); letter-spacing:.08em;
+      text-transform:uppercase; margin-bottom:16px; margin-top:36px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .tools-section-hdr::after { content:''; flex:1; height:1px; background:var(--gray-200); }
+    .tools-section-hdr:first-child { margin-top:0; }
+
+    /* Coming soon card */
+    .tool-card.coming-soon { opacity:0.6; cursor:default; pointer-events:none; }
+    .tool-card.coming-soon:hover { transform:none; box-shadow:none; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <section class="hub-hero">
+    <div class="hub-hero-badge"><i class="fas fa-tools"></i> SEO Toolkit</div>
+    <h1>All <span>Free SEO Tools</span><br>In One Place</h1>
+    <p>9 powerful tools to research, analyse, track and optimise your SEO — no signup, no limits, no cost.</p>
+    <div class="hub-stats">
+      <div class="hub-stat"><div class="hub-stat-num">9</div><div class="hub-stat-label">Tools Available</div></div>
+      <div class="hub-stat"><div class="hub-stat-num">100%</div><div class="hub-stat-label">Free Forever</div></div>
+      <div class="hub-stat"><div class="hub-stat-num">0</div><div class="hub-stat-label">Signups Required</div></div>
+    </div>
+  </section>
+
+  <section class="tools-section">
+    <div class="tools-inner">
+
+      <div class="tools-filter">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-chip active" onclick="filterTools('all',this)">All Tools</button>
+        <button class="filter-chip" onclick="filterTools('keyword',this)">Keyword</button>
+        <button class="filter-chip" onclick="filterTools('content',this)">Content</button>
+        <button class="filter-chip" onclick="filterTools('technical',this)">Technical</button>
+        <button class="filter-chip" onclick="filterTools('competitor',this)">Competitor</button>
+      </div>
+
+      <div class="tools-grid" id="toolsGrid">
+
+        <!-- Keyword Clustering -->
+        <a href="tool.html" class="tool-card" data-cats="keyword content">
+          <div class="tool-card-top" style="background:linear-gradient(135deg,#0ea5e9,#2563eb);">
+            <div class="tool-card-icon"><i class="fas fa-layer-group"></i></div>
+            <span class="tool-card-badge badge-popular">Popular</span>
+          </div>
+          <div class="tool-card-body">
+            <div class="tool-card-name">Keyword Clustering</div>
+            <div class="tool-card-desc">Upload CSV or paste keywords — instantly group them by search intent into Informational, Transactional, Commercial and Navigational clusters.</div>
+            <div class="tool-card-tags">
+              <span class="tool-tag">CSV Upload</span>
+              <span class="tool-tag">Intent Analysis</span>
+              <span class="tool-tag">Export PDF</span>
+            </div>
+          </div>
+          <div class="tool-card-footer">
+            <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
+            <button class="tool-open-btn" style="background:linear-gradient(135deg,#0ea5e9,#2563eb);">Open Tool <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </a>
+
+        <!-- Keyword Research -->
+        <a href="research.html" class="tool-card" data-cats="keyword">
+          <div class="tool-card-top" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">
+            <div class="tool-card-icon"><i class="fas fa-search"></i></div>
+            <span class="tool-card-badge badge-popular">Popular</span>
+          </div>
+          <div class="tool-card-body">
+            <div class="tool-card-name">Keyword Research</div>
+            <div class="tool-card-desc">Discover keyword ideas from Google Suggest. Filter by country, add modifiers, cluster by intent and export results as CSV or PDF.</div>
+            <div class="tool-card-tags">
+              <span class="tool-tag">Google Suggest</span>
+              <span class="tool-tag">Country Filter</span>
+              <span class="tool-tag">Export PDF</span>
+            </div>
+          </div>
+          <div class="tool-card-footer">
+            <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
+            <button class="tool-open-btn" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">Open Tool <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </a>
+
+        <!-- Entity Finder -->
+        <a href="entity-finder.html" class="tool-card" data-cats="content technical">
+          <div class="tool-card-top" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">
+            <div class="tool-card-icon"><i class="fas fa-tags"></i></div>
+            <span class="tool-card-badge badge-new">New</span>
+          </div>
+          <div class="tool-card-body">
+            <div class="tool-card-name">Entity & Attributes Finder</div>
+            <div class="tool-card-desc">Paste any text or article — extract people, places, brands, organisations and their attributes to boost semantic SEO and topical relevance.</div>
+            <div class="tool-card-tags">
+              <span class="tool-tag">NLP Extraction</span>
+              <span class="tool-tag">Semantic SEO</span>
+              <span class="tool-tag">Export CSV</span>
+            </div>
+          </div>
+          <div class="tool-card-footer">
+            <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
+            <button class="tool-open-btn" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">Open Tool <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </a>
+
+        <!-- SEO Audit -->
+        <a href="seo-audit.html" class="tool-card" data-cats="technical">
+          <div class="tool-card-top" style="background:linear-gradient(135deg,#059669,#047857);">
+            <div class="tool-card-icon"><i class="fas fa-stethoscope"></i></div>
+            <span class="tool-card-badge badge-new">New</span>
+          </div>
+          <div class="tool-card-body">
+            <div class="tool-card-name">SEO Audit Tool</div>
+            <div class="tool-card-desc">Paste your page HTML and get an instant SEO health check — title tags, meta descriptions, headings structure, image alts, word count and more.</div>
+            <div class="tool-card-tags">
+              <span class="tool-tag">On-Page SEO</span>
+              <span class="tool-tag">Technical Checks</span>
+              <span class="tool-tag">Score Report</span>
+            </div>
+          </div>
+          <div class="tool-card-footer">
+            <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
+            <button class="tool-open-btn" style="background:linear-gradient(135deg,#059669,#047857);">Open Tool <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </a>
+
+        <!-- Keyword Tracking -->
+        <a href="keyword-tracking.html" class="tool-card" data-cats="keyword">
+          <div class="tool-card-top" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+            <div class="tool-card-icon"><i class="fas fa-chart-line"></i></div>
+            <span class="tool-card-badge badge-new">New</span>
+          </div>
+          <div class="tool-card-body">
+            <div class="tool-card-name">Keyword Position Tracker</div>
+            <div class="tool-card-desc">Manually track keyword rankings over time. Add keywords with positions, monitor progress, visualise rank changes and spot trends.</div>
+            <div class="tool-card-tags">
+              <span class="tool-tag">Rank History</span>
+              <span class="tool-tag">Charts</span>
+              <span class="tool-tag">localStorage</span>
+            </div>
+          </div>
+          <div class="tool-card-footer">
+            <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
+            <button class="tool-open-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);">Open Tool <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </a>
+
+        <!-- Competitor Analysis -->
+        <a href="competitor.html" class="tool-card" data-cats="competitor keyword">
+          <div class="tool-card-top" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+            <div class="tool-card-icon"><i class="fas fa-chess"></i></div>
+            <span class="tool-card-badge badge-new">New</span>
+          </div>
+          <div class="tool-card-body">
+            <div class="tool-card-name">Competitor Analysis</div>
+            <div class="tool-card-desc">Paste your keywords and a competitor's keywords — get overlap analysis, gap identification, intent comparison and competitive positioning insights.</div>
+            <div class="tool-card-tags">
+              <span class="tool-tag">Overlap Score</span>
+              <span class="tool-tag">Intent Compare</span>
+              <span class="tool-tag">Gap Report</span>
+            </div>
+          </div>
+          <div class="tool-card-footer">
+            <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
+            <button class="tool-open-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);">Open Tool <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </a>
+
+        <!-- Keyword Gap -->
+        <a href="keyword-gap.html" class="tool-card" data-cats="competitor keyword">
+          <div class="tool-card-top" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">
+            <div class="tool-card-icon"><i class="fas fa-not-equal"></i></div>
+            <span class="tool-card-badge badge-new">New</span>
+          </div>
+          <div class="tool-card-body">
+            <div class="tool-card-name">Keyword Gap Finder</div>
+            <div class="tool-card-desc">Paste two keyword lists side by side — instantly see which keywords your competitor has that you're missing and discover new content opportunities.</div>
+            <div class="tool-card-tags">
+              <span class="tool-tag">Gap Detection</span>
+              <span class="tool-tag">Opportunities</span>
+              <span class="tool-tag">Export CSV</span>
+            </div>
+          </div>
+          <div class="tool-card-footer">
+            <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
+            <button class="tool-open-btn" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">Open Tool <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </a>
+
+        <!-- Wikipedia Entity -->
+        <a href="wikipedia-entity.html" class="tool-card" data-cats="content technical">
+          <div class="tool-card-top" style="background:linear-gradient(135deg,#64748b,#475569);">
+            <div class="tool-card-icon"><i class="fab fa-wikipedia-w"></i></div>
+            <span class="tool-card-badge badge-new">New</span>
+          </div>
+          <div class="tool-card-body">
+            <div class="tool-card-name">Wikipedia Entity Finder</div>
+            <div class="tool-card-desc">Enter any topic — fetches Wikipedia data to extract related entities, categories, links and semantic relationships for topical authority building.</div>
+            <div class="tool-card-tags">
+              <span class="tool-tag">Wikipedia API</span>
+              <span class="tool-tag">Entity Map</span>
+              <span class="tool-tag">Topical Authority</span>
+            </div>
+          </div>
+          <div class="tool-card-footer">
+            <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
+            <button class="tool-open-btn" style="background:linear-gradient(135deg,#64748b,#475569);">Open Tool <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </a>
+
+        <!-- Backlinks Overview (coming soon placeholder) -->
+        <a href="backlinks.html" class="tool-card" data-cats="technical">
+          <div class="tool-card-top" style="background:linear-gradient(135deg,#ec4899,#db2777);">
+            <div class="tool-card-icon"><i class="fas fa-link"></i></div>
+            <span class="tool-card-badge badge-free">Soon</span>
+          </div>
+          <div class="tool-card-body">
+            <div class="tool-card-name">Backlinks Overview</div>
+            <div class="tool-card-desc">Analyse your backlink profile — enter a domain to get link type breakdown, anchor text analysis, toxic link detection and link building recommendations.</div>
+            <div class="tool-card-tags">
+              <span class="tool-tag">Link Analysis</span>
+              <span class="tool-tag">Anchor Text</span>
+              <span class="tool-tag">Recommendations</span>
+            </div>
+          </div>
+          <div class="tool-card-footer">
+            <span><i class="fas fa-clock" style="color:var(--gold)"></i> Coming Soon</span>
+            <button class="tool-open-btn" style="background:linear-gradient(135deg,#ec4899,#db2777);">Preview <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="shared-layout.js"></script>
+<script>
+function filterTools(cat, btn) {
+  document.querySelectorAll('.filter-chip').forEach(function(c){ c.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.tool-card').forEach(function(card){
+    if(cat === 'all'){
+      card.style.display = '';
+    } else {
+      const cats = card.dataset.cats || '';
+      card.style.display = cats.includes(cat) ? '' : 'none';
+    }
+  });
+}
+</script>
+</body>
+</html>

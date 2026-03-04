@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entity & Attributes Finder — ClusterSEO Pro</title>
+  <meta name="description" content="Extract entities, brands, people and places from any text for semantic SEO.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .tool-hero {background:linear-gradient(135deg, #7c3aed, #6d28d9);padding:52px 28px 40px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
+    .tool-hero h1 {font-size:2rem;font-weight:800;color:var(--white);letter-spacing:-0.03em;margin-bottom:8px;}
+    .tool-hero p {font-size:14px;color:rgba(255,255,255,0.5);}
+    .tool-back {display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.2s;}
+    .tool-back:hover {background:rgba(255,255,255,0.18);}
+    .tool-section {padding:40px 28px 72px;}
+    .tool-inner {max-width:1100px;margin:0 auto;}
+    .browser-chrome {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xl);}
+    .browser-bar {background:var(--gray-100);border-bottom:1px solid var(--gray-200);padding:12px 18px;display:flex;align-items:center;gap:12px;}
+    .browser-dots {display:flex;gap:6px;}
+    .browser-dots span {width:12px;height:12px;border-radius:50%;}
+    .dot-r{background:#ff5f57;}.dot-y{background:#ffbd2e;}.dot-g{background:#28c840;}
+    .browser-url {flex:1;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 12px;font-size:12px;color:var(--gray-400);font-family:var(--mono);}
+    .app-inside {padding:28px;}
+    .input-lbl {font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    textarea.kw-box {width:100%;border:1px solid var(--gray-200);border-radius:var(--r);padding:13px;font-size:13px;font-family:var(--mono);color:var(--gray-700);background:var(--white);resize:vertical;line-height:1.6;transition:border-color 0.2s;outline:none;}
+    textarea.kw-box:focus {border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
+    .btn-run {padding:12px 28px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;color:white;transition:all 0.2s;}
+    .btn-run:hover {opacity:0.88;transform:translateY(-1px);}
+    .btn-secondary {padding:10px 20px;border:1px solid var(--gray-200);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--gray-600);background:var(--white);transition:all 0.2s;}
+    .btn-secondary:hover {border-color:var(--teal);color:var(--teal);}
+    .result-section {margin-top:24px;}
+    .result-card {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);overflow:hidden;}
+    .result-card-head {padding:14px 18px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
+    .result-card-head h3 {font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
+    .result-card-body {padding:18px;}
+    .empty-state {text-align:center;padding:48px 24px;color:var(--gray-400);}
+    .empty-state i {font-size:2.5rem;color:var(--gray-200);display:block;margin-bottom:12px;}
+    .empty-state h3 {font-size:15px;font-weight:700;color:var(--gray-600);margin-bottom:6px;}
+    .stat-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+    .stat-box {background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;}
+    .stat-box-num {font-size:1.5rem;font-weight:800;color:var(--gray-900);line-height:1;}
+    .stat-box-label {font-size:11px;color:var(--gray-400);font-weight:500;margin-top:4px;}
+    .tag-cloud {display:flex;flex-wrap:wrap;gap:8px;}
+    .entity-tag {display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid transparent;}
+    .et-person {background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,0.2);}
+    .et-org {background:var(--teal-light);color:var(--teal-dark);border-color:rgba(14,165,233,0.2);}
+    .et-place {background:var(--green-light);color:#065f46;border-color:rgba(16,185,129,0.2);}
+    .et-brand {background:#ede9fe;color:#6d28d9;border-color:rgba(124,58,237,0.2);}
+    .et-concept {background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-200);}
+    .score-bar {height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-top:6px;}
+    .score-fill {height:100%;border-radius:4px;transition:width 0.6s ease;}
+    .score-good {background:linear-gradient(90deg,var(--green),#34d399);}
+    .score-med  {background:linear-gradient(90deg,var(--gold),#fbbf24);}
+    .score-bad  {background:linear-gradient(90deg,var(--red),#f87171);}
+    .audit-item {display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);}
+    .audit-item:last-child {border-bottom:none;}
+    .audit-icon {width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;}
+    .ai-pass {background:#d1fae5;color:#065f46;}
+    .ai-warn {background:#fef3c7;color:#92400e;}
+    .ai-fail {background:#fee2e2;color:#991b1b;}
+    .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
+    .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
+    
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <section class="tool-hero">
+    <h1><i class="fas fa-tags" style="margin-right:10px;"></i> Entity & Attributes Finder</h1>
+    <p>Paste text to extract people, organisations, places, brands and key concepts</p>
+    <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
+  </section>
+  <section class="tool-section">
+    <div class="tool-inner">
+      <div class="browser-chrome">
+        <div class="browser-bar">
+          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <div class="browser-url">clusterseo.pro — Entity & Attributes Finder</div>
+        </div>
+        <div class="app-inside">
+
+          <div class="input-lbl"><i class="fas fa-tags"></i> Paste your text or article content</div>
+          <textarea class="kw-box" id="entityInput" rows="10" placeholder="Paste any article, blog post or text here. The tool will extract people, organisations, places, brands, and key concepts..."></textarea>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <button class="btn-run" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);" onclick="runEntityFinder()"><i class="fas fa-magic"></i> Extract Entities</button>
+            <button class="btn-secondary" onclick="clearEntityTool()"><i class="fas fa-trash"></i> Clear</button>
+            <button class="btn-secondary" id="btnExportEntityCSV" style="display:none;" onclick="exportEntityCSV()"><i class="fas fa-download"></i> Export CSV</button>
+          </div>
+          <div id="entityResults" class="result-section">
+            <div class="empty-state"><i class="fas fa-tags"></i><h3>No entities extracted yet</h3><p>Paste any text above and click Extract Entities</p></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="shared-layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+
+let entityData = {};
+
+function runEntityFinder() {
+  const text = document.getElementById('entityInput').value.trim();
+  if (!text) { alert('Please paste some text first.'); return; }
+
+  // NLP-style extraction using regex patterns
+  const entities = { Person:[], Organisation:[], Place:[], Brand:[], Concept:[] };
+
+  // Tokenise into sentences and words
+  const words = text.split(/\s+/);
+  const sentences = text.split(/[.!?]+/);
+
+  // Capitalised word sequences (proper nouns)
+  const capPattern = /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/g;
+  const capMatches = [...text.matchAll(capPattern)].map(m => m[1]);
+
+  // Known person title prefixes
+  const personTitles = ['Mr','Mrs','Ms','Dr','Prof','President','CEO','CTO','Director','Manager','Author','Founder'];
+  const orgSuffixes  = ['Inc','Ltd','LLC','Corp','Company','Group','Agency','Institute','University','College','Foundation','Association','Council'];
+  const placeSuffixes = ['City','Town','Village','Country','State','Province','Street','Avenue','Road','Park','Lake','River','Mountain','Island'];
+  const brandSignals  = ['®','™','©'];
+
+  const seen = new Set();
+  capMatches.forEach(function(match) {
+    if (seen.has(match.toLowerCase()) || match.split(' ').length === 1 && match.length < 4) return;
+    seen.add(match.toLowerCase());
+    const words2 = match.split(' ');
+    const lastWord = words2[words2.length - 1];
+    const firstWord = words2[0];
+    if (personTitles.some(t => text.includes(t + ' ' + match)) || (words2.length >= 2 && !orgSuffixes.includes(lastWord) && !placeSuffixes.includes(lastWord))) {
+      if (personTitles.some(t => text.includes(t + ' ' + match))) { entities.Person.push(match); return; }
+    }
+    if (orgSuffixes.some(s => lastWord === s || match.includes(s))) { entities.Organisation.push(match); return; }
+    if (placeSuffixes.some(s => lastWord === s)) { entities.Place.push(match); return; }
+    if (words2.length === 1 && /^[A-Z]{2,}$/.test(match)) { entities.Organisation.push(match); return; }
+    entities.Brand.push(match);
+  });
+
+  // Extract key concepts — frequent meaningful nouns
+  const stopwords = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','from','as','is','was','are','were','be','been','have','has','had','do','does','did','will','would','could','should','may','might','that','this','these','those','it','its','we','our','you','your','they','their','he','she','his','her','i','my','me','us','him','them','who','which','what','when','where','how','why','not','also','more','most','some','any','all','each','other','into','than','then','there','here','so','if','about','after','before','just','only','very','can','been','no','new','one','two','three','first','last','same','such']);
+  const wordFreq = {};
+  text.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).forEach(function(w) {
+    if (w.length > 4 && !stopwords.has(w)) wordFreq[w] = (wordFreq[w] || 0) + 1;
+  });
+  Object.entries(wordFreq).sort((a,b) => b[1]-a[1]).slice(0,15).forEach(function(entry) {
+    const w = entry[0][0].toUpperCase() + entry[0].slice(1);
+    if (!seen.has(entry[0])) entities.Concept.push(w + ' (x' + entry[1] + ')');
+  });
+
+  // Deduplicate
+  Object.keys(entities).forEach(k => { entities[k] = [...new Set(entities[k])].slice(0, 20); });
+  entityData = entities;
+
+  const total = Object.values(entities).reduce((s,a) => s+a.length, 0);
+  if (total === 0) { document.getElementById('entityResults').innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><h3>No entities found</h3><p>Try pasting more text with proper nouns and named entities.</p></div>'; return; }
+
+  document.getElementById('btnExportEntityCSV').style.display = 'flex';
+
+  const typeConfig = {
+    Person:       { cls:'et-person', icon:'fa-user',        label:'People' },
+    Organisation: { cls:'et-org',    icon:'fa-building',    label:'Organisations' },
+    Place:        { cls:'et-place',  icon:'fa-map-marker-alt', label:'Places' },
+    Brand:        { cls:'et-brand',  icon:'fa-trademark',   label:'Brands & Products' },
+    Concept:      { cls:'et-concept',icon:'fa-lightbulb',   label:'Key Concepts' },
+  };
+
+  let html = '<div class="stat-grid">';
+  Object.entries(typeConfig).forEach(function(e) {
+    const k = e[0], cfg = e[1];
+    html += '<div class="stat-box"><div class="stat-box-num">' + (entities[k]||[]).length + '</div><div class="stat-box-label">' + cfg.label + '</div></div>';
+  });
+  html += '<div class="stat-box"><div class="stat-box-num">' + total + '</div><div class="stat-box-label">Total Entities</div></div>';
+  html += '</div>';
+
+  Object.entries(typeConfig).forEach(function(e) {
+    const k = e[0], cfg = e[1];
+    const items = entities[k] || [];
+    if (!items.length) return;
+    html += '<div class="result-card" style="margin-bottom:14px;">';
+    html += '<div class="result-card-head"><h3><i class="fas ' + cfg.icon + '"></i> ' + cfg.label + ' (' + items.length + ')</h3></div>';
+    html += '<div class="result-card-body"><div class="tag-cloud">';
+    items.forEach(function(item) {
+      html += '<span class="entity-tag ' + cfg.cls + '">' + item + '</span>';
+    });
+    html += '</div></div></div>';
+  });
+
+  document.getElementById('entityResults').innerHTML = html;
+}
+
+function clearEntityTool() {
+  document.getElementById('entityInput').value = '';
+  document.getElementById('entityResults').innerHTML = '<div class="empty-state"><i class="fas fa-tags"></i><h3>No entities extracted yet</h3><p>Paste any text above and click Extract Entities</p></div>';
+  document.getElementById('btnExportEntityCSV').style.display = 'none';
+  entityData = {};
+}
+
+function exportEntityCSV() {
+  const rows = ['Entity,Type'];
+  Object.entries(entityData).forEach(function(e) {
+    e[1].forEach(function(item) {
+      rows.push('"' + item.replace(/"/g, '""') + '","' + e[0] + '"');
+    });
+  });
+  const csv = rows.join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+  a.download = 'entities-' + new Date().toISOString().split('T')[0] + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+</script>
+</body>
+</html>
