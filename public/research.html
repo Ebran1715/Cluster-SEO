@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Keyword Clustering Tool — ClusterSEO Pro</title>
-  <meta name="description" content="Cluster keywords by search intent instantly. Upload CSV or paste keywords. Free keyword clustering tool — no account needed.">
+  <title>Keyword Research Tool — ClusterSEO Pro</title>
+  <meta name="description" content="Discover keyword ideas from Google Suggest. Filter by country, cluster by intent, export CSV or PDF. Free keyword research tool.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="alternate icon" href="favicon.ico">
   <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
@@ -841,17 +841,17 @@
     }
     .cp-quick-title { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 3px; }
     .cp-quick-desc  { font-size: 12px; color: var(--gray-500); line-height: 1.5; }
-    </style>
+      </style>
 </head>
 <body>
 <div class="page-wrap">
 
   <section class="tool-hero">
-    <h1><i class="fas fa-layer-group" style="color:var(--teal);margin-right:10px;"></i> Keyword Clustering Tool</h1>
-    <p>Upload or paste keywords — get intent-classified clusters instantly</p>
+    <h1><i class="fas fa-search" style="color:var(--teal);margin-right:10px;"></i> Keyword Research Tool</h1>
+    <p>Discover real Google autocomplete suggestions — filter by country, cluster by intent</p>
     <div style="margin-top:14px;">
-      <a href="research.html" style="display:inline-flex;align-items:center;gap:7px;padding:8px 18px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-        <i class="fas fa-search"></i> Try Keyword Research Tool →
+      <a href="tool.html" style="display:inline-flex;align-items:center;gap:7px;padding:8px 18px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.8);font-size:13px;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+        <i class="fas fa-layer-group"></i> Try Keyword Clustering Tool →
       </a>
     </div>
   </section>
@@ -861,7 +861,7 @@
       <div class="browser-chrome">
         <div class="browser-bar">
           <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-          <div class="browser-url">clusterseo.pro/tool — Keyword Clustering</div>
+          <div class="browser-url">clusterseo.pro/research — Keyword Research</div>
           <button class="browser-help-btn" onclick="document.getElementById('helpModal').classList.add('show')">
             <i class="fas fa-question-circle"></i> Help
           </button>
@@ -869,69 +869,82 @@
         <div class="app-inside">
           <div class="app-brand-row">
             <div class="app-brand">
-              <div class="app-brand-icon"><i class="fas fa-layer-group"></i></div>
+              <div class="app-brand-icon"><i class="fas fa-search"></i></div>
               <div>
-                <div class="app-brand-name">Keyword Clustering<span>TOOL</span></div>
-                <div class="app-brand-sub">Upload CSV or paste keywords — get intent clusters in seconds</div>
+                <div class="app-brand-name">Keyword Research<span>TOOL</span></div>
+                <div class="app-brand-sub">Discover keywords from Google Suggest — filter, cluster, export</div>
               </div>
             </div>
-            <a href="research.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--teal-light);border:1px solid rgba(14,165,233,0.2);border-radius:var(--r-sm);color:var(--teal-dark);font-size:12px;font-weight:700;text-decoration:none;">
-              <i class="fas fa-search"></i> Keyword Research →
+            <a href="tool.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--teal-light);border:1px solid rgba(14,165,233,0.2);border-radius:var(--r-sm);color:var(--teal-dark);font-size:12px;font-weight:700;text-decoration:none;">
+              <i class="fas fa-layer-group"></i> Clustering Tool →
             </a>
           </div>
 
           <div class="app-tabs">
-            <button class="app-tab active" data-tab="upload" onclick="switchTab('upload')"><i class="fas fa-upload"></i> Upload File</button>
-            <button class="app-tab" data-tab="manual" onclick="switchTab('manual')"><i class="fas fa-keyboard"></i> Manual Input</button>
+            <button class="app-tab active" data-tab="research" onclick="switchTab('research')"><i class="fas fa-search"></i> Keyword Research</button>
             <button class="app-tab" data-tab="results" id="resultsTabBtn" disabled><i class="fas fa-chart-bar"></i> Results</button>
             <button class="app-tab" data-tab="contentplan" id="contentPlanTabBtn" disabled><i class="fas fa-lightbulb"></i> Content Plan</button>
           </div>
 
-          <!-- UPLOAD PANEL -->
-          <div class="app-panel active" id="panel-upload">
-            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-              <input type="file" id="fileInput" accept=".csv,.txt" hidden onchange="handleFileSelect(event)">
-              <div class="upload-icon-box"><i class="fas fa-file-csv"></i></div>
-              <h3>Drag & Drop Your CSV File Here</h3>
-              <p>Supported formats: CSV, TXT (max 10MB)</p>
-              <div class="upload-code">keyword, volume</div>
-              <p style="font-size:12px;color:var(--gray-400);">or one keyword per line</p>
-              <button class="btn-browse" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
-                <i class="fas fa-folder-open"></i> Browse Files
-              </button>
-            </div>
-            <div class="file-bar" id="fileBar">
-              <div class="file-bar-info">
-                <i class="fas fa-file-alt"></i>
-                <div><h4 id="fileName">—</h4><p id="fileStats">0 keywords</p></div>
-              </div>
-              <button class="btn-rm" onclick="removeFile()"><i class="fas fa-times"></i> Remove</button>
-            </div>
-            <button class="btn-process" id="processBtn" disabled onclick="processUploadedFile()">
-              <i class="fas fa-cogs"></i> Process File & Analyze
-            </button>
-          </div>
-
-          <!-- MANUAL PANEL -->
-          <div class="app-panel" id="panel-manual">
-            <div class="manual-grid">
-              <div>
-                <div class="input-lbl"><i class="fas fa-key"></i> Keywords — one per line or keyword, volume</div>
-                <textarea class="kw-box" id="keywordsInput" placeholder="best running shoes&#10;buy nike shoes online, 2400&#10;running shoes review&#10;how to choose running shoes, 1200&#10;nike official website" oninput="updateCount()"></textarea>
-                <div class="input-footer">
-                  <span class="kw-counter" id="kwCount">0 keywords</span>
-                  <button class="btn-clr" onclick="clearKw()"><i class="fas fa-trash"></i> Clear</button>
-                </div>
-              </div>
-              <div>
-                <div class="setting-lbl"><i class="fas fa-sliders-h"></i> Clustering Sensitivity</div>
-                <div style="margin-bottom:20px;">
-                  <input type="range" id="clusterThreshold" min="0" max="1" value="0.5" step="0.05" oninput="updateSlider(this)">
-                  <div class="slider-labels"><span>Loose</span><span class="slider-val" id="thresholdValue">50%</span><span>Tight</span></div>
-                </div>
-                <button class="btn-analyze" onclick="analyzeKeywords()">
-                  <i class="fas fa-play-circle"></i> Start Clustering Analysis
+          <!-- RESEARCH PANEL -->
+          <div class="app-panel active" id="panel-research">
+            <div class="research-box">
+              <div class="research-input-row">
+                <input class="research-input" type="text" id="researchInput"
+                  placeholder="Enter a seed keyword e.g. running shoes, coffee machine..."
+                  onkeydown="if(event.key==='Enter') doResearch()">
+                <button class="btn-research" id="researchBtn" onclick="doResearch()">
+                  <i class="fas fa-search"></i> Find Keywords
                 </button>
+              </div>
+              <div class="research-options">
+                <span class="opt-label" style="display:inline-flex;align-items:center;gap:4px;">
+                  Country:
+                  <span class="country-tooltip" tabindex="0">
+                    <i class="fas fa-info-circle" style="color:var(--teal);font-size:11px;cursor:pointer;"></i>
+                    <span class="country-tooltip-box">
+                      🌍 <strong style="color:white;">Country-localised suggestions</strong><br><br>
+                      Sends Google's <code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:3px;">gl</code> &amp; <code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:3px;">hl</code> params and filters off-country keywords from results.<br><br>
+                      <span style="color:#5eead4;font-weight:600;">&#9889; Phase 2 adds real country-specific search volumes.</span>
+                    </span>
+                  </span>
+                  <span class="country-phase-badge" title="Country filtering active"><i class="fas fa-globe" style="font-size:8px;"></i> Active</span>
+                </span>
+                <select class="opt-select" id="researchCountry">
+                  <option value="us">🇺🇸 United States</option>
+                  <option value="gb">🇬🇧 United Kingdom</option>
+                  <option value="au">🇦🇺 Australia</option>
+                  <option value="ca">🇨🇦 Canada</option>
+                  <option value="in">🇮🇳 India</option>
+                  <option value="np">🇳🇵 Nepal</option>
+                  <option value="global" selected>🌍 Global</option>
+                </select>
+                <span class="opt-label" style="margin-left:8px;">Modifiers:</span>
+                <span class="mod-chip-label">Quick add:</span>
+                <button class="mod-chip" onclick="addModifier(this,'best')">best</button>
+                <button class="mod-chip" onclick="addModifier(this,'how to')">how to</button>
+                <button class="mod-chip" onclick="addModifier(this,'buy')">buy</button>
+                <button class="mod-chip" onclick="addModifier(this,'review')">review</button>
+                <button class="mod-chip" onclick="addModifier(this,'cheap')">cheap</button>
+                <button class="mod-chip" onclick="addModifier(this,'vs')">vs</button>
+                <button class="mod-chip" onclick="addModifier(this,'for beginners')">for beginners</button>
+              </div>
+              <p class="research-hint"><i class="fas fa-info-circle"></i> Powered by Google Suggest — returns real autocomplete suggestions. Select keywords then cluster them.</p>
+            </div>
+
+            <div class="selected-bar" id="selectedBar">
+              <p>🎯 <strong id="selectedCount">0</strong> keywords selected</p>
+              <div class="selected-bar-btns">
+                <button class="btn-cluster-sel" onclick="clusterSelected()"><i class="fas fa-layer-group"></i> Cluster Selected</button>
+                <button class="btn-clear-sel" onclick="clearSelected()">Clear</button>
+              </div>
+            </div>
+
+            <div class="suggestions-area" id="suggestionsArea">
+              <div class="research-empty">
+                <i class="fas fa-search"></i>
+                <h3>Start Your Keyword Research</h3>
+                <p>Enter a seed keyword above and click <strong>Find Keywords</strong><br>to discover real Google autocomplete suggestions.</p>
               </div>
             </div>
           </div>
@@ -954,7 +967,6 @@
               <button class="btn-act" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
               <button class="btn-act" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> Export PDF</button>
             </div>
-            <div class="dup-notice" id="dupNotice"><i class="fas fa-clone"></i><span><strong id="dupCount">0</strong> duplicate keywords were automatically removed before analysis.</span></div>
             <div class="results-toolbar" id="resultsToolbar" style="display:none;">
               <input class="toolbar-search" type="text" id="kwSearch" placeholder="Search keywords..." oninput="filterResults()">
               <select class="toolbar-select" id="intentFilter" onchange="filterResults()">
@@ -989,9 +1001,9 @@
               </div>
             </div>
             <div class="clusters-out">
-              <div class="clusters-out-head"><h3>Keyword Analysis Results</h3><p>Click an intent type above to filter keywords</p></div>
+              <div class="clusters-out-head"><h3>Keyword Research Results</h3><p>Click an intent type above to filter</p></div>
               <div class="clusters-body-inner" id="clustersBody">
-                <div class="empty-inner"><i class="fas fa-inbox"></i><h3>No data yet</h3><p>Analyze keywords to see results here</p></div>
+                <div class="empty-inner"><i class="fas fa-inbox"></i><h3>No data yet</h3><p>Research and cluster keywords to see results.</p></div>
               </div>
             </div>
             <div class="history-section" id="historySection">
@@ -1029,8 +1041,8 @@
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-card">
     <div class="ring"></div>
-    <h3>Analyzing Keywords</h3>
-    <p id="loadingMsg">Computing intent clusters...</p>
+    <h3>Finding Keywords</h3>
+    <p id="loadingMsg">Fetching Google suggestions...</p>
     <div class="prog-track"><div class="prog-fill"></div></div>
   </div>
 </div>
@@ -1049,23 +1061,23 @@
   <div class="modal-box">
     <div class="modal-hd"><h3><i class="fas fa-question-circle" style="color:var(--teal)"></i> Help & Instructions</h3><button class="modal-x" onclick="closeModal('helpModal')">×</button></div>
     <div class="modal-bd">
-      <h4>How to use Keyword Clustering</h4>
+      <h4>How to use Keyword Research</h4>
       <ol>
-        <li><strong>Upload a CSV/TXT file</strong> with keywords and optional volumes</li>
-        <li><strong>Or manually input</strong> keywords in the Manual Input tab</li>
-        <li><strong>Adjust clustering sensitivity</strong> to control grouping tightness</li>
-        <li><strong>Click "Start Clustering Analysis"</strong> to process</li>
+        <li><strong>Enter a seed keyword</strong> and select your target country</li>
+        <li><strong>Use modifier chips</strong> to add "best", "how to", "buy" etc.</li>
+        <li><strong>Click Find Keywords</strong> to fetch Google Suggest results</li>
+        <li><strong>Select keywords</strong> you want or click Cluster All</li>
         <li><strong>Export results</strong> as CSV or PDF</li>
       </ol>
+      <h4>Country Filtering</h4>
+      <p>Selecting a country biases Google results toward that region and filters out keywords mentioning other countries.</p>
       <h4>Intent Classification</h4>
       <ul>
         <li><strong>Informational:</strong> how, what, why, guide, tutorial</li>
-        <li><strong>Transactional:</strong> buy, price, order, shop, cost</li>
+        <li><strong>Transactional:</strong> buy, price, order, cost</li>
         <li><strong>Commercial:</strong> best, review, compare, vs, top</li>
         <li><strong>Navigational:</strong> login, website, official, app</li>
       </ul>
-      <h4>CSV Format</h4>
-      <p>Header row: <code>keyword,volume</code> — then one keyword per row. Volume is optional.</p>
     </div>
     <div class="modal-ft"><button class="btn-ok" onclick="closeModal('helpModal')">Got it!</button></div>
   </div>
@@ -1074,6 +1086,7 @@
 <script src="shared-layout.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
+
 
 /* ══════════════════════════════════════
    STATE
@@ -2068,6 +2081,150 @@ function exportContentPlanPDF(){
   doc.setFillColor(248,250,252); doc.rect(0,doc.internal.pageSize.getHeight()-10,pageW,10,'F');
   doc.setTextColor(150,150,150); doc.setFont('helvetica','normal'); doc.setFontSize(8);
   doc.text('clusterseo.pro - Free SEO Tools',pageW/2,doc.internal.pageSize.getHeight()-3,{align:'center'});
+  doc.save('content-plan-'+new Date().toISOString().split('T')[0]+'.pdf');
+}
+
+
+/* ══════════════════════════════════════
+   PDF EXPORT - RESEARCH TOOL
+══════════════════════════════════════ */
+function exportCSV(){ exportResults(); }
+
+function exportPDF(){
+  if(!Object.keys(kwByIntent).length){ alert('No results to export.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  let y = 20;
+  doc.setFillColor(15,23,42); doc.rect(0,0,pageW,30,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('ClusterSEO Pro - Keyword Research Report', pageW/2, 13, {align:'center'});
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Generated: '+new Date().toLocaleString(), pageW/2, 22, {align:'center'});
+  y = 40;
+  const stats = [['Total Keywords',appStats.totalKeywords||0],['Total Volume',fmt(appStats.totalVolume||0)],['Clusters',appStats.totalClusters||0]];
+  const bw=(pageW-30)/3;
+  stats.forEach(function(s,i){
+    const bx=15+i*bw;
+    doc.setFillColor(248,250,252); doc.roundedRect(bx,y,bw-4,16,2,2,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(15,23,42);
+    doc.text(String(s[1]),bx+bw/2-2,y+8,{align:'center'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,100,100);
+    doc.text(s[0],bx+bw/2-2,y+13,{align:'center'});
+  });
+  y+=26;
+  const intentColors={Informational:[14,165,233],Transactional:[245,158,11],Commercial:[16,185,129],Navigational:[124,58,237]};
+  ['Informational','Transactional','Commercial','Navigational'].forEach(function(intent){
+    const kws=kwByIntent[intent]||[]; if(!kws.length) return;
+    if(y>250){ doc.addPage(); y=20; }
+    const col=intentColors[intent];
+    doc.setFillColor(col[0],col[1],col[2]); doc.rect(15,y,pageW-30,8,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text(intent+' ('+kws.length+' keywords)',19,y+5.5);
+    y+=11;
+    doc.setFillColor(248,250,252); doc.rect(15,y,pageW-30,6,'F');
+    doc.setTextColor(80,80,80); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+    doc.text('#',18,y+4); doc.text('Keyword',25,y+4); doc.text('Volume',pageW-55,y+4); doc.text('Difficulty',pageW-35,y+4);
+    y+=7;
+    kws.forEach(function(k,i){
+      if(y>270){ doc.addPage(); y=20; }
+      if(i%2===0){ doc.setFillColor(252,252,252); doc.rect(15,y-1,pageW-30,6,'F'); }
+      doc.setTextColor(50,50,50); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+      doc.text(String(i+1),18,y+3.5);
+      doc.text(k.keyword.length>55?k.keyword.substring(0,52)+'...':k.keyword,25,y+3.5);
+      doc.text(fmt(k.volume||0)+(k.estimated?' ~':''),pageW-55,y+3.5);
+      const diff=k.difficulty||estimateDifficulty(k.keyword);
+      const dc=diff.label==='Easy'?[5,150,105]:diff.label==='Hard'?[220,38,38]:[180,120,0];
+      doc.setTextColor(dc[0],dc[1],dc[2]); doc.setFont('helvetica','bold');
+      doc.text(diff.label,pageW-35,y+3.5);
+      y+=6;
+    });
+    y+=5;
+  });
+  doc.setFillColor(248,250,252); doc.rect(0,doc.internal.pageSize.getHeight()-12,pageW,12,'F');
+  doc.setTextColor(150,150,150); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('clusterseo.pro',pageW/2,doc.internal.pageSize.getHeight()-4,{align:'center'});
+  doc.save('keyword-research-'+new Date().toISOString().split('T')[0]+'.pdf');
+}
+
+function bulkExportCSV(){ bulkExport(); }
+function bulkExportPDF(){
+  const kws=getSelectedKws(); if(!kws.length){ alert('No keywords selected.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const pageW=doc.internal.pageSize.getWidth(); let y=20;
+  doc.setFillColor(15,23,42); doc.rect(0,0,pageW,28,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text('ClusterSEO Pro - Selected Keywords',pageW/2,12,{align:'center'});
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text(kws.length+' keywords · '+new Date().toLocaleString(),pageW/2,20,{align:'center'});
+  y=36;
+  doc.setFillColor(248,250,252); doc.rect(15,y,pageW-30,7,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(80,80,80);
+  doc.text('#',18,y+5); doc.text('Keyword',25,y+5); doc.text('Intent',pageW-65,y+5);
+  doc.text('Volume',pageW-45,y+5); doc.text('Difficulty',pageW-25,y+5);
+  y+=9;
+  kws.forEach(function(k,i){
+    if(y>270){ doc.addPage(); y=20; }
+    if(i%2===0){ doc.setFillColor(252,252,252); doc.rect(15,y-1,pageW-30,7,'F'); }
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(50,50,50);
+    doc.text(String(i+1),18,y+4);
+    doc.text(k.keyword.length>50?k.keyword.substring(0,47)+'...':k.keyword,25,y+4);
+    doc.text(k.intent||'',pageW-65,y+4);
+    doc.text(fmt(k.volume||0),pageW-45,y+4);
+    const diff=k.difficulty||estimateDifficulty(k.keyword);
+    const dc=diff.label==='Easy'?[5,150,105]:diff.label==='Hard'?[220,38,38]:[180,120,0];
+    doc.setTextColor(dc[0],dc[1],dc[2]); doc.setFont('helvetica','bold');
+    doc.text(diff.label,pageW-25,y+4);
+    y+=7;
+  });
+  doc.save('selected-keywords-'+new Date().toISOString().split('T')[0]+'.pdf');
+}
+
+function exportContentPlanPDF(){
+  if(!appStats.totalKeywords){ alert('No data - cluster some keywords first.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const pageW=doc.internal.pageSize.getWidth(); let y=20;
+  doc.setFillColor(15,23,42); doc.rect(0,0,pageW,32,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text('Content Gap Plan - ClusterSEO Pro',pageW/2,14,{align:'center'});
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Generated: '+new Date().toLocaleString()+' · '+appStats.totalKeywords+' keywords analysed',pageW/2,24,{align:'center'});
+  y=42;
+  const dist=appStats.intentDistribution||{};
+  const TEMPLATES={
+    Informational:{pageTypes:[{type:'Pillar Page',words:'3000-5000'},{type:'Supporting Articles',words:'1200-2000'},{type:'FAQ Page',words:'800-1500'}]},
+    Transactional:{pageTypes:[{type:'Product/Service Page',words:'800-1500'},{type:'Category Page',words:'600-1000'},{type:'Landing Page',words:'500-800'}]},
+    Commercial:   {pageTypes:[{type:'Comparison Page',words:'1500-2500'},{type:'Review Page',words:'1200-2000'},{type:'Best-of Roundup',words:'2000-3500'}]},
+    Navigational: {pageTypes:[{type:'Homepage',words:'500-1000'},{type:'About Page',words:'400-800'},{type:'Contact Page',words:'200-400'}]},
+  };
+  const intentColors={Informational:[14,165,233],Transactional:[245,158,11],Commercial:[16,185,129],Navigational:[124,58,237]};
+  ['Transactional','Informational','Commercial','Navigational'].forEach(function(intent){
+    const count=dist[intent]||0; if(!count) return;
+    if(y>240){ doc.addPage(); y=20; }
+    const col=intentColors[intent];
+    doc.setFillColor(col[0],col[1],col[2]); doc.rect(15,y,pageW-30,9,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    const pages=intent==='Informational'?Math.ceil(count/3)+1:Math.ceil(count/4)+1;
+    doc.text(intent+' - '+count+' keywords → ~'+pages+' pages recommended',19,y+6);
+    y+=12;
+    TEMPLATES[intent].pageTypes.forEach(function(pt){
+      if(y>270){ doc.addPage(); y=20; }
+      doc.setFillColor(248,250,252); doc.rect(19,y,pageW-38,8,'F');
+      doc.setTextColor(30,30,30); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+      doc.text(pt.type,23,y+5.5);
+      doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
+      doc.text(pt.words+' words',pageW-40,y+5.5);
+      y+=10;
+    });
+    const topKws=(kwByIntent[intent]||[]).slice(0,5).map(function(k){return k.keyword;}).join(', ');
+    if(topKws){ doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(120,120,120); doc.text('Top keywords: '+topKws,19,y+3); y+=8; }
+    y+=4;
+  });
+  doc.setFillColor(248,250,252); doc.rect(0,doc.internal.pageSize.getHeight()-10,pageW,10,'F');
+  doc.setTextColor(150,150,150); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.text('clusterseo.pro',pageW/2,doc.internal.pageSize.getHeight()-3,{align:'center'});
   doc.save('content-plan-'+new Date().toISOString().split('T')[0]+'.pdf');
 }
 </script>
