@@ -559,6 +559,176 @@
       background: var(--teal); border-color: var(--teal); color: white;
     }
     .mod-chip-label { font-size: 11px; color: var(--gray-400); font-weight: 600; align-self: center; }
+
+    /* ── PHASE 1 ADDITIONS ── */
+
+    /* Duplicate notice */
+    .dup-notice {
+      display:none; align-items:center; gap:10px;
+      padding:10px 14px; margin-bottom:14px;
+      background:var(--gold-light); border:1px solid rgba(245,158,11,0.25);
+      border-radius:var(--r); font-size:13px; color:#92400e; font-weight:500;
+    }
+    .dup-notice.show { display:flex; }
+    .dup-notice i { color:var(--gold); flex-shrink:0; }
+    .dup-notice strong { font-weight:700; }
+
+    /* Filter/sort toolbar */
+    .results-toolbar {
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      padding:14px 16px; background:var(--gray-50);
+      border:1px solid var(--gray-200); border-radius:var(--r);
+      margin-bottom:16px;
+    }
+    .toolbar-search {
+      flex:1; min-width:180px;
+      padding:8px 12px 8px 34px; border:1px solid var(--gray-200);
+      border-radius:var(--r-sm); font-size:13px; font-family:var(--font);
+      color:var(--gray-700); background:var(--white); outline:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:10px center;
+      transition:border-color 0.2s;
+    }
+    .toolbar-search:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(14,165,233,0.1); }
+    .toolbar-select {
+      padding:8px 12px; border:1px solid var(--gray-200); border-radius:var(--r-sm);
+      font-size:13px; font-family:var(--font); color:var(--gray-700);
+      background:var(--white); cursor:pointer; outline:none;
+    }
+    .toolbar-select:focus { border-color:var(--teal); }
+    .toolbar-divider { width:1px; height:24px; background:var(--gray-200); }
+    .toolbar-count { font-size:12px; color:var(--gray-400); font-weight:500; margin-left:auto; white-space:nowrap; }
+
+    /* Enhanced kw table with checkboxes */
+    .kw-tbl th.check-col, .kw-tbl td.check-col { width:36px; text-align:center; padding:10px 8px; }
+    .kw-checkbox { width:15px; height:15px; accent-color:var(--teal); cursor:pointer; }
+    .kw-tbl tr.selected-row td { background:var(--teal-light); }
+
+    /* Bulk action bar */
+    .bulk-bar {
+      display:none; align-items:center; justify-content:space-between;
+      padding:10px 14px; background:var(--navy);
+      border-radius:var(--r); margin-bottom:12px; gap:10px; flex-wrap:wrap;
+    }
+    .bulk-bar.show { display:flex; }
+    .bulk-bar p { font-size:13px; color:rgba(255,255,255,0.8); font-weight:500; }
+    .bulk-bar p strong { color:var(--teal); }
+    .bulk-btns { display:flex; gap:8px; }
+    .btn-bulk {
+      padding:6px 14px; border-radius:var(--r-sm); font-size:12px; font-weight:600;
+      cursor:pointer; font-family:var(--font); display:flex; align-items:center; gap:5px;
+      border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.1);
+      color:rgba(255,255,255,0.8); transition:all 0.15s;
+    }
+    .btn-bulk:hover { background:rgba(255,255,255,0.2); }
+    .btn-bulk.danger:hover { background:rgba(239,68,68,0.3); border-color:rgba(239,68,68,0.4); }
+
+    /* Volume badge */
+    .vol-badge {
+      display:inline-block; font-family:var(--mono); font-weight:700;
+      font-size:12px; color:var(--teal-dark); padding:2px 7px;
+      background:var(--teal-light); border-radius:100px;
+    }
+    .vol-badge.zero { color:var(--gray-400); background:var(--gray-100); }
+    .vol-est { font-size:10px; color:var(--gray-400); margin-left:3px; }
+
+    /* Difficulty badge */
+    .diff-badge {
+      display:inline-flex; align-items:center; gap:3px;
+      font-size:11px; font-weight:700; padding:2px 7px;
+      border-radius:100px;
+    }
+    .diff-easy   { background:#d1fae5; color:#065f46; }
+    .diff-medium { background:#fef3c7; color:#92400e; }
+    .diff-hard   { background:#fee2e2; color:#991b1b; }
+
+    /* History panel */
+    .history-section {
+      margin-top:32px; border-top:1px solid var(--gray-200); padding-top:24px;
+    }
+    .history-header {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;
+    }
+    .history-header h3 { font-size:14px; font-weight:700; color:var(--gray-700); display:flex; align-items:center; gap:7px; }
+    .btn-clear-hist {
+      font-size:12px; color:var(--gray-400); background:none; border:none; cursor:pointer;
+      font-family:var(--font); display:flex; align-items:center; gap:4px; transition:color 0.15s;
+    }
+    .btn-clear-hist:hover { color:var(--red); }
+    .history-list { display:flex; flex-direction:column; gap:8px; }
+    .history-item {
+      background:var(--white); border:1px solid var(--gray-200); border-radius:var(--r);
+      padding:12px 14px; display:flex; align-items:center; justify-content:space-between;
+      gap:12px; transition:all 0.2s; cursor:pointer;
+    }
+    .history-item:hover { border-color:var(--teal); box-shadow:var(--shadow); }
+    .history-item-left { display:flex; align-items:center; gap:10px; }
+    .history-item-icon {
+      width:32px; height:32px; background:linear-gradient(135deg,var(--teal-light),#dbeafe);
+      border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center;
+      font-size:13px; color:var(--teal-dark); flex-shrink:0;
+    }
+    .history-item h4 { font-size:13px; font-weight:700; color:var(--gray-900); }
+    .history-item p  { font-size:11px; color:var(--gray-400); margin-top:2px; }
+    .history-item-right { display:flex; align-items:center; gap:8px; }
+    .btn-restore {
+      padding:5px 12px; background:var(--teal); color:white; border:none;
+      border-radius:var(--r-sm); font-size:12px; font-weight:600; cursor:pointer;
+      font-family:var(--font); display:flex; align-items:center; gap:4px; transition:all 0.15s;
+    }
+    .btn-restore:hover { background:var(--teal-dark); }
+    .btn-del-hist {
+      padding:5px 10px; background:none; border:1px solid var(--gray-200);
+      border-radius:var(--r-sm); font-size:12px; color:var(--gray-400);
+      cursor:pointer; font-family:var(--font); transition:all 0.15s;
+    }
+    .btn-del-hist:hover { border-color:var(--red); color:var(--red); }
+    .history-empty { text-align:center; padding:24px; color:var(--gray-400); font-size:13px; }
+
+    /* Vol estimation legend */
+    .vol-legend {
+      display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; margin-bottom:16px;
+    }
+    .vol-leg-item {
+      display:flex; align-items:center; gap:5px;
+      font-size:11px; color:var(--gray-500); font-weight:500;
+    }
+    .vol-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .vol-dot.high   { background:var(--teal); }
+    .vol-dot.medium { background:var(--gold); }
+    .vol-dot.low    { background:var(--gray-300); }
+
+    /* Country tooltip */
+    .country-tooltip {
+      position: relative; display: inline-flex; align-items: center;
+      margin-left: 3px; vertical-align: middle;
+    }
+    .country-tooltip-box {
+      display: none; position: absolute; left: 50%; top: calc(100% + 8px);
+      transform: translateX(-50%); width: 240px;
+      background: var(--navy); color: rgba(255,255,255,0.85);
+      border-radius: var(--r); padding: 10px 12px; font-size: 12px;
+      line-height: 1.6; z-index: 999; pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      font-weight: 400; letter-spacing: 0;
+    }
+    .country-tooltip-box::before {
+      content: ''; position: absolute; bottom: 100%; left: 50%;
+      transform: translateX(-50%); border: 6px solid transparent;
+      border-bottom-color: var(--navy);
+    }
+    .country-tooltip:hover .country-tooltip-box,
+    .country-tooltip:focus .country-tooltip-box { display: block; }
+
+    /* Phase badge on country select */
+    .country-phase-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 700; letter-spacing: .04em;
+      padding: 2px 7px; border-radius: 100px;
+      background: var(--green-light); color: #065f46;
+      vertical-align: middle; margin-left: 4px;
+      cursor: default;
+    }
   </style>
 </head>
 <body>
@@ -682,8 +852,19 @@
 
               <!-- Options row -->
               <div class="research-options">
-                <span class="opt-label">Country:</span>
-                <select class="opt-select" id="researchCountry">
+                <span class="opt-label" style="display:inline-flex;align-items:center;gap:4px;">
+                  Country:
+                  <span class="country-tooltip" tabindex="0">
+                    <i class="fas fa-info-circle" style="color:var(--teal);font-size:11px;cursor:pointer;"></i>
+                    <span class="country-tooltip-box">
+                      🌍 <strong style="color:white;">Country-localised suggestions</strong><br><br>
+                      Selecting a country sends Google's <code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:3px;">gl</code> &amp; <code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:3px;">hl</code> parameters so results are biased toward that region.<br><br>
+                      <span style="color:#5eead4;font-weight:600;">&#9889; Phase 2 will add real country-specific search volumes via DataForSEO.</span>
+                    </span>
+                  </span>
+                  <span class="country-phase-badge" title="Basic country filtering active. Phase 2 adds real search volumes."><i class="fas fa-globe" style="font-size:8px;"></i> Active</span>
+                </span>
+                <select class="opt-select" id="researchCountry" title="Country filtering coming in Phase 2 — currently display only" >
                   <option value="us">🇺🇸 United States</option>
                   <option value="gb">🇬🇧 United Kingdom</option>
                   <option value="au">🇦🇺 Australia</option>
@@ -766,6 +947,48 @@
               <button class="btn-act primary" onclick="copyResults()"><i class="fas fa-copy"></i> Copy Results</button>
               <button class="btn-act" onclick="exportResults()"><i class="fas fa-download"></i> Export CSV</button>
             </div>
+            <!-- Duplicate notice -->
+            <div class="dup-notice" id="dupNotice">
+              <i class="fas fa-clone"></i>
+              <span><strong id="dupCount">0</strong> duplicate keywords were automatically removed before analysis.</span>
+            </div>
+
+            <!-- Filter/sort toolbar -->
+            <div class="results-toolbar" id="resultsToolbar" style="display:none;">
+              <input class="toolbar-search" type="text" id="kwSearch" placeholder="Search keywords..." oninput="filterResults()">
+              <select class="toolbar-select" id="intentFilter" onchange="filterResults()">
+                <option value="all">All Intents</option>
+                <option value="Informational">Informational</option>
+                <option value="Transactional">Transactional</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Navigational">Navigational</option>
+              </select>
+              <select class="toolbar-select" id="sortBy" onchange="filterResults()">
+                <option value="default">Default Order</option>
+                <option value="vol-desc">Volume: High → Low</option>
+                <option value="vol-asc">Volume: Low → High</option>
+                <option value="az">A → Z</option>
+                <option value="za">Z → A</option>
+                <option value="diff-asc">Difficulty: Easy first</option>
+                <option value="diff-desc">Difficulty: Hard first</option>
+                <option value="len-asc">Shortest first</option>
+                <option value="len-desc">Longest first</option>
+              </select>
+              <div class="toolbar-divider"></div>
+              <span class="toolbar-count" id="toolbarCount">0 keywords</span>
+            </div>
+
+            <!-- Bulk action bar -->
+            <div class="bulk-bar" id="bulkBar">
+              <p><strong id="bulkCount">0</strong> keywords selected</p>
+              <div class="bulk-btns">
+                <button class="btn-bulk" onclick="bulkCopy()"><i class="fas fa-copy"></i> Copy</button>
+                <button class="btn-bulk" onclick="bulkExport()"><i class="fas fa-download"></i> Export</button>
+                <button class="btn-bulk danger" onclick="bulkDelete()"><i class="fas fa-trash"></i> Remove</button>
+                <button class="btn-bulk" onclick="bulkDeselect()"><i class="fas fa-times"></i> Deselect</button>
+              </div>
+            </div>
+
             <div class="clusters-out">
               <div class="clusters-out-head">
                 <h3>Keyword Analysis Results</h3>
@@ -774,6 +997,15 @@
               <div class="clusters-body-inner" id="clustersBody">
                 <div class="empty-inner"><i class="fas fa-inbox"></i><h3>No data yet</h3><p>Analyze keywords to see results here</p></div>
               </div>
+            </div>
+
+            <!-- History section -->
+            <div class="history-section" id="historySection">
+              <div class="history-header">
+                <h3><i class="fas fa-history" style="color:var(--teal)"></i> Recent Analyses</h3>
+                <button class="btn-clear-hist" onclick="clearHistory()"><i class="fas fa-trash"></i> Clear All</button>
+              </div>
+              <div id="historyList"></div>
             </div>
           </div>
 
@@ -838,13 +1070,24 @@
 
 <script src="shared-layout.js"></script>
 <script>
-let kwByIntent = {}, appStats = {};
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let kwByIntent     = {};
+let appStats       = {};
+let filteredKwList = [];
+let selectedRows   = new Set();
+let currentView    = 'all';
+let selectedKws    = new Set();
+let allSuggestions = [];
 
+/* ══════════════════════════════════════
+   CORE HELPERS
+══════════════════════════════════════ */
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 function showLoading(msg){ document.getElementById('loadingMsg').textContent=msg; document.getElementById('loadingOverlay').classList.add('show'); }
 function hideLoading(){ document.getElementById('loadingOverlay').classList.remove('show'); }
 function showError(msg){ document.getElementById('errorMsg').textContent=msg; document.getElementById('errorModal').classList.add('show'); }
-
 function switchTab(tab){
   document.querySelectorAll('.app-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
   document.querySelectorAll('.app-panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
@@ -855,10 +1098,86 @@ function updateCount(){
   document.getElementById('kwCount').textContent=n+' keywords';
 }
 function clearKw(){ document.getElementById('keywordsInput').value=''; updateCount(); }
+function fmt(n){ if(n>=1e6)return(n/1e6).toFixed(1)+'M'; if(n>=1000)return(n/1000).toFixed(1)+'K'; return String(n||0); }
+function getClass(i){ return {Informational:'info',Transactional:'trans',Commercial:'comm',Navigational:'nav'}[i]||''; }
+function getIcon(i){ return {Informational:'fa-info-circle',Transactional:'fa-shopping-cart',Commercial:'fa-chart-line',Navigational:'fa-compass'}[i]||'fa-circle'; }
 
+/* ══════════════════════════════════════
+   VOLUME & DIFFICULTY ESTIMATION
+══════════════════════════════════════ */
+function estimateVolume(keyword, position){
+  const k=keyword.toLowerCase(), words=k.split(' ').length;
+  let base=position===0?5000:position<=2?2000:position<=5?800:position<=8?300:100;
+  if(k.includes('best')||k.includes('how to')||k.includes('what is')) base*=1.8;
+  if(k.includes('buy')||k.includes('price')||k.includes('review')) base*=1.5;
+  if(words>=5) base*=0.4; else if(words===4) base*=0.6; else if(words===3) base*=0.8;
+  const result=Math.round(base/100)*100;
+  return result<100?100:result;
+}
+function volLabel(v){
+  if(v>=2000) return {label:'High',  cls:'high'  };
+  if(v>=500)  return {label:'Medium',cls:'medium'};
+  return             {label:'Low',   cls:'low'   };
+}
+function estimateDifficulty(keyword){
+  const k=keyword.toLowerCase(), words=k.split(' ').length;
+  let score=50;
+  if(words===1) score+=35; else if(words===2) score+=20; else if(words>=5) score-=20;
+  if(k.includes('best')||k.includes('top')||k.includes('review')) score+=15;
+  if(k.includes('how to')||k.includes('what is')||k.includes('guide')) score-=10;
+  if(k.includes('for beginners')||k.includes('tutorial')||k.includes('tips')) score-=15;
+  if(k.includes('cheap')||k.includes('free')||k.includes('diy')) score-=5;
+  score=Math.max(10,Math.min(90,score));
+  if(score>=65) return {score,label:'Hard',  cls:'diff-hard'  };
+  if(score>=40) return {score,label:'Medium',cls:'diff-medium'};
+  return              {score,label:'Easy',  cls:'diff-easy'  };
+}
+
+/* ══════════════════════════════════════
+   DUPLICATE REMOVAL
+══════════════════════════════════════ */
+function deduplicateKeywords(keywords, volumes){
+  const seen=new Set(), kOut=[], vOut=[];
+  let dupCnt=0;
+  keywords.forEach(function(kw,i){
+    const key=kw.toLowerCase().trim();
+    if(!seen.has(key)){ seen.add(key); kOut.push(kw.trim()); vOut.push(volumes[i]||0); }
+    else dupCnt++;
+  });
+  return {keywords:kOut,volumes:vOut,duplicatesRemoved:dupCnt};
+}
+
+/* ══════════════════════════════════════
+   COUNTRY KEYWORD FILTER
+══════════════════════════════════════ */
+const COUNTRY_BLOCKED = {
+  us:     ['uk','australia','india','nepal','pakistan','canada','ireland','dubai','nz','philippines','sri lanka','bangladesh','qatar'],
+  gb:     ['australia','india','nepal','pakistan','canada','ireland','dubai','nz','philippines','sri lanka','bangladesh','qatar','usa'],
+  au:     ['india','nepal','pakistan','ireland','dubai','philippines','sri lanka','bangladesh','qatar','usa'],
+  ca:     ['australia','india','nepal','pakistan','ireland','dubai','nz','philippines','sri lanka','bangladesh','qatar'],
+  in:     ['uk','australia','nepal','pakistan','canada','ireland','dubai','nz','philippines','sri lanka','bangladesh','qatar'],
+  np:     ['uk','australia','pakistan','canada','ireland','dubai','nz','philippines','sri lanka','bangladesh','qatar','india'],
+  global: []
+};
+
+function filterByCountry(keywords, countryCode){
+  const blocked = COUNTRY_BLOCKED[countryCode] || [];
+  if(!blocked.length) return keywords;
+  return keywords.filter(function(item){
+    const kw = item.keyword.toLowerCase();
+    return !blocked.some(function(term){ return kw.includes(term); });
+  });
+}
+
+/* ══════════════════════════════════════
+   FILE UPLOAD
+══════════════════════════════════════ */
 function handleDragOver(e){ e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
 function handleDragLeave(e){ e.preventDefault(); document.getElementById('uploadZone').classList.remove('drag-over'); }
-function handleDrop(e){ e.preventDefault(); document.getElementById('uploadZone').classList.remove('drag-over'); if(e.dataTransfer.files.length) handleFileSelect({target:{files:e.dataTransfer.files}}); }
+function handleDrop(e){
+  e.preventDefault(); document.getElementById('uploadZone').classList.remove('drag-over');
+  if(e.dataTransfer.files.length) handleFileSelect({target:{files:e.dataTransfer.files}});
+}
 async function handleFileSelect(e){
   const f=e.target.files[0]; if(!f) return;
   const txt=await f.text();
@@ -868,37 +1187,79 @@ async function handleFileSelect(e){
   document.getElementById('fileBar').classList.add('show');
   document.getElementById('processBtn').disabled=false;
 }
-function removeFile(){ document.getElementById('fileInput').value=''; document.getElementById('fileBar').classList.remove('show'); document.getElementById('processBtn').disabled=true; }
+function removeFile(){
+  document.getElementById('fileInput').value='';
+  document.getElementById('fileBar').classList.remove('show');
+  document.getElementById('processBtn').disabled=true;
+}
 
+/* ══════════════════════════════════════
+   ENRICH + DEDUP NOTICE
+══════════════════════════════════════ */
+function enrichWithEstimates(data){
+  ['Informational','Transactional','Commercial','Navigational'].forEach(function(intent){
+    (data.keywordsByIntent[intent]||[]).forEach(function(item,i){
+      item.difficulty=estimateDifficulty(item.keyword);
+      if(!item.volume||item.volume===0){ item.volume=estimateVolume(item.keyword,i); item.estimated=true; }
+    });
+  });
+  let total=0;
+  ['Informational','Transactional','Commercial','Navigational'].forEach(function(intent){
+    (data.keywordsByIntent[intent]||[]).forEach(function(item){ total+=item.volume||0; });
+  });
+  data.stats.totalVolume=total;
+}
+function showDupNotice(count){
+  const el=document.getElementById('dupNotice');
+  if(count>0){ document.getElementById('dupCount').textContent=count; el.classList.add('show'); }
+  else el.classList.remove('show');
+}
+
+/* ══════════════════════════════════════
+   ANALYSE
+══════════════════════════════════════ */
 async function analyzeKeywords(){
   const text=document.getElementById('keywordsInput').value.trim();
   if(!text){ showError('Please enter some keywords first.'); return; }
-  showLoading('Analyzing keywords...');
-  try {
+  showLoading('Removing duplicates & analyzing...');
+  try{
     const lines=text.split('\n').filter(l=>l.trim());
-    const keywords=[],volumes=[];
-    lines.forEach(line=>{ const p=line.split(',').map(x=>x.trim()); if(p[0]){keywords.push(p[0]);volumes.push(p[1]?parseInt(p[1])||0:0);} });
-    const res=await fetch('/api/process-keywords',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keywords,volumes})});
+    const rawKw=[], rawVol=[];
+    lines.forEach(function(line){
+      const p=line.split(',').map(function(x){return x.trim();});
+      if(p[0]){ rawKw.push(p[0]); rawVol.push(p[1]?parseInt(p[1])||0:0); }
+    });
+    const deduped=deduplicateKeywords(rawKw,rawVol);
+    showDupNotice(deduped.duplicatesRemoved);
+    const res=await fetch('/api/process-keywords',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keywords:deduped.keywords,volumes:deduped.volumes})});
     const data=await res.json();
-    data.success ? processResults(data) : showError(data.error||'Analysis failed');
-  } catch(e){ showError('Network error: '+e.message); }
+    if(data.success){ enrichWithEstimates(data); processResults(data); }
+    else showError(data.error||'Analysis failed');
+  }catch(e){ showError('Network error: '+e.message); }
   finally{ hideLoading(); }
 }
+
 async function processUploadedFile(){
   const fi=document.getElementById('fileInput');
   if(!fi.files||!fi.files[0]){ showError('Please select a file first'); return; }
   showLoading('Processing file...');
-  try {
+  try{
     const fd=new FormData(); fd.append('file',fi.files[0]);
     const res=await fetch('/api/process-csv',{method:'POST',body:fd});
     const data=await res.json();
-    data.success ? processResults(data) : showError(data.error||'Failed to process file');
-  } catch(e){ showError('Network error: '+e.message); }
+    if(data.success){ enrichWithEstimates(data); processResults(data); }
+    else showError(data.error||'Failed to process file');
+  }catch(e){ showError('Network error: '+e.message); }
   finally{ hideLoading(); }
 }
-function fmt(n){ if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return String(n); }
+
+/* ══════════════════════════════════════
+   PROCESS RESULTS
+══════════════════════════════════════ */
 function processResults(data){
-  kwByIntent=data.keywordsByIntent||{}; appStats=data.stats||{};
+  kwByIntent=data.keywordsByIntent||{};
+  appStats=data.stats||{};
+  selectedRows.clear();
   document.getElementById('totalClusters').textContent=appStats.totalClusters||0;
   document.getElementById('totalKeywords').textContent=appStats.totalKeywords||0;
   document.getElementById('totalVolume').textContent=fmt(appStats.totalVolume||0);
@@ -908,283 +1269,374 @@ function processResults(data){
   document.getElementById('commCount').textContent=d.Commercial||0;
   document.getElementById('navCount').textContent=d.Navigational||0;
   document.getElementById('resultsTabBtn').disabled=false;
+  document.getElementById('resultsToolbar').style.display='flex';
   switchTab('results');
-  showAllKw();
+  currentView='all';
+  document.getElementById('kwSearch').value='';
+  document.getElementById('intentFilter').value='all';
+  document.getElementById('sortBy').value='default';
+  filterResults();
+  saveToHistory(data);
+  renderHistory();
 }
-function getClass(i){ return {Informational:'info',Transactional:'trans',Commercial:'comm',Navigational:'nav'}[i]||''; }
-function getIcon(i){ return {Informational:'fa-info-circle',Transactional:'fa-shopping-cart',Commercial:'fa-chart-line',Navigational:'fa-compass'}[i]||'fa-circle'; }
 
-function showAllKw(){
-  document.querySelectorAll('.intent-box').forEach(b=>b.classList.remove('active'));
-  const body=document.getElementById('clustersBody');
-  const intents=['Informational','Transactional','Commercial','Navigational'];
-  const has=intents.filter(i=>(kwByIntent[i]||[]).length>0);
-  if(!has.length){ body.innerHTML='<div class="empty-inner"><i class="fas fa-inbox"></i><h3>No data yet</h3><p>Analyze keywords to see results.</p></div>'; return; }
-  body.innerHTML=has.map(intent=>{
-    const kws=kwByIntent[intent]||[];
-    const vol=kws.reduce((s,k)=>s+(k.volume||0),0);
-    const cls=getClass(intent);
-    const tags=kws.slice(0,3).map(k=>`<div class="prev-tag"><span>${k.keyword}</span><span class="prev-vol">${k.volume}</span></div>`).join('');
-    const more=kws.length>3?`<span class="prev-more">+${kws.length-3} more</span>`:'';
-    return `<div class="intent-row ${cls}">
-      <div class="intent-row-hdr" onclick="showIntentKw('${intent}')">
-        <div class="intent-row-left">
-          <div class="intent-row-ico"><i class="fas ${getIcon(intent)}"></i></div>
-          <div>
-            <div class="intent-row-name">${intent}</div>
-            <div class="intent-row-meta"><span><i class="fas fa-key"></i> ${kws.length} keywords</span><span><i class="fas fa-chart-bar"></i> ${fmt(vol)} volume</span></div>
-          </div>
-        </div>
-        <div class="intent-row-right">
-          <button class="btn-view" onclick="event.stopPropagation();showIntentKw('${intent}')">View All <i class="fas fa-arrow-right"></i></button>
-          <i class="fas fa-chevron-right chevron"></i>
-        </div>
-      </div>
-      <div class="intent-row-prev"><div class="prev-tags">${tags}${more}</div></div>
-    </div>`;
-  }).join('');
+/* ══════════════════════════════════════
+   FILTER + SORT
+══════════════════════════════════════ */
+function filterResults(){
+  const search=document.getElementById('kwSearch').value.toLowerCase().trim();
+  const intent=document.getElementById('intentFilter').value;
+  const sort=document.getElementById('sortBy').value;
+  let allKws=[];
+  ['Informational','Transactional','Commercial','Navigational'].forEach(function(i){
+    (kwByIntent[i]||[]).forEach(function(k){ if(intent==='all'||intent===i) allKws.push(Object.assign({},k,{intent:i})); });
+  });
+  if(search) allKws=allKws.filter(function(k){ return k.keyword.toLowerCase().includes(search); });
+  allKws.sort(function(a,b){
+    switch(sort){
+      case 'vol-desc':  return (b.volume||0)-(a.volume||0);
+      case 'vol-asc':   return (a.volume||0)-(b.volume||0);
+      case 'az':        return a.keyword.localeCompare(b.keyword);
+      case 'za':        return b.keyword.localeCompare(a.keyword);
+      case 'len-asc':   return a.keyword.length-b.keyword.length;
+      case 'len-desc':  return b.keyword.length-a.keyword.length;
+      case 'diff-asc':  return ((a.difficulty&&a.difficulty.score)||50)-((b.difficulty&&b.difficulty.score)||50);
+      case 'diff-desc': return ((b.difficulty&&b.difficulty.score)||50)-((a.difficulty&&a.difficulty.score)||50);
+      default: return 0;
+    }
+  });
+  filteredKwList=allKws;
+  document.getElementById('toolbarCount').textContent=allKws.length+' keywords';
+  document.querySelectorAll('.intent-box').forEach(function(b){
+    b.classList.toggle('active',b.dataset.intent===intent&&intent!=='all');
+  });
+  renderFilteredTable(allKws);
 }
-function showIntentKw(intent){
-  document.querySelectorAll('.intent-box').forEach(b=>b.classList.toggle('active',b.dataset.intent===intent));
-  const kws=kwByIntent[intent]||[];
+
+function renderFilteredTable(kws){
   const body=document.getElementById('clustersBody');
-  const vol=kws.reduce((s,k)=>s+(k.volume||0),0);
-  const avg=kws.length?Math.round(vol/kws.length):0;
+  selectedRows.clear(); updateBulkBar();
   if(!kws.length){
-    body.innerHTML=`<div class="back-hdr"><button class="btn-back" onclick="showAllKw()"><i class="fas fa-arrow-left"></i> Back</button><span class="back-title">${intent} Keywords</span></div><div class="empty-inner"><i class="fas fa-search"></i><h3>No ${intent} keywords</h3><p>None matched this intent type.</p></div>`;
+    body.innerHTML='<div class="empty-inner"><i class="fas fa-search"></i><h3>No keywords match</h3><p>Try adjusting your search or filter.</p></div>';
     return;
   }
-  body.innerHTML=`<div class="back-hdr"><button class="btn-back" onclick="showAllKw()"><i class="fas fa-arrow-left"></i> Back to All</button><div><span class="back-title">${intent} Keywords</span><div class="back-meta"><span><i class="fas fa-key"></i> ${kws.length} keywords</span><span><i class="fas fa-chart-bar"></i> ${fmt(vol)} volume</span><span><i class="fas fa-calculator"></i> Avg: ${fmt(avg)}</span></div></div></div>
-  <table class="kw-tbl"><thead><tr><th>S.N.</th><th>Keyword</th><th>Volume</th></tr></thead><tbody>${kws.map((k,i)=>`<tr><td>${i+1}</td><td>${k.keyword}</td><td>${fmt(k.volume)}</td></tr>`).join('')}</tbody></table>`;
+  const intentBg={info:'var(--teal-light)',trans:'var(--gold-light)',comm:'var(--green-light)',nav:'#ede9fe'};
+  const intentColor={info:'var(--teal-dark)',trans:'#92400e',comm:'#065f46',nav:'#6d28d9'};
+  const rows=kws.map(function(k,i){
+    const diff=k.difficulty||estimateDifficulty(k.keyword);
+    const estMark=k.estimated?'<span class="vol-est" title="Estimated">~</span>':'';
+    const cls=getClass(k.intent);
+    const kwHtml=k.keyword.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const kwJs=k.keyword.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<tr data-idx="'+i+'">'
+      +'<td class="check-col"><input type="checkbox" class="kw-checkbox" onchange="toggleRow('+i+',this)"></td>'
+      +'<td style="font-family:var(--mono);font-size:11px;color:var(--gray-400)">'+(i+1)+'</td>'
+      +'<td><div style="font-weight:600;color:var(--gray-900)">'+kwHtml+'</div>'
+      +'<div style="margin-top:3px;"><span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:100px;'
+      +'background:'+intentBg[cls]+';color:'+intentColor[cls]+'">'+k.intent+'</span></div></td>'
+      +'<td><span class="diff-badge '+diff.cls+'">'+diff.label+' ('+diff.score+')</span></td>'
+      +'<td><span class="vol-badge '+((k.volume||0)===0?'zero':'')+'">'+fmt(k.volume)+estMark+'</span></td>'
+      +'<td><button onclick="copySingleKw(\''+kwJs+'\',this)" title="Copy"'
+      +' style="background:none;border:1px solid var(--gray-200);padding:4px 8px;border-radius:var(--r-sm);'
+      +'font-size:11px;color:var(--gray-500);cursor:pointer;font-family:var(--font);'
+      +'display:flex;align-items:center;gap:3px;transition:all 0.15s;">'
+      +'<i class="fas fa-copy"></i></button></td></tr>';
+  }).join('');
+  body.innerHTML='<table class="kw-tbl"><thead><tr>'
+    +'<th class="check-col"><input type="checkbox" class="kw-checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>'
+    +'<th>#</th><th>Keyword</th><th>Difficulty</th><th>Volume</th><th></th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="vol-legend">'
+    +'<span style="font-size:11px;color:var(--gray-400);font-weight:600;">Volume:</span>'
+    +'<span class="vol-leg-item"><span class="vol-dot high"></span> High (2000+)</span>'
+    +'<span class="vol-leg-item"><span class="vol-dot medium"></span> Medium (500–2000)</span>'
+    +'<span class="vol-leg-item"><span class="vol-dot low"></span> Low (&lt;500)</span>'
+    +'<span style="font-size:11px;color:var(--gray-400);margin-left:8px;">~ = estimated</span>'
+    +'</div>';
 }
-function copyResults(){
-  if(!Object.keys(kwByIntent).length){alert('No results');return;}
-  let t='Keyword Analysis Results\n=====================\n\n';
-  ['Informational','Transactional','Commercial','Navigational'].forEach(i=>{
-    const kws=kwByIntent[i]||[];
-    if(kws.length){t+=`${i} (${kws.length}):\n`;kws.forEach((k,j)=>{t+=`  ${j+1}. ${k.keyword} - ${k.volume}\n`;});t+='\n';}
+
+function showAllKw(){ document.getElementById('intentFilter').value='all'; filterResults(); }
+function showIntentKw(intent){ document.getElementById('intentFilter').value=intent; filterResults(); }
+
+/* ══════════════════════════════════════
+   BULK ACTIONS
+══════════════════════════════════════ */
+function toggleRow(idx,cb){
+  if(cb.checked) selectedRows.add(idx); else selectedRows.delete(idx);
+  const row=cb.closest('tr'); if(row) row.classList.toggle('selected-row',cb.checked);
+  updateBulkBar();
+}
+function toggleSelectAll(cb){
+  document.querySelectorAll('.kw-checkbox:not(#selectAll)').forEach(function(c,i){
+    c.checked=cb.checked;
+    const row=c.closest('tr'); if(row) row.classList.toggle('selected-row',cb.checked);
+    if(cb.checked) selectedRows.add(i); else selectedRows.delete(i);
   });
-  navigator.clipboard.writeText(t).then(()=>alert('Copied!')).catch(e=>alert('Failed: '+e));
+  updateBulkBar();
+}
+function updateBulkBar(){
+  document.getElementById('bulkCount').textContent=selectedRows.size;
+  document.getElementById('bulkBar').classList.toggle('show',selectedRows.size>0);
+}
+function bulkDeselect(){
+  selectedRows.clear();
+  document.querySelectorAll('.kw-checkbox').forEach(function(c){ c.checked=false; });
+  document.querySelectorAll('tr.selected-row').forEach(function(r){ r.classList.remove('selected-row'); });
+  updateBulkBar();
+}
+function getSelectedKws(){ return Array.from(selectedRows).map(function(i){ return filteredKwList[i]; }).filter(Boolean); }
+function bulkCopy(){
+  const kws=getSelectedKws(); if(!kws.length) return;
+  const text=kws.map(function(k){ return k.keyword+(k.volume?', '+k.volume:''); }).join('\n');
+  navigator.clipboard.writeText(text).then(function(){ alert('Copied '+kws.length+' keywords!'); }).catch(function(e){ alert('Copy failed: '+e); });
+}
+function bulkExport(){
+  const kws=getSelectedKws(); if(!kws.length) return;
+  let csv='Keyword,Volume,Intent,Difficulty\n';
+  kws.forEach(function(k){ csv+='"'+k.keyword+'",'+( k.volume||0)+',"'+k.intent+'","'+((k.difficulty&&k.difficulty.label)||'')+'"\n'; });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='selected-keywords.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function bulkDelete(){
+  const toDelete=new Set(Array.from(selectedRows).map(function(i){ return filteredKwList[i]&&filteredKwList[i].keyword; }));
+  ['Informational','Transactional','Commercial','Navigational'].forEach(function(intent){
+    kwByIntent[intent]=(kwByIntent[intent]||[]).filter(function(k){ return !toDelete.has(k.keyword); });
+    appStats.intentDistribution[intent]=kwByIntent[intent].length;
+  });
+  appStats.totalKeywords=Object.values(kwByIntent).reduce(function(s,a){ return s+a.length; },0);
+  selectedRows.clear(); updateBulkBar(); filterResults();
+  document.getElementById('totalKeywords').textContent=appStats.totalKeywords;
+  const d=appStats.intentDistribution;
+  document.getElementById('infoCount').textContent=d.Informational||0;
+  document.getElementById('transCount').textContent=d.Transactional||0;
+  document.getElementById('commCount').textContent=d.Commercial||0;
+  document.getElementById('navCount').textContent=d.Navigational||0;
+}
+function copySingleKw(kw,btn){
+  navigator.clipboard.writeText(kw).then(function(){
+    btn.innerHTML='<i class="fas fa-check" style="color:var(--green)"></i>';
+    setTimeout(function(){ btn.innerHTML='<i class="fas fa-copy"></i>'; },1500);
+  });
+}
+
+/* ══════════════════════════════════════
+   COPY / EXPORT ALL
+══════════════════════════════════════ */
+function copyResults(){
+  if(!Object.keys(kwByIntent).length){ alert('No results'); return; }
+  let t='Keyword Analysis Results\n=====================\n\n';
+  ['Informational','Transactional','Commercial','Navigational'].forEach(function(i){
+    const kws=kwByIntent[i]||[];
+    if(kws.length){
+      t+=i+' ('+kws.length+'):\n';
+      kws.forEach(function(k,j){ t+='  '+(j+1)+'. '+k.keyword+' - '+k.volume+(k.estimated?' (est)':'')+' - '+((k.difficulty&&k.difficulty.label)||'')+'\n'; });
+      t+='\n';
+    }
+  });
+  navigator.clipboard.writeText(t).then(function(){ alert('Copied!'); }).catch(function(e){ alert('Failed: '+e); });
 }
 function exportResults(){
-  if(!Object.keys(kwByIntent).length){alert('No results');return;}
-  let csv='S.N.,Keyword,Volume,Intent\n';
-  ['Informational','Transactional','Commercial','Navigational'].forEach(i=>{
-    (kwByIntent[i]||[]).forEach((k,j)=>{csv+=`${j+1},"${k.keyword}",${k.volume},"${i}"\n`;});
+  if(!Object.keys(kwByIntent).length){ alert('No results'); return; }
+  let csv='S.N.,Keyword,Volume,Intent,Difficulty,Difficulty Score\n';
+  ['Informational','Transactional','Commercial','Navigational'].forEach(function(i){
+    (kwByIntent[i]||[]).forEach(function(k,j){
+      csv+=(j+1)+',"'+k.keyword+'",'+k.volume+',"'+i+'","'+((k.difficulty&&k.difficulty.label)||'')+'",'+((k.difficulty&&k.difficulty.score)||'')+'\n';
+    });
   });
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download=`keywords-${new Date().toISOString().split('T')[0]}.csv`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  a.download='keywords-'+new Date().toISOString().split('T')[0]+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   alert('CSV downloaded!');
 }
-document.addEventListener('DOMContentLoaded',()=>{
-  const s=document.getElementById('clusterThreshold');
-  if(s) document.getElementById('thresholdValue').textContent=Math.round(s.value*100)+'%';
-});
 
-
-/* ═══════════════════════════════
-   KEYWORD RESEARCH — Google Suggest
-═══════════════════════════════ */
-let selectedKws = new Set();
-let allSuggestions = [];
-
-async function doResearch() {
-  const query = document.getElementById('researchInput').value.trim();
-  if (!query) { alert('Please enter a seed keyword first.'); return; }
-
-  const btn = document.getElementById('researchBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-
-  document.getElementById('suggestionsArea').innerHTML = `
-    <div class="research-spinner">
-      <div class="ring"></div>
-      <p>Fetching Google suggestions for "<strong>${query}</strong>"...</p>
-    </div>`;
-
-  selectedKws.clear();
-  updateSelectedBar();
-
-  try {
-    const results = await fetchAllSuggestions(query);
-    allSuggestions = results;
-    renderSuggestions(query, results);
-  } catch(e) {
-    document.getElementById('suggestionsArea').innerHTML = `
-      <div class="research-empty">
-        <i class="fas fa-exclamation-circle" style="color:var(--red)"></i>
-        <h3>Could not fetch suggestions</h3>
-        <p>This may be a network or CORS issue.<br>Try running the tool on your live server (not file://).</p>
-      </div>`;
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-search"></i> Find Keywords';
-  }
+/* ══════════════════════════════════════
+   HISTORY (localStorage)
+══════════════════════════════════════ */
+const HIST_KEY='clusterseo_history';
+const MAX_HIST=5;
+function saveToHistory(data){
+  try{
+    const hist=getHistory();
+    hist.unshift({id:Date.now(),timestamp:new Date().toLocaleString(),totalKeywords:(data.stats&&data.stats.totalKeywords)||0,totalVolume:(data.stats&&data.stats.totalVolume)||0,distribution:(data.stats&&data.stats.intentDistribution)||{},data:data});
+    if(hist.length>MAX_HIST) hist.pop();
+    localStorage.setItem(HIST_KEY,JSON.stringify(hist));
+  }catch(e){ console.warn('History save failed:',e); }
 }
-
-/* Fetch suggestions from Google Suggest via a CORS proxy */
-async function fetchSuggestions(query) {
-  // Use allorigins as CORS proxy for Google Suggest
-  const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-    `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`
-  )}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return Array.isArray(data[1]) ? data[1] : [];
+function getHistory(){
+  try{ return JSON.parse(localStorage.getItem(HIST_KEY)||'[]'); }catch(e){ return []; }
 }
-
-/* Build multiple query variants for richer results */
-async function fetchAllSuggestions(seed) {
-  const res = await fetch(`/api/suggest?q=${encodeURIComponent(seed)}`);
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error);
-  return data.keywords;
-}
-
-
-/* Classify intent quickly (reuses same logic as backend) */
-function quickIntent(kw) {
-  const k = kw.toLowerCase();
-  if (k.includes('best') || k.includes('review') || k.includes(' vs ') || k.includes('top ') || k.includes('compare')) return 'Commercial';
-  if (k.includes('buy') || k.includes('price') || k.includes('cheap') || k.includes('order') || k.includes('purchase') || k.includes('cost') || k.includes('deal') || k.includes('discount')) return 'Transactional';
-  if (k.includes('login') || k.includes('website') || k.includes('official') || k.includes('app') || k.includes('sign in')) return 'Navigational';
-  return 'Informational';
-}
-
-function intentClass(intent) {
-  return { Informational:'type-info', Transactional:'type-trans', Commercial:'type-comm', Navigational:'type-nav' }[intent] || 'type-info';
-}
-
-/* Render all suggestions grouped by source query */
-function renderSuggestions(seed, suggestions) {
-  const area = document.getElementById('suggestionsArea');
-
-  if (!suggestions.length) {
-    area.innerHTML = `<div class="research-empty"><i class="fas fa-empty-set"></i><h3>No suggestions found</h3><p>Try a different or broader seed keyword.</p></div>`;
+function renderHistory(){
+  const hist=getHistory();
+  const list=document.getElementById('historyList');
+  if(!hist.length){
+    list.innerHTML='<div class="history-empty"><i class="fas fa-history" style="font-size:1.5rem;color:var(--gray-200);display:block;margin-bottom:8px;"></i>No history yet. Analyses will appear here.</div>';
     return;
   }
+  list.innerHTML='<div class="history-list">'+hist.map(function(entry){
+    return '<div class="history-item">'
+      +'<div class="history-item-left"><div class="history-item-icon"><i class="fas fa-history"></i></div>'
+      +'<div><h4>'+entry.totalKeywords+' keywords &bull; '+fmt(entry.totalVolume)+' total volume</h4>'
+      +'<p>'+entry.timestamp+' &bull; Info: '+((entry.distribution&&entry.distribution.Informational)||0)
+      +' &bull; Trans: '+((entry.distribution&&entry.distribution.Transactional)||0)
+      +' &bull; Comm: '+((entry.distribution&&entry.distribution.Commercial)||0)
+      +' &bull; Nav: '+((entry.distribution&&entry.distribution.Navigational)||0)+'</p></div></div>'
+      +'<div class="history-item-right">'
+      +'<button class="btn-restore" onclick="restoreHistory('+entry.id+')"><i class="fas fa-undo"></i> Restore</button>'
+      +'<button class="btn-del-hist" onclick="deleteHistory('+entry.id+')"><i class="fas fa-times"></i></button>'
+      +'</div></div>';
+  }).join('')+'</div>';
+}
+function restoreHistory(id){
+  const entry=getHistory().find(function(h){ return h.id===id; });
+  if(!entry) return;
+  enrichWithEstimates(entry.data); processResults(entry.data);
+}
+function deleteHistory(id){
+  localStorage.setItem(HIST_KEY,JSON.stringify(getHistory().filter(function(h){ return h.id!==id; })));
+  renderHistory();
+}
+function clearHistory(){
+  if(!confirm('Clear all analysis history?')) return;
+  localStorage.removeItem(HIST_KEY); renderHistory();
+}
 
-  // Group by source
-  const groups = {};
-  suggestions.forEach(item => {
-    if (!groups[item.source]) groups[item.source] = [];
+/* ══════════════════════════════════════
+   KEYWORD RESEARCH
+══════════════════════════════════════ */
+async function doResearch(){
+  const query=document.getElementById('researchInput').value.trim();
+  if(!query){ alert('Please enter a seed keyword first.'); return; }
+  const selectedCountry=document.getElementById('researchCountry').value;
+  const btn=document.getElementById('researchBtn');
+  btn.disabled=true;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Searching...';
+  document.getElementById('suggestionsArea').innerHTML=
+    '<div class="research-spinner"><div class="ring"></div>'
+    +'<p>Fetching Google suggestions for "<strong>'+query+'</strong>"...</p></div>';
+  selectedKws.clear(); updateSelectedBar();
+  try{
+    const res=await fetch('/api/suggest?q='+encodeURIComponent(query)+'&country='+encodeURIComponent(selectedCountry));
+    const data=await res.json();
+    if(!data.success) throw new Error(data.error||'Server returned an error');
+    const raw=data.keywords||[];
+    allSuggestions=filterByCountry(raw, selectedCountry);
+    const filteredOut=raw.length-allSuggestions.length;
+    renderSuggestions(query, allSuggestions, filteredOut);
+  }catch(e){
+    document.getElementById('suggestionsArea').innerHTML=
+      '<div class="research-empty"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i>'
+      +'<h3>Could not fetch suggestions</h3><p>Error: '+e.message+'<br>Make sure your server is running.</p></div>';
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='<i class="fas fa-search"></i> Find Keywords';
+  }
+}
+
+function quickIntent(kw){
+  const k=kw.toLowerCase();
+  if(k.includes('best')||k.includes('review')||k.includes(' vs ')||k.includes('top ')||k.includes('compare')) return 'Commercial';
+  if(k.includes('buy')||k.includes('price')||k.includes('cheap')||k.includes('order')||k.includes('purchase')||k.includes('cost')||k.includes('deal')||k.includes('discount')) return 'Transactional';
+  if(k.includes('login')||k.includes('website')||k.includes('official')||k.includes('app')||k.includes('sign in')) return 'Navigational';
+  return 'Informational';
+}
+function intentClass(intent){
+  return {Informational:'type-info',Transactional:'type-trans',Commercial:'type-comm',Navigational:'type-nav'}[intent]||'type-info';
+}
+
+function renderSuggestions(seed, suggestions, filteredOut){
+  const area=document.getElementById('suggestionsArea');
+  if(!suggestions.length){
+    area.innerHTML='<div class="research-empty"><i class="fas fa-search"></i><h3>No suggestions found</h3><p>Try a different or broader seed keyword.</p></div>';
+    return;
+  }
+  const groups={};
+  suggestions.forEach(function(item){
+    if(!groups[item.source]) groups[item.source]=[];
     groups[item.source].push(item);
   });
+  const filterNote=(filteredOut&&filteredOut>0)
+    ?'<span style="font-size:11px;color:var(--gold);font-weight:600;margin-left:8px;">'
+     +'<i class="fas fa-filter"></i> '+filteredOut+' off-country keywords hidden</span>'
+    :'';
+  let html='<div class="suggestions-header"><div>'
+    +'<h3><i class="fas fa-lightbulb" style="color:var(--teal);margin-right:6px;"></i>'
+    +suggestions.length+' keyword suggestions found'+filterNote+'</h3>'
+    +'<p>Click to select, then cluster — or cluster all at once</p></div>'
+    +'<button class="btn-cluster-all" onclick="clusterAll()">'
+    +'<i class="fas fa-layer-group"></i> Cluster All ('+suggestions.length+')</button></div>';
 
-  let html = `
-    <div class="suggestions-header">
-      <div>
-        <h3><i class="fas fa-lightbulb" style="color:var(--teal);margin-right:6px;"></i>
-        ${suggestions.length} keyword suggestions found</h3>
-        <p>Click keywords to select, then cluster them — or cluster all at once</p>
-      </div>
-      <button class="btn-cluster-all" onclick="clusterAll()">
-        <i class="fas fa-layer-group"></i> Cluster All (${suggestions.length})
-      </button>
-    </div>`;
-
-  // Render each group
-  Object.entries(groups).forEach(([src, kws]) => {
-    html += `<div class="source-group">
-      <div class="source-group-title"><i class="fas fa-search" style="font-size:10px;"></i> Suggestions for "${src}"</div>
-      <div class="kw-pills-grid">`;
-
-    kws.forEach(item => {
-      const intent = quickIntent(item.keyword);
-      const cls    = intentClass(intent);
-      html += `
-        <div class="kw-pill" id="pill-${CSS.escape(item.keyword)}" onclick="toggleKw('${item.keyword.replace(/'/g,"\'")}', this)">
-          <span class="kw-pill-text">${item.keyword}</span>
-          <div class="kw-pill-actions">
-            <span class="kw-pill-type ${cls}">${intent}</span>
-            <div class="kw-pill-check"><i class="fas fa-check"></i></div>
-          </div>
-        </div>`;
+  Object.entries(groups).forEach(function(entry){
+    const src=entry[0], kws=entry[1];
+    html+='<div class="source-group"><div class="source-group-title">'
+      +'<i class="fas fa-search" style="font-size:10px;"></i> Suggestions for &quot;'+src+'&quot;</div>'
+      +'<div class="kw-pills-grid">';
+    kws.forEach(function(item, pos){
+      const intent=quickIntent(item.keyword);
+      const cls=intentClass(intent);
+      const diff=estimateDifficulty(item.keyword);
+      const estVol=estimateVolume(item.keyword,pos);
+      const kwHtml=item.keyword.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const kwJs=item.keyword.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      html+='<div class="kw-pill" onclick="toggleKw(\''+kwJs+'\',this)">'
+        +'<span class="kw-pill-text">'+kwHtml+'</span>'
+        +'<div class="kw-pill-actions">'
+        +'<span class="kw-pill-type '+cls+'">'+intent+'</span>'
+        +'<span class="diff-badge '+diff.cls+'" style="font-size:9px;padding:1px 5px;">'+diff.label+'</span>'
+        +'<span style="font-size:10px;color:var(--gray-400);" title="Est. volume">~'+(estVol<100?'&lt;100':fmt(estVol))+'</span>'
+        +'<div class="kw-pill-check"><i class="fas fa-check"></i></div>'
+        +'</div></div>';
     });
-
-    html += `</div></div>`;
+    html+='</div></div>';
   });
-
-  area.innerHTML = html;
+  area.innerHTML=html;
 }
 
-/* Toggle a keyword pill selected/unselected */
-function toggleKw(kw, el) {
-  if (selectedKws.has(kw)) {
-    selectedKws.delete(kw);
-    el.classList.remove('selected');
-  } else {
-    selectedKws.add(kw);
-    el.classList.add('selected');
-  }
+function toggleKw(kw,el){
+  if(selectedKws.has(kw)){ selectedKws.delete(kw); el.classList.remove('selected'); }
+  else{ selectedKws.add(kw); el.classList.add('selected'); }
   updateSelectedBar();
 }
-
-function updateSelectedBar() {
-  const bar = document.getElementById('selectedBar');
-  const count = selectedKws.size;
-  document.getElementById('selectedCount').textContent = count;
-  bar.classList.toggle('show', count > 0);
+function updateSelectedBar(){
+  const count=selectedKws.size;
+  document.getElementById('selectedCount').textContent=count;
+  document.getElementById('selectedBar').classList.toggle('show',count>0);
 }
-
-function clearSelected() {
+function clearSelected(){
   selectedKws.clear();
-  document.querySelectorAll('.kw-pill.selected').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.kw-pill.selected').forEach(function(el){ el.classList.remove('selected'); });
   updateSelectedBar();
 }
-
-/* Cluster selected keywords — feeds into existing cluster engine */
-async function clusterSelected() {
-  if (!selectedKws.size) return;
-  const keywords = [...selectedKws];
-  await runCluster(keywords);
+async function clusterSelected(){ if(selectedKws.size) await runCluster(Array.from(selectedKws)); }
+async function clusterAll(){ if(allSuggestions.length) await runCluster(allSuggestions.map(function(s){ return s.keyword; })); }
+async function runCluster(keywords){
+  showLoading('Clustering '+keywords.length+' keywords...');
+  try{
+    const res=await fetch('/api/process-keywords',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keywords:keywords,volumes:new Array(keywords.length).fill(0)})});
+    const data=await res.json();
+    if(data.success){ enrichWithEstimates(data); processResults(data); }
+    else showError(data.error||'Clustering failed');
+  }catch(e){ showError('Network error: '+e.message); }
+  finally{ hideLoading(); }
 }
-
-/* Cluster ALL suggestions */
-async function clusterAll() {
-  if (!allSuggestions.length) return;
-  const keywords = allSuggestions.map(s => s.keyword);
-  await runCluster(keywords);
-}
-
-/* Feed keywords into existing /api/process-keywords */
-async function runCluster(keywords) {
-  showLoading('Clustering ' + keywords.length + ' keywords...');
-  try {
-    const res = await fetch('/api/process-keywords', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ keywords, volumes: new Array(keywords.length).fill(0) })
-    });
-    const data = await res.json();
-    if (data.success) {
-      processResults(data);
-    } else {
-      showError(data.error || 'Clustering failed');
-    }
-  } catch(e) {
-    showError('Network error: ' + e.message);
-  } finally {
-    hideLoading();
-  }
-}
-
-/* Modifier chip — appends word to search input */
-function addModifier(el, word) {
-  const input = document.getElementById('researchInput');
-  const current = input.value.trim();
-  if (current) {
-    input.value = word + ' ' + current;
-  } else {
-    input.value = word + ' ';
-  }
+function addModifier(el,word){
+  const input=document.getElementById('researchInput');
+  input.value=input.value.trim()?word+' '+input.value.trim():word+' ';
   input.focus();
-  el.classList.toggle('active');
-  setTimeout(() => el.classList.remove('active'), 600);
+  el.classList.add('active');
+  setTimeout(function(){ el.classList.remove('active'); },600);
 }
 
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',function(){
+  const s=document.getElementById('clusterThreshold');
+  if(s) document.getElementById('thresholdValue').textContent=Math.round(s.value*100)+'%';
+  renderHistory();
+});
 </script>
 </body>
 </html>

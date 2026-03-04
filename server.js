@@ -201,8 +201,22 @@ app.post('/api/process-csv', upload.single('file'), async (req, res) => {
    window.google.ac.h(["query",["sug1","sug2",...]])
    We fetch as text and parse with regex.
 ===================== */
-async function fetchGoogleSuggest(query) {
-  const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
+// Country code → Google gl/hl params
+const COUNTRY_PARAMS = {
+  us: { gl: 'us', hl: 'en' },
+  gb: { gl: 'gb', hl: 'en' },
+  au: { gl: 'au', hl: 'en' },
+  ca: { gl: 'ca', hl: 'en' },
+  in: { gl: 'in', hl: 'en' },
+  np: { gl: 'np', hl: 'ne' },
+  global: { gl: '',   hl: 'en' },
+};
+
+async function fetchGoogleSuggest(query, gl = '', hl = 'en') {
+  const params = new URLSearchParams({ client: 'firefox', q: query });
+  if (gl)  params.set('gl',  gl);
+  if (hl)  params.set('hl',  hl);
+  const url = `https://suggestqueries.google.com/complete/search?${params.toString()}`;
   try {
     const response = await fetch(url, {
       headers: {
@@ -248,25 +262,29 @@ app.get('/api/suggest', async (req, res) => {
       return res.status(400).json({ success: false, error: 'No query provided' });
     }
 
-    const q = query.trim();
+    const q       = query.trim();
+    const country = (req.query.country || 'global').toLowerCase();
+    const { gl, hl } = COUNTRY_PARAMS[country] || COUNTRY_PARAMS['global'];
 
-    // 8 variants — more variety = more keywords returned
+    console.log(`[Suggest] Country: ${country} → gl=${gl||'(none)'} hl=${hl}`);
+
+    // 8 clean, meaningful variants — no trailing spaces or broken grammar
     const variants = [
-      q,
-      q + ' ',
-      'best ' + q,
-      'how to ' + q,
-      'buy '   + q,
-      q + ' review',
-      q + ' vs',
-      q + ' for beginners',
+      q,                          // seed as-is
+      'best ' + q,                // commercial intent
+      'how to choose ' + q,       // informational (grammatically correct)
+      'buy ' + q,                 // transactional
+      q + ' review',              // commercial
+      q + ' vs',                  // comparison
+      q + ' for beginners',       // long-tail informational
+      q + ' price',               // transactional
     ];
 
     console.log(`[Suggest] Fetching for: "${q}"`);
 
     // Run all in parallel
     const results = await Promise.allSettled(
-      variants.map(v => fetchGoogleSuggest(v).then(sugs => ({ variant: v, suggestions: sugs })))
+      variants.map(v => fetchGoogleSuggest(v, gl, hl).then(sugs => ({ variant: v, suggestions: sugs })))
     );
 
     const seen     = new Set();
@@ -278,7 +296,8 @@ app.get('/api/suggest', async (req, res) => {
         console.log(`  variant "${variant}" → ${suggestions.length} suggestions`);
         suggestions.forEach(kw => {
           const key = kw.toLowerCase().trim();
-          if (!seen.has(key) && key.length > 1) {
+          // Skip if already seen, too short, or looks like a broken query
+          if (!seen.has(key) && key.length > 3) {
             seen.add(key);
             keywords.push({ keyword: kw.trim(), source: variant });
           }
@@ -306,7 +325,7 @@ app.use((req, res) => {
 /* =====================
    START SERVER
 ===================== */
-const PORT = process.env.PORT || 8007;
+const PORT = process.env.PORT || 8001;
 
 ['uploads', 'public'].forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
