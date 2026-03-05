@@ -199,7 +199,7 @@ footer {
 }
 
 /* ── PAGE WRAPPER ── */
-.page-wrap { margin-top: 68px; }
+.page-wrap { margin-top: 0px; }
 
 /* ── SECTION HELPERS ── */
 .section-label {
