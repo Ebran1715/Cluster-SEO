@@ -112,159 +112,231 @@
 <script src="shared-layout.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-
 let auditChecks = [];
 
 function runSeoAudit() {
-  const html = document.getElementById('auditHtml').value.trim();
-  if (!html) { alert('Please paste your page HTML first.'); return; }
+  const htmlSrc = document.getElementById('auditHtml').value.trim();
+  if (!htmlSrc) { alert('Please paste your page HTML first.'); return; }
   const keyword = document.getElementById('auditKeyword').value.trim().toLowerCase();
-  const url     = document.getElementById('auditUrl').value.trim();
+  const urlInput = document.getElementById('auditUrl').value.trim();
 
   const parser = new DOMParser();
-  const doc    = parser.parseFromString(html, 'text/html');
+  const doc = parser.parseFromString(htmlSrc, 'text/html');
 
   const checks = [];
   let score = 0, maxScore = 0;
 
-  function addCheck(label, status, detail, points, max) {
-    checks.push({ label, status, detail, points, max });
-    score += points; maxScore += max;
+  function pass(label, detail, pts, max, tip) { checks.push({ label, status: 'pass', detail, pts, max, tip: tip||'' }); score += pts; maxScore += max; }
+  function warn(label, detail, pts, max, tip) { checks.push({ label, status: 'warn', detail, pts, max, tip: tip||'' }); score += pts; maxScore += max; }
+  function fail(label, detail, max, tip)      { checks.push({ label, status: 'fail', detail, pts: 0, max, tip: tip||'' }); maxScore += max; }
+
+  // ── 1. TITLE TAG ───────────────────────────────────────────────
+  const titleEl = doc.querySelector('title');
+  const titleText = titleEl ? titleEl.textContent.trim() : '';
+  const tLen = titleText.length;
+  if (!titleText)         fail('Title Tag', 'Missing. Every page must have a unique, descriptive title.', 10, 'Add a title tag: <title>Primary Keyword – Brand Name</title>');
+  else if (tLen < 30)     warn('Title Tag', 'Too short at ' + tLen + ' characters. Aim for 50–60 chars.', 5, 10, 'Expand your title to include your primary keyword and brand name.');
+  else if (tLen > 60)     warn('Title Tag', 'Too long at ' + tLen + ' chars — may be truncated in Google to ~60 chars.', 7, 10, 'Shorten to under 60 characters. Put the most important keyword first.');
+  else                    pass('Title Tag', 'Perfect length: ' + tLen + ' chars. "' + titleText.substring(0, 55) + (tLen>55?'…':'') + '"', 10, 10);
+
+  // ── 2. KEYWORD IN TITLE ────────────────────────────────────────
+  if (keyword) {
+    if (!titleText)                                    fail('Keyword in Title', 'No title tag to check against.', 8, 'Add a title tag containing your keyword.');
+    else if (!titleText.toLowerCase().includes(keyword)) warn('Keyword in Title', 'Target keyword "' + keyword + '" not found in title.', 3, 8, 'Add "' + keyword + '" naturally to your title, ideally near the beginning.');
+    else if (titleText.toLowerCase().indexOf(keyword) < 20) pass('Keyword in Title', 'Keyword "' + keyword + '" found near the start of title — excellent!', 8, 8);
+    else                                               pass('Keyword in Title', 'Keyword "' + keyword + '" found in title.', 7, 8);
   }
 
-  // Title tag
-  const title = doc.querySelector('title');
-  const titleText = title ? title.textContent.trim() : '';
-  const tLen = titleText.length;
-  if (!titleText) addCheck('Title Tag', 'fail', 'No title tag found. Add a descriptive title (50-60 chars).', 0, 10);
-  else if (tLen < 30) addCheck('Title Tag', 'warn', 'Title too short (' + tLen + ' chars). Aim for 50-60 characters.', 5, 10);
-  else if (tLen > 70) addCheck('Title Tag', 'warn', 'Title too long (' + tLen + ' chars). May be truncated in SERPs. Keep under 60.', 6, 10);
-  else addCheck('Title Tag', 'pass', 'Good length (' + tLen + ' chars): "' + titleText.substring(0,60) + '"', 10, 10);
+  // ── 3. META DESCRIPTION ────────────────────────────────────────
+  const metaEl  = doc.querySelector('meta[name="description"]');
+  const metaTxt = metaEl ? (metaEl.getAttribute('content') || '').trim() : '';
+  const mLen = metaTxt.length;
+  if (!metaTxt)           fail('Meta Description', 'Missing. Google may auto-generate one from your content — usually poor quality.', 8, 'Write a 140–160 char meta description with your keyword and a clear CTA.');
+  else if (mLen < 70)     warn('Meta Description', 'Too short at ' + mLen + ' chars. More context improves CTR.', 4, 8, 'Expand to 140–160 characters. Include keyword + benefit + CTA.');
+  else if (mLen > 160)    warn('Meta Description', 'Too long at ' + mLen + ' chars — truncated in SERPs at ~160 chars.', 6, 8, 'Trim to under 160 characters. Keep the CTA in the first 155 characters.');
+  else                    pass('Meta Description', 'Good length: ' + mLen + ' chars. "' + metaTxt.substring(0, 80) + (mLen>80?'…':'') + '"', 8, 8);
 
-  if (keyword && titleText && !titleText.toLowerCase().includes(keyword))
-    addCheck('Keyword in Title', 'warn', 'Target keyword "' + keyword + '" not found in title tag.', 3, 8);
-  else if (keyword && titleText && titleText.toLowerCase().includes(keyword))
-    addCheck('Keyword in Title', 'pass', 'Target keyword found in title tag.', 8, 8);
+  // ── 4. KEYWORD IN META DESCRIPTION ────────────────────────────
+  if (keyword && metaTxt) {
+    if (!metaTxt.toLowerCase().includes(keyword)) warn('Keyword in Meta Description', 'Keyword "' + keyword + '" not in meta description — Google bolds matching keywords.', 3, 5, 'Add the keyword naturally to your meta description to improve CTR.');
+    else                                          pass('Keyword in Meta Description', 'Keyword "' + keyword + '" found in meta description — Google will bold it in search results.', 5, 5);
+  }
 
-  // Meta description
-  const metaDesc = doc.querySelector('meta[name="description"]');
-  const metaText = metaDesc ? metaDesc.getAttribute('content') || '' : '';
-  const mLen = metaText.length;
-  if (!metaText) addCheck('Meta Description', 'fail', 'No meta description found. Add one (140-160 chars).', 0, 8);
-  else if (mLen < 70) addCheck('Meta Description', 'warn', 'Meta description too short (' + mLen + ' chars). Aim for 140-160.', 4, 8);
-  else if (mLen > 170) addCheck('Meta Description', 'warn', 'Meta description too long (' + mLen + ' chars). May be truncated.', 5, 8);
-  else addCheck('Meta Description', 'pass', 'Good length (' + mLen + ' chars).', 8, 8);
-
-  // H1
+  // ── 5. H1 TAG ──────────────────────────────────────────────────
   const h1s = doc.querySelectorAll('h1');
-  if (h1s.length === 0) addCheck('H1 Tag', 'fail', 'No H1 tag found. Every page needs exactly one H1.', 0, 8);
-  else if (h1s.length > 1) addCheck('H1 Tag', 'warn', 'Multiple H1 tags (' + h1s.length + '). Use only one H1 per page.', 4, 8);
-  else addCheck('H1 Tag', 'pass', 'One H1 found: "' + h1s[0].textContent.trim().substring(0,50) + '"', 8, 8);
+  if (h1s.length === 0)   fail('H1 Tag', 'No H1 tag. Every page needs exactly one H1 as its primary headline.', 10, 'Add one <h1> tag with your primary keyword as the first heading.');
+  else if (h1s.length > 1) warn('H1 Tag', 'Found ' + h1s.length + ' H1 tags. Use exactly one per page.', 5, 10, 'Keep only one H1. Convert others to H2 or H3 headings.');
+  else                    pass('H1 Tag', 'One H1 found: "' + h1s[0].textContent.trim().substring(0, 60) + '"', 10, 10);
 
-  if (keyword && h1s.length > 0 && !h1s[0].textContent.toLowerCase().includes(keyword))
-    addCheck('Keyword in H1', 'warn', 'Target keyword "' + keyword + '" not in H1. Add it naturally.', 3, 6);
-  else if (keyword && h1s.length > 0)
-    addCheck('Keyword in H1', 'pass', 'Target keyword found in H1.', 6, 6);
+  // ── 6. KEYWORD IN H1 ──────────────────────────────────────────
+  if (keyword && h1s.length > 0) {
+    if (!h1s[0].textContent.toLowerCase().includes(keyword)) warn('Keyword in H1', '"' + keyword + '" not in H1. Primary keyword should be in the main headline.', 3, 8, 'Rephrase your H1 to naturally include "' + keyword + '".');
+    else                                                     pass('Keyword in H1', '"' + keyword + '" present in H1.', 8, 8);
+  }
 
-  // Headings structure
+  // ── 7. HEADING STRUCTURE ──────────────────────────────────────
   const h2s = doc.querySelectorAll('h2');
   const h3s = doc.querySelectorAll('h3');
-  if (h2s.length === 0) addCheck('Heading Structure', 'warn', 'No H2 tags found. Use H2s to structure content sections.', 3, 6);
-  else addCheck('Heading Structure', 'pass', h2s.length + ' H2s and ' + h3s.length + ' H3s found — good structure.', 6, 6);
+  const h4s = doc.querySelectorAll('h4');
+  if (h2s.length === 0)   warn('Heading Structure (H2/H3)', 'No H2 tags. Use H2 headings to divide content into sections.', 3, 7, 'Add H2 headings for each major section. Target: 2–6 H2s per page.');
+  else if (h2s.length > 10) warn('Heading Structure (H2/H3)', 'Many H2s (' + h2s.length + '). Ensure each represents a distinct section.', 5, 7);
+  else                    pass('Heading Structure (H2/H3)', h2s.length + ' H2s, ' + h3s.length + ' H3s, ' + h4s.length + ' H4s — well structured.', 7, 7);
 
-  // Word count
-  const bodyText = doc.body ? doc.body.innerText || doc.body.textContent : '';
-  const wordCount = bodyText.trim().split(/\s+/).filter(w => w.length > 1).length;
-  if (wordCount < 300) addCheck('Word Count', 'fail', 'Very thin content (' + wordCount + ' words). Aim for 800+ for blog posts.', 0, 8);
-  else if (wordCount < 600) addCheck('Word Count', 'warn', 'Content is short (' + wordCount + ' words). Consider expanding.', 4, 8);
-  else addCheck('Word Count', 'pass', 'Good content length: ' + wordCount.toLocaleString() + ' words.', 8, 8);
+  // ── 8. WORD COUNT ─────────────────────────────────────────────
+  const bodyText  = (doc.body || doc.documentElement).innerText || (doc.body || doc.documentElement).textContent || '';
+  const cleanText = bodyText.replace(/\s+/g, ' ').trim();
+  const wordCount = cleanText.split(/\s+/).filter(function(w) { return w.length > 1; }).length;
+  if (wordCount < 300)    fail('Word Count', 'Only ' + wordCount.toLocaleString() + ' words — very thin content, likely to rank poorly.', 10, 'Aim for at least 800 words for blog posts, 500+ for product pages.');
+  else if (wordCount < 600) warn('Word Count', wordCount.toLocaleString() + ' words — consider expanding. Competitors likely have 1000+ for competitive topics.', 6, 10, 'Add more depth: examples, FAQs, comparisons, case studies.');
+  else if (wordCount < 1000) warn('Word Count', wordCount.toLocaleString() + ' words — decent but competitors likely have more for competitive keywords.', 8, 10, 'Expand with FAQs, examples or a comparison table to strengthen the page.');
+  else                    pass('Word Count', 'Excellent: ' + wordCount.toLocaleString() + ' words of content.', 10, 10);
 
-  // Images & alt text
+  // ── 9. KEYWORD DENSITY ────────────────────────────────────────
+  if (keyword && wordCount > 0) {
+    const kwCount = (cleanText.toLowerCase().match(new RegExp('\\b' + keyword.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b', 'g')) || []).length;
+    const density = ((kwCount / wordCount) * 100).toFixed(2);
+    if (kwCount === 0)      warn('Keyword Density', '"' + keyword + '" not found in body text at all.', 2, 8, 'Include your keyword naturally in the first paragraph, headings and throughout the content.');
+    else if (density > 3)   warn('Keyword Density', '"' + keyword + '" appears ' + kwCount + 'x (' + density + '%) — possible keyword stuffing. Keep under 2.5%.', 5, 8, 'Reduce keyword repetition. Use synonyms and related terms instead.');
+    else if (density < 0.5) warn('Keyword Density', '"' + keyword + '" appears only ' + kwCount + 'x (' + density + '%). Consider mentioning it more.', 5, 8, 'Use keyword more naturally throughout — aim for 1–2% density.');
+    else                    pass('Keyword Density', '"' + keyword + '" appears ' + kwCount + 'x (' + density + '%) — good balance.', 8, 8);
+  }
+
+  // ── 10. IMAGES & ALT TEXT ─────────────────────────────────────
   const imgs = doc.querySelectorAll('img');
-  const missingAlt = [...imgs].filter(img => !img.getAttribute('alt') || img.getAttribute('alt').trim() === '');
-  if (imgs.length === 0) addCheck('Images', 'warn', 'No images found. Visual content improves engagement.', 3, 6);
-  else if (missingAlt.length > 0) addCheck('Image Alt Text', 'warn', missingAlt.length + ' of ' + imgs.length + ' images missing alt text. Add descriptive alt attributes.', 3, 6);
-  else addCheck('Image Alt Text', 'pass', 'All ' + imgs.length + ' images have alt text.', 6, 6);
+  const missingAlt = Array.from(imgs).filter(function(img) { return !img.getAttribute('alt') || img.getAttribute('alt').trim() === ''; });
+  const emptyAlt   = Array.from(imgs).filter(function(img) { return img.getAttribute('alt') !== null && img.getAttribute('alt').trim() === ''; });
+  if (imgs.length === 0)   warn('Images', 'No images found. Visuals improve engagement and dwell time.', 4, 6, 'Add at least 1–2 relevant images with descriptive alt text.');
+  else if (missingAlt.length === imgs.length) fail('Image Alt Text', 'All ' + imgs.length + ' images are missing alt text — invisible to screen readers and search engines.', 8, 'Add descriptive alt text to every image. Include keyword in the most relevant one.');
+  else if (missingAlt.length > 0) warn('Image Alt Text', missingAlt.length + ' of ' + imgs.length + ' images missing alt text.', 4, 8, 'Add alt text to all images. Describe the image content, include keyword where natural.');
+  else                             pass('Image Alt Text', 'All ' + imgs.length + ' images have alt text.', 8, 8);
 
-  // Canonical
+  // ── 11. CANONICAL TAG ─────────────────────────────────────────
   const canonical = doc.querySelector('link[rel="canonical"]');
-  if (!canonical) addCheck('Canonical Tag', 'warn', 'No canonical tag found. Add one to prevent duplicate content issues.', 2, 5);
-  else addCheck('Canonical Tag', 'pass', 'Canonical: ' + (canonical.getAttribute('href')||'').substring(0,50), 5, 5);
+  if (!canonical) warn('Canonical Tag', 'No canonical tag. Risk of duplicate content issues across paginated or parameter URLs.', 2, 5, 'Add <link rel="canonical" href="YOUR-URL"> in the <head>.');
+  else {
+    const href = canonical.getAttribute('href') || '';
+    if (urlInput && !href.includes(urlInput.replace(/https?:\/\//,''))) warn('Canonical Tag', 'Canonical points to: ' + href.substring(0, 60) + ' — verify this is correct.', 4, 5, 'Ensure canonical points to the intended canonical URL.');
+    else pass('Canonical Tag', 'Canonical: ' + href.substring(0, 60), 5, 5);
+  }
 
-  // Open Graph
+  // ── 12. OPEN GRAPH TAGS ───────────────────────────────────────
   const ogTitle = doc.querySelector('meta[property="og:title"]');
-  if (!ogTitle) addCheck('Open Graph Tags', 'warn', 'No og:title found. Add Open Graph tags for better social sharing.', 2, 5);
-  else addCheck('Open Graph Tags', 'pass', 'Open Graph tags present.', 5, 5);
+  const ogDesc  = doc.querySelector('meta[property="og:description"]');
+  const ogImg   = doc.querySelector('meta[property="og:image"]');
+  const ogCount = [ogTitle, ogDesc, ogImg].filter(Boolean).length;
+  if (ogCount === 0)     warn('Open Graph / Social Tags', 'No Open Graph tags. Social shares will look generic without them.', 2, 5, 'Add og:title, og:description, og:image and og:url meta tags.');
+  else if (ogCount < 3)  warn('Open Graph / Social Tags', 'Only ' + ogCount + '/3 key OG tags found. Add og:' + (!ogTitle?'title ':' ') + (!ogDesc?'description ':' ') + (!ogImg?'image':' '), 3, 5, 'Complete all 4 core OG tags for optimal social sharing.');
+  else                   pass('Open Graph / Social Tags', 'All key OG tags present: title, description, image.', 5, 5);
 
-  // Internal links
-  const links = doc.querySelectorAll('a[href]');
-  const internalLinks = [...links].filter(a => { const h = a.getAttribute('href')||''; return h.startsWith('/') || h.startsWith('#') || (url && h.includes(new URL(url.startsWith('http')?url:'https://'+url).hostname)); });
-  if (internalLinks.length < 2) addCheck('Internal Links', 'warn', 'Only ' + internalLinks.length + ' internal links found. Add more to help crawlers and users navigate.', 3, 6);
-  else addCheck('Internal Links', 'pass', internalLinks.length + ' internal links found.', 6, 6);
+  // ── 13. INTERNAL LINKS ────────────────────────────────────────
+  const allLinks     = doc.querySelectorAll('a[href]');
+  const internalLinks = Array.from(allLinks).filter(function(a) {
+    const h = a.getAttribute('href') || '';
+    return h.startsWith('/') || h.startsWith('#') || (urlInput && h.includes((urlInput.replace(/https?:\/\//,'').split('/')[0])));
+  });
+  const externalLinks = Array.from(allLinks).filter(function(a) {
+    const h = a.getAttribute('href') || '';
+    return h.startsWith('http') && (!urlInput || !h.includes(urlInput.replace(/https?:\/\//,'').split('/')[0]));
+  });
+  if (internalLinks.length < 2)     warn('Internal Links', 'Only ' + internalLinks.length + ' internal link(s). Interlink to related pages to distribute PageRank.', 3, 6, 'Add 3–8 internal links to related content. Use keyword-rich anchor text.');
+  else if (internalLinks.length > 100) warn('Internal Links', internalLinks.length + ' internal links — very high. Ensure links are meaningful, not navigation spam.', 5, 6);
+  else                               pass('Internal Links', internalLinks.length + ' internal links found. ' + externalLinks.length + ' external links.', 6, 6);
 
-  // Viewport meta
+  // ── 14. MOBILE VIEWPORT ───────────────────────────────────────
   const viewport = doc.querySelector('meta[name="viewport"]');
-  if (!viewport) addCheck('Mobile Viewport', 'fail', 'No viewport meta tag. Page may not be mobile-friendly.', 0, 5);
-  else addCheck('Mobile Viewport', 'pass', 'Viewport meta tag present — mobile ready.', 5, 5);
+  if (!viewport) fail('Mobile Viewport', 'No viewport meta tag — page will not display correctly on mobile. Google uses mobile-first indexing.', 5, 'Add: <meta name="viewport" content="width=device-width, initial-scale=1.0">');
+  else           pass('Mobile Viewport', 'Viewport tag present: ' + (viewport.getAttribute('content') || ''), 5, 5);
+
+  // ── 15. SCHEMA / STRUCTURED DATA ──────────────────────────────
+  const schemas  = doc.querySelectorAll('script[type="application/ld+json"]');
+  const microdata = doc.querySelectorAll('[itemtype]');
+  if (schemas.length === 0 && microdata.length === 0) warn('Structured Data (Schema.org)', 'No structured data found. Schema markup helps Google understand your content and enables rich results.', 2, 6, 'Add JSON-LD schema: Article, Product, FAQPage, BreadcrumbList or Organization.');
+  else {
+    let schemaTypes = [];
+    schemas.forEach(function(s) { try { const d = JSON.parse(s.textContent); schemaTypes.push(d['@type'] || 'Unknown'); } catch(e) {} });
+    pass('Structured Data (Schema.org)', 'Schema markup found: ' + (schemaTypes.join(', ') || 'present') + '.', 6, 6);
+  }
+
+  // ── 16. PAGE SPEED HINTS ──────────────────────────────────────
+  const inlineStyles = doc.querySelectorAll('[style]').length;
+  const inlineScripts = doc.querySelectorAll('script:not([src])').length;
+  const renderBlocking = doc.querySelectorAll('link[rel="stylesheet"]:not([media])').length;
+  if (renderBlocking > 3) warn('Page Speed Hints', renderBlocking + ' render-blocking CSS files detected. May slow page load.', 3, 5, 'Load non-critical CSS asynchronously. Use media queries or defer loading.');
+  else                    pass('Page Speed Hints', 'Render-blocking resources look reasonable (' + renderBlocking + ' CSS files).', 5, 5);
 
   auditChecks = checks;
-  renderAudit(checks, score, maxScore);
+  renderAudit(checks, score, maxScore, keyword, titleText, metaTxt, wordCount);
   document.getElementById('btnExportAudit').style.display = 'flex';
 }
 
-function renderAudit(checks, score, maxScore) {
-  const pct = Math.round((score/maxScore)*100);
+function renderAudit(checks, score, maxScore, keyword, titleText, metaTxt, wordCount) {
+  const pct = Math.round((score / maxScore) * 100);
   const scoreColor = pct >= 80 ? '#059669' : pct >= 60 ? '#f59e0b' : '#ef4444';
-  const scoreLabel = pct >= 80 ? 'Excellent' : pct >= 60 ? 'Needs Work' : 'Poor';
+  const scoreLabel = pct >= 80 ? 'Excellent' : pct >= 60 ? 'Needs Work' : 'Poor — Urgent Action';
   const scoreCls   = pct >= 80 ? 'score-good' : pct >= 60 ? 'score-med' : 'score-bad';
 
-  const pass = checks.filter(c=>c.status==='pass').length;
-  const warn = checks.filter(c=>c.status==='warn').length;
-  const fail = checks.filter(c=>c.status==='fail').length;
+  const passed = checks.filter(function(c) { return c.status === 'pass'; }).length;
+  const warned = checks.filter(function(c) { return c.status === 'warn'; }).length;
+  const failed = checks.filter(function(c) { return c.status === 'fail'; }).length;
 
   let html = '<div class="stat-grid">';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:'+scoreColor+'">'+pct+'%</div><div class="stat-box-label">SEO Score — '+scoreLabel+'</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">'+pass+'</div><div class="stat-box-label">Passed</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#f59e0b">'+warn+'</div><div class="stat-box-label">Warnings</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">'+fail+'</div><div class="stat-box-label">Failed</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:' + scoreColor + '">' + pct + '%</div><div class="stat-box-label">SEO Score</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">' + passed + '</div><div class="stat-box-label">Passed</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#f59e0b">' + warned + '</div><div class="stat-box-label">Warnings</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">' + failed + '</div><div class="stat-box-label">Critical Issues</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">' + wordCount.toLocaleString() + '</div><div class="stat-box-label">Word Count</div></div>';
   html += '</div>';
-  html += '<div style="margin-bottom:20px;"><div class="score-bar"><div class="score-fill '+scoreCls+'" style="width:'+pct+'%"></div></div></div>';
 
-  html += '<div class="result-card"><div class="result-card-head"><h3><i class="fas fa-list-check"></i> Audit Checks</h3></div><div class="result-card-body">';
-  // Show fails first, then warns, then passes
-  const sorted = [...checks].sort((a,b) => {
-    const order = {fail:0,warn:1,pass:2};
-    return order[a.status]-order[b.status];
+  html += '<div style="margin-bottom:20px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+  html += '<span style="font-size:13px;font-weight:700;color:var(--gray-700);">Overall SEO Health</span>';
+  html += '<span style="font-size:14px;font-weight:800;color:' + scoreColor + '">' + scoreLabel + '</span>';
+  html += '</div>';
+  html += '<div class="score-bar" style="height:12px;"><div class="score-fill ' + scoreCls + '" style="width:' + pct + '%"></div></div>';
+  html += '</div>';
+
+  // Sort: fail first, then warn, then pass
+  const sorted = checks.slice().sort(function(a, b) {
+    const order = { fail: 0, warn: 1, pass: 2 };
+    return order[a.status] - order[b.status];
   });
+
+  html += '<div class="result-card"><div class="result-card-head"><h3><i class="fas fa-list-check"></i> ' + checks.length + ' SEO Checks</h3></div><div class="result-card-body">';
   sorted.forEach(function(c) {
-    const iconMap = {pass:'fa-check',warn:'fa-exclamation',fail:'fa-times'};
-    const clsMap  = {pass:'ai-pass',warn:'ai-warn',fail:'ai-fail'};
+    const icons  = { pass: 'fa-check-circle', warn: 'fa-exclamation-triangle', fail: 'fa-times-circle' };
+    const colors = { pass: '#059669', warn: '#f59e0b', fail: '#ef4444' };
     html += '<div class="audit-item">';
-    html += '<div class="audit-icon '+clsMap[c.status]+'"><i class="fas '+iconMap[c.status]+'"></i></div>';
-    html += '<div><div class="audit-title">'+c.label+'</div><div class="audit-detail">'+c.detail+'</div></div>';
-    html += '</div>';
+    html += '<div class="audit-icon" style="background:' + (c.status==='pass'?'#d1fae5':c.status==='warn'?'#fef3c7':'#fee2e2') + ';color:' + colors[c.status] + ';width:30px;height:30px;flex-shrink:0;">';
+    html += '<i class="fas ' + icons[c.status] + '"></i></div>';
+    html += '<div style="flex:1;">';
+    html += '<div class="audit-title" style="display:flex;align-items:center;gap:8px;">' + c.label;
+    html += '<span style="font-size:10px;font-weight:700;color:' + colors[c.status] + ';text-transform:uppercase;">' + c.status + '</span></div>';
+    html += '<div class="audit-detail">' + c.detail + '</div>';
+    if (c.tip) html += '<div style="font-size:11px;color:var(--teal-dark);margin-top:4px;padding:4px 8px;background:var(--teal-light);border-radius:var(--r-sm);"><i class="fas fa-lightbulb" style="margin-right:4px;"></i>' + c.tip + '</div>';
+    html += '</div></div>';
   });
   html += '</div></div>';
+
   document.getElementById('auditResults').innerHTML = html;
 }
 
 function clearAudit() {
-  document.getElementById('auditHtml').value='';
-  document.getElementById('auditUrl').value='';
-  document.getElementById('auditKeyword').value='';
-  document.getElementById('auditResults').innerHTML='<div class="empty-state"><i class="fas fa-stethoscope"></i><h3>Ready to audit</h3><p>Paste your page HTML and click Run SEO Audit</p></div>';
-  document.getElementById('btnExportAudit').style.display='none';
-  auditChecks=[];
+  document.getElementById('auditHtml').value = '';
+  document.getElementById('auditUrl').value = '';
+  document.getElementById('auditKeyword').value = '';
+  document.getElementById('auditResults').innerHTML = '<div class="empty-state"><i class="fas fa-stethoscope"></i><h3>Ready to audit</h3><p>Paste your page HTML and click Run SEO Audit</p></div>';
+  document.getElementById('btnExportAudit').style.display = 'none';
+  auditChecks = [];
 }
 
 function exportAuditCSV() {
-  const rows = ['Check,Status,Detail'];
+  const rows = ['Check,Status,Score,Max Score,Detail,Fix Tip'];
   auditChecks.forEach(function(c) {
-    rows.push('"' + c.label + '","' + c.status + '","' + c.detail.replace(/"/g, '""') + '"');
+    rows.push('"' + c.label + '","' + c.status + '",' + c.pts + ',' + c.max + ',"' + c.detail.replace(/"/g, '""') + '","' + (c.tip||'').replace(/"/g, '""') + '"');
   });
   const csv = rows.join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
   a.download = 'seo-audit-' + new Date().toISOString().split('T')[0] + '.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }

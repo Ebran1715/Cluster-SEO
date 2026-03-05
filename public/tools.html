@@ -118,9 +118,7 @@
     .tools-section-hdr::after { content:''; flex:1; height:1px; background:var(--gray-200); }
     .tools-section-hdr:first-child { margin-top:0; }
 
-    /* Coming soon card */
-    .tool-card.coming-soon { opacity:0.6; cursor:default; pointer-events:none; }
-    .tool-card.coming-soon:hover { transform:none; box-shadow:none; }
+
   </style>
 </head>
 <body>
@@ -168,7 +166,7 @@
           </div>
           <div class="tool-card-footer">
             <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
-            <button class="tool-open-btn" style="background:linear-gradient(135deg,#0ea5e9,#2563eb);">Open Tool <i class="fas fa-arrow-right"></i></button>
+            <span class="tool-open-btn" style="background:linear-gradient(135deg,#0ea5e9,#2563eb);">Open Tool <i class="fas fa-arrow-right"></i></span>
           </div>
         </a>
 
@@ -189,7 +187,7 @@
           </div>
           <div class="tool-card-footer">
             <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
-            <button class="tool-open-btn" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">Open Tool <i class="fas fa-arrow-right"></i></button>
+            <span class="tool-open-btn" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">Open Tool <i class="fas fa-arrow-right"></i></span>
           </div>
         </a>
 
@@ -210,7 +208,7 @@
           </div>
           <div class="tool-card-footer">
             <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
-            <button class="tool-open-btn" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">Open Tool <i class="fas fa-arrow-right"></i></button>
+            <span class="tool-open-btn" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">Open Tool <i class="fas fa-arrow-right"></i></span>
           </div>
         </a>
 
@@ -231,7 +229,7 @@
           </div>
           <div class="tool-card-footer">
             <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
-            <button class="tool-open-btn" style="background:linear-gradient(135deg,#059669,#047857);">Open Tool <i class="fas fa-arrow-right"></i></button>
+            <span class="tool-open-btn" style="background:linear-gradient(135deg,#059669,#047857);">Open Tool <i class="fas fa-arrow-right"></i></span>
           </div>
         </a>
 
@@ -252,7 +250,7 @@
           </div>
           <div class="tool-card-footer">
             <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
-            <button class="tool-open-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);">Open Tool <i class="fas fa-arrow-right"></i></button>
+            <span class="tool-open-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);">Open Tool <i class="fas fa-arrow-right"></i></span>
           </div>
         </a>
 
@@ -273,7 +271,7 @@
           </div>
           <div class="tool-card-footer">
             <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
-            <button class="tool-open-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);">Open Tool <i class="fas fa-arrow-right"></i></button>
+            <span class="tool-open-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);">Open Tool <i class="fas fa-arrow-right"></i></span>
           </div>
         </a>
 
@@ -294,7 +292,7 @@
           </div>
           <div class="tool-card-footer">
             <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
-            <button class="tool-open-btn" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">Open Tool <i class="fas fa-arrow-right"></i></button>
+            <span class="tool-open-btn" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">Open Tool <i class="fas fa-arrow-right"></i></span>
           </div>
         </a>
 
@@ -315,15 +313,15 @@
           </div>
           <div class="tool-card-footer">
             <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
-            <button class="tool-open-btn" style="background:linear-gradient(135deg,#64748b,#475569);">Open Tool <i class="fas fa-arrow-right"></i></button>
+            <span class="tool-open-btn" style="background:linear-gradient(135deg,#64748b,#475569);">Open Tool <i class="fas fa-arrow-right"></i></span>
           </div>
         </a>
 
-        <!-- Backlinks Overview (coming soon placeholder) -->
+        <!-- Backlinks Overview -->
         <a href="backlinks.html" class="tool-card" data-cats="technical">
           <div class="tool-card-top" style="background:linear-gradient(135deg,#ec4899,#db2777);">
             <div class="tool-card-icon"><i class="fas fa-link"></i></div>
-            <span class="tool-card-badge badge-free">Soon</span>
+            <span class="tool-card-badge badge-new">New</span>
           </div>
           <div class="tool-card-body">
             <div class="tool-card-name">Backlinks Overview</div>
@@ -335,8 +333,8 @@
             </div>
           </div>
           <div class="tool-card-footer">
-            <span><i class="fas fa-clock" style="color:var(--gold)"></i> Coming Soon</span>
-            <button class="tool-open-btn" style="background:linear-gradient(135deg,#ec4899,#db2777);">Preview <i class="fas fa-arrow-right"></i></button>
+            <span><i class="fas fa-check-circle" style="color:var(--green)"></i> Free</span>
+            <span class="tool-open-btn" style="background:linear-gradient(135deg,#ec4899,#db2777);">Open Tool <i class="fas fa-arrow-right"></i></span>
           </div>
         </a>
 
@@ -353,7 +351,7 @@ function filterTools(cat, btn) {
   btn.classList.add('active');
   document.querySelectorAll('.tool-card').forEach(function(card){
     if(cat === 'all'){
-      card.style.display = '';
+      card.style.display = 'flex';
     } else {
       const cats = card.dataset.cats || '';
       card.style.display = cats.includes(cat) ? '' : 'none';

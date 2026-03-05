@@ -83,18 +83,22 @@
         </div>
         <div class="app-inside">
 
-          <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:end;margin-bottom:20px;flex-wrap:wrap;">
+          <div style="display:grid;grid-template-columns:1fr 1fr auto auto auto;gap:10px;align-items:end;margin-bottom:20px;flex-wrap:wrap;">
             <div>
               <div class="input-lbl"><i class="fas fa-key"></i> Keyword</div>
-              <input type="text" id="trackKw" placeholder="e.g. best running shoes" style="width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'" onkeydown="if(event.key==='Enter')addTrackedKw()">
+              <input type="text" id="trackKw" placeholder="e.g. best running shoes" style="width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'" onkeydown="if(event.key==='Enter')addTrackedKw()">
+            </div>
+            <div>
+              <div class="input-lbl"><i class="fas fa-link"></i> Page URL <span style="color:var(--gray-300);font-weight:400;">(optional)</span></div>
+              <input type="text" id="trackUrl" placeholder="e.g. /running-shoes" style="width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'">
             </div>
             <div>
               <div class="input-lbl"><i class="fas fa-hashtag"></i> Position</div>
-              <input type="number" id="trackPos" placeholder="1-100" min="1" max="200" style="width:90px;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'" onkeydown="if(event.key==='Enter')addTrackedKw()">
+              <input type="number" id="trackPos" placeholder="1–100" min="1" max="200" style="width:80px;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'" onkeydown="if(event.key==='Enter')addTrackedKw()">
             </div>
             <div>
               <div class="input-lbl"><i class="fas fa-calendar"></i> Date</div>
-              <input type="date" id="trackDate" style="padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'">
+              <input type="date" id="trackDate" style="padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'">
             </div>
             <button class="btn-run" style="background:linear-gradient(135deg,#f59e0b,#d97706);height:42px;margin-top:auto;" onclick="addTrackedKw()"><i class="fas fa-plus"></i> Add</button>
           </div>
@@ -114,44 +118,45 @@
 <script src="shared-layout.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-
 const TRACK_KEY = 'clusterseo_tracking';
 
 function getTrackingData() {
-  try { return JSON.parse(localStorage.getItem(TRACK_KEY)||'{}'); } catch(e){ return {}; }
+  try { return JSON.parse(localStorage.getItem(TRACK_KEY) || '{}'); } catch(e) { return {}; }
 }
-function saveTrackingData(d){ localStorage.setItem(TRACK_KEY, JSON.stringify(d)); }
+function saveTrackingData(d) { localStorage.setItem(TRACK_KEY, JSON.stringify(d)); }
 
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('trackDate').value = new Date().toISOString().split('T')[0];
   renderTracking();
 });
 
-function addTrackedKw(){
+function addTrackedKw() {
   const kw  = document.getElementById('trackKw').value.trim();
   const pos = parseInt(document.getElementById('trackPos').value);
+  const url = document.getElementById('trackUrl').value.trim();
   const dt  = document.getElementById('trackDate').value;
-  if(!kw){ alert('Enter a keyword.'); return; }
-  if(!pos||pos<1||pos>200){ alert('Enter a position between 1 and 200.'); return; }
-  if(!dt){ alert('Select a date.'); return; }
+  if (!kw)                      { alert('Enter a keyword.'); return; }
+  if (!pos || pos < 1 || pos > 200) { alert('Enter a valid position (1–200).'); return; }
+  if (!dt)                      { alert('Select a date.'); return; }
 
   const data = getTrackingData();
-  if(!data[kw]) data[kw] = [];
-  // Remove existing entry for same date
-  data[kw] = data[kw].filter(e => e.date !== dt);
-  data[kw].push({ date: dt, pos: pos });
-  data[kw].sort((a,b) => a.date.localeCompare(b.date));
+  if (!data[kw]) data[kw] = { url: '', entries: [] };
+  if (url) data[kw].url = url;
+  // Remove duplicate for same date
+  data[kw].entries = data[kw].entries.filter(function(e) { return e.date !== dt; });
+  data[kw].entries.push({ date: dt, pos: pos });
+  data[kw].entries.sort(function(a, b) { return a.date.localeCompare(b.date); });
   saveTrackingData(data);
-  document.getElementById('trackKw').value = '';
+
+  document.getElementById('trackKw').value  = '';
   document.getElementById('trackPos').value = '';
   renderTracking();
 }
 
-
 function deleteTrackedKw(btn) {
-  var kw = btn.getAttribute('data-kw');
-  if (!kw || !confirm('Delete tracking data for "' + kw + '"?')) return;
-  var data = getTrackingData();
+  const kw = btn.getAttribute('data-kw');
+  if (!kw || !confirm('Delete all tracking data for "' + kw + '"?')) return;
+  const data = getTrackingData();
   delete data[kw];
   saveTrackingData(data);
   renderTracking();
@@ -160,77 +165,155 @@ function deleteTrackedKw(btn) {
 function renderTracking() {
   const data = getTrackingData();
   const keys = Object.keys(data);
-  const el = document.getElementById('trackingResults');
+  const el   = document.getElementById('trackingResults');
+
   if (!keys.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-chart-line"></i><h3>No keywords tracked yet</h3><p>Add keywords with their current positions above to start tracking</p></div>';
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-chart-line"></i><h3>No keywords tracked yet</h3><p>Add a keyword and its current ranking position above to begin tracking.</p></div>';
     return;
   }
-  let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+
+  // Summary stats
+  let totalKws = keys.length;
+  let improving = 0, declining = 0, stable = 0, top3 = 0, top10 = 0;
   keys.forEach(function(kw) {
-    const entries = data[kw];
-    const latest  = entries[entries.length - 1];
-    const prev    = entries.length > 1 ? entries[entries.length - 2] : null;
-    const change  = prev ? prev.pos - latest.pos : 0;
-    const changeHtml = change > 0
-      ? '<span style="color:#059669;font-weight:700;font-size:12px;"><i class="fas fa-arrow-up"></i> +' + change + '</span>'
-      : change < 0
-      ? '<span style="color:#ef4444;font-weight:700;font-size:12px;"><i class="fas fa-arrow-down"></i> ' + change + '</span>'
-      : '<span style="color:var(--gray-400);font-size:12px;">—</span>';
-    const posColor = latest.pos <= 3 ? '#059669' : latest.pos <= 10 ? '#f59e0b' : '#ef4444';
-    const pts = entries.slice(-10);
-    const maxP = Math.max.apply(null, pts.map(function(e) { return e.pos; }));
-    const minP = Math.min.apply(null, pts.map(function(e) { return e.pos; }));
-    const range = Math.max(maxP - minP, 1);
-    const svgPts = pts.map(function(e, i) {
-      const x = pts.length === 1 ? 40 : (i / (pts.length - 1)) * 80;
-      const y = 30 - ((maxP - e.pos) / range) * 24;
-      return x + ',' + y;
-    }).join(' ');
-    const sparkline = pts.length > 1
-      ? '<svg width="80" height="32" style="flex-shrink:0;"><polyline points="' + svgPts + '" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linejoin="round"/></svg>'
-      : '<span style="font-size:11px;color:var(--gray-300);">1 entry</span>';
-    const safeKw = kw.replace(/['"<>&\\]/g, '');
-    html += '<div style="background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px 16px;">';
-    html += '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
-    html += '<div style="flex:1;min-width:120px;font-size:14px;font-weight:700;color:var(--gray-900);">' + kw + '</div>';
-    html += '<div style="display:flex;align-items:center;gap:6px;">';
-    html += '<span style="font-size:1.4rem;font-weight:800;color:' + posColor + ';">#' + latest.pos + '</span>';
-    html += changeHtml;
-    html += '</div>';
-    html += sparkline;
-    html += '<span style="font-size:11px;color:var(--gray-400);">' + entries.length + ' entries</span>';
-    html += '<button data-kw="' + safeKw + '" onclick="deleteTrackedKw(this)" style="background:none;border:1px solid var(--gray-200);padding:4px 8px;border-radius:var(--r-sm);font-size:11px;color:var(--gray-400);cursor:pointer;font-family:var(--font);" title="Delete"><i class="fas fa-times"></i></button>';
-    html += '</div>';
+    const entries = data[kw].entries || [];
+    if (!entries.length) return;
+    const latest = entries[entries.length - 1].pos;
+    if (latest <= 3)  top3++;
+    if (latest <= 10) top10++;
     if (entries.length > 1) {
-      html += '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">';
-      entries.slice(-6).forEach(function(e) {
-        html += '<span style="font-size:11px;background:var(--gray-50);border:1px solid var(--gray-200);padding:2px 8px;border-radius:100px;color:var(--gray-500);">' + e.date + ' — #' + e.pos + '</span>';
-      });
-      html += '</div>';
+      const prev = entries[entries.length - 2].pos;
+      if (latest < prev) improving++;
+      else if (latest > prev) declining++;
+      else stable++;
     }
+  });
+
+  let html = '<div class="stat-grid" style="grid-template-columns:repeat(5,1fr);">';
+  html += '<div class="stat-box"><div class="stat-box-num">' + totalKws + '</div><div class="stat-box-label">Keywords Tracked</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">' + improving + '</div><div class="stat-box-label">Improving</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">' + declining + '</div><div class="stat-box-label">Declining</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--teal)">' + top3 + '</div><div class="stat-box-label">Top 3</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--gold)">' + top10 + '</div><div class="stat-box-label">Top 10</div></div>';
+  html += '</div>';
+
+  // Sort by latest position
+  const sortedKeys = keys.slice().sort(function(a, b) {
+    const aLast = (data[a].entries || [{ pos: 999 }]).slice(-1)[0].pos;
+    const bLast = (data[b].entries || [{ pos: 999 }]).slice(-1)[0].pos;
+    return aLast - bLast;
+  });
+
+  html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+  sortedKeys.forEach(function(kw) {
+    const kwData  = data[kw];
+    const entries = kwData.entries || [];
+    if (!entries.length) return;
+    const latest = entries[entries.length - 1];
+    const prev   = entries.length > 1 ? entries[entries.length - 2] : null;
+    const change = prev ? prev.pos - latest.pos : 0; // positive = rank improved (lower number)
+
+    const posColor  = latest.pos <= 3 ? '#059669' : latest.pos <= 10 ? '#f59e0b' : latest.pos <= 20 ? '#0ea5e9' : '#94a3b8';
+    const posLabel  = latest.pos <= 3 ? 'Top 3' : latest.pos <= 10 ? 'Page 1' : latest.pos <= 20 ? 'Page 2' : 'Page 3+';
+    const posLabelColor = latest.pos <= 3 ? '#065f46' : latest.pos <= 10 ? '#92400e' : latest.pos <= 20 ? 'var(--teal-dark)' : 'var(--gray-500)';
+    const posLabelBg    = latest.pos <= 3 ? '#d1fae5' : latest.pos <= 10 ? '#fef3c7' : latest.pos <= 20 ? 'var(--teal-light)' : 'var(--gray-100)';
+
+    const changeHtml = change > 0
+      ? '<span style="color:#059669;font-weight:700;font-size:13px;display:flex;align-items:center;gap:3px;"><i class="fas fa-arrow-up"></i> +' + change + '</span>'
+      : change < 0
+      ? '<span style="color:#ef4444;font-weight:700;font-size:13px;display:flex;align-items:center;gap:3px;"><i class="fas fa-arrow-down"></i> ' + Math.abs(change) + '</span>'
+      : '<span style="color:var(--gray-400);font-size:12px;">No change</span>';
+
+    // SVG sparkline — y axis inverted because lower rank = better
+    const pts = entries.slice(-12);
+    const allPos = pts.map(function(e) { return e.pos; });
+    const maxP = Math.max.apply(null, allPos);
+    const minP = Math.min.apply(null, allPos);
+    const rangeP = Math.max(maxP - minP, 1);
+    const svgW = 120, svgH = 36;
+    const svgPts = pts.map(function(e, i) {
+      const x = pts.length === 1 ? svgW / 2 : (i / (pts.length - 1)) * svgW;
+      const y = svgH - 4 - ((maxP - e.pos) / rangeP) * (svgH - 8);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+    const sparkColor = change > 0 ? '#059669' : change < 0 ? '#ef4444' : '#94a3b8';
+    const sparkline = pts.length > 1
+      ? '<svg width="' + svgW + '" height="' + svgH + '" style="flex-shrink:0;"><polyline points="' + svgPts + '" fill="none" stroke="' + sparkColor + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>'
+      : '<div style="font-size:10px;color:var(--gray-300);width:120px;text-align:center;">Add more entries to see trend</div>';
+
+    const safeKw = kw.replace(/['"<>&]/g, '');
+
+    html += '<div style="background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);padding:16px 18px;transition:all 0.2s;" onmouseover="this.style.borderColor=\'var(--gray-300)\';this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.06)\'" onmouseout="this.style.borderColor=\'var(--gray-200)\';this.style.boxShadow=\'none\'">';
+    html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">';
+
+    // Rank number
+    html += '<div style="text-align:center;flex-shrink:0;">';
+    html += '<div style="font-size:1.8rem;font-weight:800;color:' + posColor + ';line-height:1;">#' + latest.pos + '</div>';
+    html += '<div style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:100px;background:' + posLabelBg + ';color:' + posLabelColor + ';margin-top:3px;">' + posLabel + '</div>';
+    html += '</div>';
+
+    // Keyword info
+    html += '<div style="flex:1;min-width:120px;">';
+    html += '<div style="font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:3px;">' + kw + '</div>';
+    if (kwData.url) html += '<div style="font-size:11px;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">' + kwData.url + '</div>';
+    html += '<div style="margin-top:4px;">' + changeHtml + '</div>';
+    html += '</div>';
+
+    // Sparkline
+    html += sparkline;
+
+    // Last updated + actions
+    html += '<div style="text-align:right;flex-shrink:0;">';
+    html += '<div style="font-size:11px;color:var(--gray-400);margin-bottom:4px;">' + entries.length + ' data point' + (entries.length===1?'':'s') + '</div>';
+    html += '<div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Updated: ' + latest.date + '</div>';
+    html += '<button data-kw="' + safeKw + '" onclick="deleteTrackedKw(this)" style="background:none;border:1px solid var(--gray-200);padding:4px 10px;border-radius:var(--r-sm);font-size:11px;color:var(--gray-400);cursor:pointer;font-family:var(--font);transition:all 0.15s;" onmouseover="this.style.borderColor=\'#ef4444\';this.style.color=\'#ef4444\'" onmouseout="this.style.borderColor=\'var(--gray-200)\';this.style.color=\'var(--gray-400)\'"><i class="fas fa-trash"></i> Delete</button>';
+    html += '</div>';
+    html += '</div>';
+
+    // Full history row
+    if (entries.length > 1) {
+      html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);">';
+      html += '<div style="font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Position History</div>';
+      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+      entries.slice().reverse().slice(0, 8).forEach(function(e, i) {
+        const c = i === 0 ? posColor : 'var(--gray-400)';
+        html += '<div style="text-align:center;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 10px;">';
+        html += '<div style="font-size:13px;font-weight:700;color:' + c + '">#' + e.pos + '</div>';
+        html += '<div style="font-size:10px;color:var(--gray-400);">' + e.date + '</div>';
+        html += '</div>';
+      });
+      if (entries.length > 8) html += '<div style="font-size:11px;color:var(--gray-400);align-self:center;">+' + (entries.length-8) + ' more</div>';
+      html += '</div></div>';
+    }
+
     html += '</div>';
   });
   html += '</div>';
   el.innerHTML = html;
 }
 
-function clearAllTracking(){
-  if(!confirm('Delete all tracking data?')) return;
+function clearAllTracking() {
+  if (!confirm('Delete ALL tracking data? This cannot be undone.')) return;
   localStorage.removeItem(TRACK_KEY);
   renderTracking();
 }
 
 function exportTrackingCSV() {
-  var data = getTrackingData();
-  var rows = ['Keyword,Date,Position'];
+  const data = getTrackingData();
+  const rows = ['Keyword,URL,Date,Position,Change'];
   Object.entries(data).forEach(function(e) {
-    e[1].forEach(function(entry) {
-      rows.push('"' + e[0] + '","' + entry.date + '",' + entry.pos);
+    const kw  = e[0];
+    const entries = e[1].entries || [];
+    const url = e[1].url || '';
+    entries.forEach(function(entry, i) {
+      const prev   = i > 0 ? entries[i-1].pos : '';
+      const change = prev !== '' ? prev - entry.pos : '';
+      rows.push('"' + kw + '","' + url + '","' + entry.date + '",' + entry.pos + ',' + change);
     });
   });
-  var csv = rows.join('\n');
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+  const csv = rows.join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
   a.download = 'keyword-tracking-' + new Date().toISOString().split('T')[0] + '.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }

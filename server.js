@@ -325,7 +325,7 @@ app.use((req, res) => {
 /* =====================
    START SERVER
 ===================== */
-const PORT = process.env.PORT || 8008;
+const PORT = process.env.PORT || 8001;
 
 ['uploads', 'public'].forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });

@@ -110,59 +110,140 @@
 <script src="shared-layout.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-
 let gapResults = {};
 
-function getKwIntent(kw){
-  const k=kw.toLowerCase();
-  if(k.includes('best')||k.includes('review')||k.includes(' vs ')||k.includes('top ')||k.includes('compare')) return 'Commercial';
-  if(k.includes('buy')||k.includes('price')||k.includes('cheap')||k.includes('cost')||k.includes('deal')) return 'Transactional';
-  if(k.includes('login')||k.includes('website')||k.includes('official')||k.includes('app')) return 'Navigational';
+function classifyKwIntent(kw) {
+  const k = kw.toLowerCase();
+  if (/\b(best|top|review|reviews|compare|comparison|vs|versus|rated|recommended|ranking)\b/.test(k)) return 'Commercial';
+  if (/\b(buy|purchase|order|shop|price|cost|cheap|discount|deal|coupon|sale|pricing)\b/.test(k)) return 'Transactional';
+  if (/\b(login|sign in|sign up|register|account|download|app|website|official|portal)\b/.test(k)) return 'Navigational';
   return 'Informational';
 }
 
-function runKeywordGap(){
-  const yours = document.getElementById('gapYours').value.split('\n').map(l=>l.split(',')[0].trim()).filter(k=>k.length>1);
-  const comps  = document.getElementById('gapComp').value.split('\n').map(l=>l.split(',')[0].trim()).filter(k=>k.length>1);
-  if(!yours.length||!comps.length){ alert('Paste keywords in both columns.'); return; }
-
-  const yourSet = new Set(yours.map(k=>k.toLowerCase()));
-  const gaps    = comps.filter(k=>!yourSet.has(k.toLowerCase()));
-
-  // Group gaps by intent
-  const grouped={Informational:[],Transactional:[],Commercial:[],Navigational:[]};
-  gaps.forEach(function(k){ grouped[getKwIntent(k)].push(k); });
-
-  gapResults = { gaps, grouped, yours, comps };
-
-  let html='<div class="stat-grid">';
-  html+='<div class="stat-box"><div class="stat-box-num">'+yours.length+'</div><div class="stat-box-label">Your Keywords</div></div>';
-  html+='<div class="stat-box"><div class="stat-box-num">'+comps.length+'</div><div class="stat-box-label">Competitor Keywords</div></div>';
-  html+='<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">'+gaps.length+'</div><div class="stat-box-label">Keyword Gaps</div></div>';
-  html+='<div class="stat-box"><div class="stat-box-num">'+Math.round((gaps.length/Math.max(comps.length,1))*100)+'%</div><div class="stat-box-label">Gap Rate</div></div>';
-  html+='</div>';
-
-  const intentConfig={Informational:{color:'#0ea5e9',icon:'fa-info-circle',cls:'et-org'},Transactional:{color:'#f59e0b',icon:'fa-shopping-cart',cls:'et-person'},Commercial:{color:'#10b981',icon:'fa-chart-line',cls:'et-place'},Navigational:{color:'#7c3aed',icon:'fa-compass',cls:'et-brand'}};
-
-  ['Transactional','Commercial','Informational','Navigational'].forEach(function(intent){
-    const kws=grouped[intent]; if(!kws.length) return;
-    const cfg=intentConfig[intent];
-    html+='<div class="result-card" style="margin-bottom:14px;">';
-    html+='<div class="result-card-head"><h3><i class="fas '+cfg.icon+'" style="color:'+cfg.color+'"></i> '+intent+' Gaps ('+kws.length+')</h3></div>';
-    html+='<div class="result-card-body"><div class="tag-cloud">';
-    kws.forEach(function(k){ html+='<span class="entity-tag '+cfg.cls+'">'+k+'</span>'; });
-    html+='</div></div></div>';
-  });
-
-  if(!gaps.length){
-    html+='<div class="result-card"><div class="result-card-body" style="text-align:center;padding:32px;color:var(--green);font-weight:700;"><i class="fas fa-check-circle" style="font-size:2rem;display:block;margin-bottom:10px;"></i>No gaps found — you cover all competitor keywords!</div></div>';
-  }
-
-  document.getElementById('gapResults').innerHTML=html;
-  document.getElementById('btnExportGap').style.display='flex';
+function kwDifficulty(kw) {
+  const w = kw.trim().split(/\s+/).length;
+  if (w === 1) return { label:'Hard', color:'#ef4444' };
+  if (w === 2) return { label:'Medium', color:'#f59e0b' };
+  return { label:'Easy', color:'#059669' };
 }
 
-function clearGap(){
+function runKeywordGap() {
+  const rawYours = document.getElementById('gapYours').value;
+  const rawComps = document.getElementById('gapComp').value;
+  const yours = rawYours.split('\n').map(function(l){return l.split(',')[0].trim();}).filter(function(k){return k.length>1;});
+  const comps  = rawComps.split('\n').map(function(l){return l.split(',')[0].trim();}).filter(function(k){return k.length>1;});
+  if (!yours.length || !comps.length) { alert('Paste keywords in both columns.'); return; }
+
+  const yourSet  = new Set(yours.map(function(k){return k.toLowerCase();}));
+  const compSet  = new Set(comps.map(function(k){return k.toLowerCase();}));
+
+  // Gaps: keywords competitor has that you don't
+  const gaps = comps.filter(function(k){return !yourSet.has(k.toLowerCase());});
+  // Shared
+  const shared = comps.filter(function(k){return yourSet.has(k.toLowerCase());});
+  // Your unique
+  const unique = yours.filter(function(k){return !compSet.has(k.toLowerCase());});
+
+  // Enrich gaps
+  const enriched = gaps.map(function(k) {
+    return { keyword: k, intent: classifyKwIntent(k), difficulty: kwDifficulty(k) };
+  });
+
+  // Group by intent
+  const grouped = { Commercial:[], Transactional:[], Informational:[], Navigational:[] };
+  enriched.forEach(function(k){ grouped[k.intent].push(k); });
+
+  // Prioritise: sort each group — easy keywords first
+  Object.keys(grouped).forEach(function(intent) {
+    grouped[intent].sort(function(a,b){
+      const order = {Easy:0,Medium:1,Hard:2};
+      return order[a.difficulty.label] - order[b.difficulty.label];
+    });
+  });
+
+  const quickWins = enriched.filter(function(k){return k.difficulty.label==='Easy';});
+  gapResults = { gaps: enriched, grouped, shared, unique, yours, comps };
+
+  const gapRate = Math.round((gaps.length / Math.max(comps.length,1)) * 100);
+  const coverage = Math.round((shared.length / Math.max(comps.length,1)) * 100);
+
+  let html = '<div class="stat-grid">';
+  html += '<div class="stat-box"><div class="stat-box-num">' + yours.length + '</div><div class="stat-box-label">Your Keywords</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">' + comps.length + '</div><div class="stat-box-label">Competitor Keywords</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">' + gaps.length + '</div><div class="stat-box-label">Keyword Gaps</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">' + quickWins.length + '</div><div class="stat-box-label">Quick Wins</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--teal)">' + coverage + '%</div><div class="stat-box-label">Your Coverage</div></div>';
+  html += '</div>';
+
+  // Coverage bar
+  html += '<div class="result-card" style="margin-bottom:14px;"><div class="result-card-head"><h3><i class="fas fa-chart-bar"></i> Keyword Coverage Analysis</h3></div><div class="result-card-body">';
+  html += '<div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;">';
+  html += '<div style="flex:1;min-width:100px;"><div style="font-size:12px;color:var(--gray-500);margin-bottom:4px;">Coverage Rate</div><div style="height:10px;background:var(--gray-100);border-radius:5px;"><div style="width:' + coverage + '%;height:100%;background:var(--teal);border-radius:5px;"></div></div><div style="font-size:11px;color:var(--gray-400);margin-top:3px;">' + coverage + '% of competitor keywords covered</div></div>';
+  html += '<div style="flex:1;min-width:100px;"><div style="font-size:12px;color:var(--gray-500);margin-bottom:4px;">Gap Rate</div><div style="height:10px;background:var(--gray-100);border-radius:5px;"><div style="width:' + gapRate + '%;height:100%;background:#ef4444;border-radius:5px;"></div></div><div style="font-size:11px;color:var(--gray-400);margin-top:3px;">' + gapRate + '% of competitor keywords you\'re missing</div></div>';
+  html += '</div>';
+  // Visual breakdown bar
+  const t = yours.length + gaps.length;
+  const yPct = t > 0 ? Math.round((unique.length/t)*100) : 0;
+  const sPct = t > 0 ? Math.round((shared.length/t)*100) : 0;
+  const gPct = t > 0 ? Math.round((gaps.length/t)*100) : 0;
+  html += '<div style="height:28px;display:flex;border-radius:6px;overflow:hidden;margin-top:8px;">';
+  if (yPct) html += '<div style="width:'+yPct+'%;background:#059669;display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:700;" title="Your unique: '+unique.length+'">' + (yPct>6?unique.length:'') + '</div>';
+  if (sPct) html += '<div style="width:'+sPct+'%;background:var(--teal);display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:700;" title="Shared: '+shared.length+'">' + (sPct>6?shared.length:'') + '</div>';
+  if (gPct) html += '<div style="width:'+gPct+'%;background:#ef4444;display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:700;" title="Gaps: '+gaps.length+'">' + (gPct>6?gaps.length:'') + '</div>';
+  html += '</div>';
+  html += '<div style="display:flex;gap:14px;margin-top:6px;font-size:11px;">';
+  html += '<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#059669;border-radius:2px;display:inline-block;"></span>Your unique ('+unique.length+')</span>';
+  html += '<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:var(--teal);border-radius:2px;display:inline-block;"></span>Shared ('+shared.length+')</span>';
+  html += '<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#ef4444;border-radius:2px;display:inline-block;"></span>Gaps ('+gaps.length+')</span>';
+  html += '</div></div></div>';
+
+  // Quick wins first
+  if (quickWins.length) {
+    html += '<div class="result-card" style="margin-bottom:14px;">';
+    html += '<div class="result-card-head"><h3><i class="fas fa-bolt" style="color:var(--gold)"></i> Quick Wins — Target These First ('+quickWins.length+')</h3></div>';
+    html += '<div class="result-card-body">';
+    html += '<p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">Long-tail keywords (3+ words) — easiest to rank for, create content around these first.</p>';
+    html += '<div class="tag-cloud">';
+    quickWins.forEach(function(k){
+      html += '<span class="entity-tag et-place" style="cursor:default;">' + k.keyword + ' <span style="opacity:0.6;font-size:10px;">Easy</span></span>';
+    });
+    html += '</div></div></div>';
+  }
+
+  // Gaps by intent — most valuable first
+  ['Transactional','Commercial','Informational','Navigational'].forEach(function(intent){
+    const kws = grouped[intent];
+    if (!kws.length) return;
+    const intentIcons = {Transactional:'fa-shopping-cart',Commercial:'fa-chart-line',Informational:'fa-info-circle',Navigational:'fa-compass'};
+    const intentColors = {Transactional:'#f59e0b',Commercial:'#10b981',Informational:'#0ea5e9',Navigational:'#7c3aed'};
+    const intentDesc = {
+      Transactional:'High buying intent — these drive revenue. Create product/service pages.',
+      Commercial:'Research intent — create comparison, review and best-of content.',
+      Informational:'Educational intent — create blog posts, guides and how-to articles.',
+      Navigational:'Brand/tool intent — ensure your brand pages are optimised.'
+    };
+    html += '<div class="result-card" style="margin-bottom:14px;">';
+    html += '<div class="result-card-head"><h3><i class="fas ' + intentIcons[intent] + '" style="color:' + intentColors[intent] + '"></i> ' + intent + ' Gaps (' + kws.length + ')</h3></div>';
+    html += '<div class="result-card-body">';
+    html += '<p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">' + intentDesc[intent] + '</p>';
+    html += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+    html += '<thead><tr style="background:var(--gray-50);"><th style="text-align:left;padding:7px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Keyword</th><th style="padding:7px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);white-space:nowrap;">Difficulty</th><th style="text-align:left;padding:7px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Action</th></tr></thead><tbody>';
+    kws.forEach(function(k,i){
+      const action = intent==='Transactional'?'Create product/landing page' : intent==='Commercial'?'Write comparison or review post' : intent==='Informational'?'Write a blog post or guide' : 'Optimise brand/about page';
+      html += '<tr style="border-bottom:1px solid var(--gray-100);' + (i%2?'background:var(--gray-50)':'') + '">';
+      html += '<td style="padding:7px 12px;font-weight:600;">' + k.keyword + '</td>';
+      html += '<td style="padding:7px 12px;text-align:center;"><span style="font-size:11px;font-weight:700;color:' + k.difficulty.color + '">' + k.difficulty.label + '</span></td>';
+      html += '<td style="padding:7px 12px;font-size:12px;color:var(--gray-500);">' + action + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div></div></div>';
+  });
+
+  document.getElementById('gapResults').innerHTML = html;
+  document.getElementById('btnExportGap').style.display = 'flex';
+}
+
+function clearGap() {
   document.getElementById('gapYours').value='';
   document.getElementById('gapComp').value='';
   document.getElementById('gapResults').innerHTML='<div class="empty-state"><i class="fas fa-not-equal"></i><h3>Ready to find gaps</h3><p>Paste both keyword lists to discover opportunities</p></div>';
@@ -171,16 +252,21 @@ function clearGap(){
 }
 
 function exportGapCSV() {
-  const rows = ['Keyword,Intent,Category'];
-  Object.entries(gapResults.grouped || {}).forEach(function(e) {
-    e[1].forEach(function(k) {
-      rows.push('"' + k + '","' + e[0] + '","Gap - Missing"');
-    });
+  const rows = ['Keyword,Intent,Difficulty,Category,Recommended Action'];
+  const actionMap = {Transactional:'Create product/landing page',Commercial:'Write comparison or review post',Informational:'Write blog post or guide',Navigational:'Optimise brand page'};
+  (gapResults.gaps||[]).forEach(function(k){
+    rows.push('"'+k.keyword+'","'+k.intent+'","'+k.difficulty.label+'","Gap — Missing","'+actionMap[k.intent]+'"');
+  });
+  (gapResults.shared||[]).forEach(function(k){
+    rows.push('"'+k+'","'+classifyKwIntent(k)+'","'+kwDifficulty(k).label+'","Shared","Already targeting"');
+  });
+  (gapResults.unique||[]).forEach(function(k){
+    rows.push('"'+k+'","'+classifyKwIntent(k)+'","'+kwDifficulty(k).label+'","Your Advantage","Keep optimising"');
   });
   const csv = rows.join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
-  a.download = 'keyword-gap-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'keyword-gap-'+new Date().toISOString().split('T')[0]+'.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 

@@ -103,108 +103,283 @@
 <script src="shared-layout.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-
 let wikiData = {};
 
-async function runWikiEntity(){
+async function runWikiEntity() {
   const topic = document.getElementById('wikiInput').value.trim();
-  if(!topic){ alert('Enter a topic first.'); return; }
+  if (!topic) { alert('Enter a topic first.'); return; }
 
-  document.getElementById('wikiResults').innerHTML='<div class="empty-state"><div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px;"></div><p style="color:var(--gray-400);">Fetching Wikipedia data for "'+topic+'"...</p></div>';
+  const resultsEl = document.getElementById('wikiResults');
+  resultsEl.innerHTML = '<div class="empty-state"><div style="width:40px;height:40px;border:3px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div><p style="color:var(--gray-400);">Searching Wikipedia for "' + topic + '"...</p></div>';
 
   try {
-    // Search for the topic
-    const searchUrl='https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(topic.replace(/ /g,'_'));
-    const sumRes=await fetch(searchUrl);
-    const sumData=await sumRes.json();
-
-    if(sumData.type==='disambiguation'||!sumData.extract){
-      // Try search endpoint
-      const srUrl='https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(topic)+'&format=json&origin=*&srlimit=5';
-      const srRes=await fetch(srUrl);
-      const srData=await srRes.json();
-      const results=srData.query&&srData.query.search||[];
-      if(!results.length){ document.getElementById('wikiResults').innerHTML='<div class="empty-state"><i class="fas fa-search"></i><h3>No results found</h3><p>Try a more specific or different topic.</p></div>'; return; }
-      // Use first result
-      const firstTitle=results[0].title;
-      const r2=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(firstTitle.replace(/ /g,'_')));
-      const d2=await r2.json();
-      await processWikiData(d2, firstTitle);
+    // Step 1: Search for best matching article
+    const searchRes = await fetch('https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(topic) + '&format=json&origin=*&srlimit=5&srprop=snippet');
+    const searchData = await searchRes.json();
+    const results = (searchData.query && searchData.query.search) || [];
+    if (!results.length) {
+      resultsEl.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><h3>No Wikipedia article found</h3><p>Try a different or more general topic name.</p></div>';
       return;
     }
-    await processWikiData(sumData, topic);
-  } catch(e){
-    document.getElementById('wikiResults').innerHTML='<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Could not fetch Wikipedia data</h3><p>'+e.message+'<br>Check your internet connection.</p></div>';
+
+    const pageTitle = results[0].title;
+    resultsEl.innerHTML = '<div class="empty-state"><div style="width:40px;height:40px;border:3px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div><p style="color:var(--gray-400);">Loading article: "' + pageTitle + '"...</p></div>';
+
+    // Step 2: Fetch summary + full content + links + categories in parallel
+    const [summaryRes, detailRes] = await Promise.all([
+      fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(pageTitle.replace(/ /g,'_'))),
+      fetch('https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=links|categories|extlinks|sections&pllimit=max&cllimit=max&format=json&origin=*&clshow=!hidden')
+    ]);
+    const summary = await summaryRes.json();
+    const detail  = await detailRes.json();
+
+    const page = Object.values((detail.query && detail.query.pages) || {})[0] || {};
+    const rawLinks = (page.links || []).map(function(l){return l.title;}).filter(function(l){return !l.includes(':');});
+    const rawCats  = (page.categories || []).map(function(c){return c.title.replace(/^Category:/,'');});
+
+    const extract = summary.extract || '';
+    const pageUrl = summary.content_urls && summary.content_urls.desktop && summary.content_urls.desktop.page;
+    const thumbnail = summary.thumbnail && summary.thumbnail.source;
+
+    // Step 3: Deep NLP entity extraction from the full extract text
+    const entities = extractEntitiesFromText(extract, pageTitle);
+
+    // Step 4: Classify links into semantic clusters
+    const topicLinks = classifyLinks(rawLinks, pageTitle);
+
+    // Step 5: Clean categories
+    const cleanCats = rawCats
+      .filter(function(c){ return !/(Articles|Wikipedia|Pages|CS1|Use |All |Webarchive|Coordinates|Infobox|Good article|Featured)/.test(c); })
+      .slice(0, 30);
+
+    // Step 6: Extract key facts from the extract
+    const facts = extractFacts(extract);
+
+    wikiData = { topic: pageTitle, extract, entities, topicLinks, cleanCats, facts, url: pageUrl, thumbnail, searchResults: results.slice(0,5) };
+    renderWikiResults();
+
+  } catch(e) {
+    resultsEl.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error fetching Wikipedia data</h3><p>' + e.message + '</p></div>';
   }
 }
 
-async function processWikiData(sumData, topic){
-  // Get full page data with links and categories
-  const pageTitle=sumData.title||topic;
-  const apiUrl='https://en.wikipedia.org/w/api.php?action=query&titles='+encodeURIComponent(pageTitle)+'&prop=links|categories|extlinks&pllimit=50&cllimit=30&format=json&origin=*';
-  const apiRes=await fetch(apiUrl);
-  const apiData=await apiRes.json();
+function extractEntitiesFromText(text, excludeTitle) {
+  const result = { Person:[], Organisation:[], Place:[], Date:[], Number:[] };
+  if (!text) return result;
 
-  const pages=apiData.query&&apiData.query.pages||{};
-  const page=Object.values(pages)[0]||{};
-  const links=(page.links||[]).map(l=>l.title).filter(l=>!l.includes(':')).slice(0,40);
-  const categories=(page.categories||[]).map(c=>c.title.replace('Category:','')).slice(0,20);
+  const seen = new Set([excludeTitle.toLowerCase()]);
 
-  // Extract entities from the summary text
-  const extract=sumData.extract||'';
-  const capPattern=/([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/g;
-  const entities=[...new Set([...extract.matchAll(capPattern)].map(m=>m[1]).filter(e=>e!==pageTitle&&e.length>3))].slice(0,30);
-
-  wikiData={topic:pageTitle,extract,entities,links,categories,url:sumData.content_urls&&sumData.content_urls.desktop&&sumData.content_urls.desktop.page};
-
-  let html='';
-  // Summary card
-  html+='<div class="result-card" style="margin-bottom:14px;">';
-  html+='<div class="result-card-head"><h3><i class="fab fa-wikipedia-w"></i> '+pageTitle+' &nbsp;<a href="'+(wikiData.url||'#')+'" target="_blank" style="font-size:11px;color:var(--teal);font-weight:600;"><i class="fas fa-external-link-alt"></i> View on Wikipedia</a></h3></div>';
-  html+='<div class="result-card-body"><p style="font-size:13px;color:var(--gray-600);line-height:1.7;">'+extract.substring(0,400)+(extract.length>400?'...':'')+'</p></div></div>';
-
-  // Stats
-  html+='<div class="stat-grid">';
-  html+='<div class="stat-box"><div class="stat-box-num">'+entities.length+'</div><div class="stat-box-label">Named Entities</div></div>';
-  html+='<div class="stat-box"><div class="stat-box-num">'+links.length+'</div><div class="stat-box-label">Related Topics</div></div>';
-  html+='<div class="stat-box"><div class="stat-box-num">'+categories.length+'</div><div class="stat-box-label">Categories</div></div>';
-  html+='</div>';
-
-  // Entities
-  if(entities.length){
-    html+='<div class="result-card" style="margin-bottom:14px;"><div class="result-card-head"><h3><i class="fas fa-tags"></i> Named Entities Found</h3></div><div class="result-card-body"><div class="tag-cloud">';
-    entities.forEach(function(e){ html+='<span class="entity-tag et-brand">'+e+'</span>'; });
-    html+='</div></div></div>';
+  // People — capitalised 2-3 word sequences near person signals
+  const personCtx = /(?:(?:born|died|founded by|led by|created by|by|written by|directed by|said)\s+)([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})/g;
+  let m;
+  while ((m = personCtx.exec(text)) !== null) {
+    const n = m[1].trim();
+    if (!seen.has(n.toLowerCase()) && n.split(' ').length >= 2) { result.Person.push(n); seen.add(n.toLowerCase()); }
+  }
+  // Person titles
+  const titlePat = /\b(?:President|Prime Minister|King|Queen|Emperor|Pope|CEO|Dr\.?|Prof\.?|Sir|Lord|General|Captain|Senator)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})/g;
+  while ((m = titlePat.exec(text)) !== null) {
+    const n = m[1].trim();
+    if (!seen.has(n.toLowerCase())) { result.Person.push(n); seen.add(n.toLowerCase()); }
   }
 
-  // Related topics (Wikipedia links)
-  if(links.length){
-    html+='<div class="result-card" style="margin-bottom:14px;"><div class="result-card-head"><h3><i class="fas fa-project-diagram"></i> Related Topics & Semantic Links</h3></div><div class="result-card-body"><div class="tag-cloud">';
-    links.forEach(function(l){ const safeL=l.replace(/['"<>&]/g,''); html+='<span class="entity-tag et-org" style="cursor:pointer;" onclick="document.getElementById(\'wikiInput\').value=\''+safeL+'\';runWikiEntity();" title="Click to research">'+l+' <i class="fas fa-search" style="font-size:9px;opacity:0.6;"></i></span>'; });
-    html+='</div></div></div>';
+  // Organisations — company/org suffixes or all-caps
+  const orgPat = /([A-Z][A-Za-z\s&]{2,40}(?:Corporation|Company|Inc|Ltd|University|Institute|Foundation|Association|Organization|Council|Agency|Authority|Group|Museum|Library|Academy))/g;
+  while ((m = orgPat.exec(text)) !== null) {
+    const n = m[1].trim();
+    if (!seen.has(n.toLowerCase())) { result.Organisation.push(n); seen.add(n.toLowerCase()); }
+  }
+  // ALL-CAPS abbreviations
+  const abbrPat = /\b([A-Z]{2,6})\b/g;
+  const skipAbbr = new Set(['AD','BC','AM','PM','US','UK','EU','UN','NATO','UNESCO','WHO','GDP','CEO','CTO','CFO','ISBN','DOI','PDF','HTML','CSS','API']);
+  while ((m = abbrPat.exec(text)) !== null) {
+    if (!skipAbbr.has(m[1]) && !seen.has(m[1].toLowerCase())) {
+      result.Organisation.push(m[1]);
+      seen.add(m[1].toLowerCase());
+    }
   }
 
-  // Categories
-  if(categories.length){
-    html+='<div class="result-card"><div class="result-card-head"><h3><i class="fas fa-folder"></i> Wikipedia Categories</h3></div><div class="result-card-body"><div class="tag-cloud">';
-    categories.forEach(function(c){ html+='<span class="entity-tag et-concept">'+c+'</span>'; });
-    html+='</div></div></div>';
+  // Places — countries, cities, geographic terms
+  const placePat = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s+(?:City|Town|Country|State|Province|Island|River|Mountain|Ocean|Sea|Lake|Bay|Valley|Peninsula|Desert|Forest|Park)))/g;
+  while ((m = placePat.exec(text)) !== null) {
+    const n = m[1].trim();
+    if (!seen.has(n.toLowerCase())) { result.Place.push(n); seen.add(n.toLowerCase()); }
+  }
+  // Look for "in [Place]" patterns
+  const inPlacePat = /\bin\s+([A-Z][a-z]+(?:,\s*[A-Z][a-z]+)?)\b/g;
+  while ((m = inPlacePat.exec(text)) !== null) {
+    const n = m[1].trim();
+    if (n.length > 3 && !seen.has(n.toLowerCase())) { result.Place.push(n); seen.add(n.toLowerCase()); }
   }
 
-  document.getElementById('wikiResults').innerHTML=html;
-  document.getElementById('btnExportWiki').style.display='flex';
+  // Dates
+  const datePat = /\b(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}|\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}|\b\d{4}\b)/g;
+  const datesSeen = new Set();
+  while ((m = datePat.exec(text)) !== null) {
+    if (!datesSeen.has(m[1])) { result.Date.push(m[1]); datesSeen.add(m[1]); }
+  }
+
+  // Numbers/Statistics
+  const numPat = /(\d[\d,]*(?:\.\d+)?)\s*(million|billion|trillion|thousand|percent|%|km|miles?|years?|meters?|kg|lb)/gi;
+  const numsSeen = new Set();
+  while ((m = numPat.exec(text)) !== null) {
+    const s = m[1] + ' ' + m[2];
+    if (!numsSeen.has(s)) { result.Number.push(s); numsSeen.add(s); }
+  }
+
+  // Deduplicate and limit
+  Object.keys(result).forEach(function(k) {
+    const uniqSeen = new Set();
+    result[k] = result[k].filter(function(e) {
+      const key = e.toLowerCase().trim();
+      if (uniqSeen.has(key) || key.length < 2) return false;
+      uniqSeen.add(key); return true;
+    }).slice(0, 20);
+  });
+  return result;
+}
+
+function classifyLinks(links, title) {
+  // Group related links into semantic clusters
+  const clusters = {};
+  links.forEach(function(link) {
+    // Try to find a 1-word grouping based on first word
+    const firstWord = link.split(' ')[0];
+    if (!clusters[firstWord]) clusters[firstWord] = [];
+    clusters[firstWord].push(link);
+  });
+  // Only keep clusters with 2+ items or return flat list
+  const grouped = {};
+  const ungrouped = [];
+  Object.entries(clusters).forEach(function(e) {
+    if (e[1].length >= 2) grouped[e[0]] = e[1];
+    else ungrouped.push(...e[1]);
+  });
+  return { grouped, ungrouped: ungrouped.slice(0, 40), all: links.slice(0, 60) };
+}
+
+function extractFacts(text) {
+  const facts = [];
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  // Look for factual sentences with numbers, dates, or key verbs
+  sentences.forEach(function(s) {
+    if (s.length < 20 || s.length > 200) return;
+    if (/\b(\d{4}|\d+\s*(?:million|billion|percent|%|km|miles))\b/.test(s)) facts.push(s.trim());
+  });
+  return facts.slice(0, 6);
+}
+
+function renderWikiResults() {
+  const d = wikiData;
+  const resultsEl = document.getElementById('wikiResults');
+  let html = '';
+
+  // ── Summary card ────────────────────────────────────────────
+  html += '<div class="result-card" style="margin-bottom:14px;">';
+  html += '<div class="result-card-head"><h3><i class="fab fa-wikipedia-w" style="color:var(--gray-600)"></i>&nbsp;' + d.topic;
+  if (d.url) html += '&nbsp;<a href="' + d.url + '" target="_blank" rel="noopener" style="font-size:11px;color:var(--teal);font-weight:600;vertical-align:middle;"><i class="fas fa-external-link-alt"></i> Wikipedia</a>';
+  html += '</h3></div><div class="result-card-body" style="display:flex;gap:14px;">';
+  if (d.thumbnail) html += '<img src="' + d.thumbnail + '" alt="' + d.topic + '" style="width:80px;height:80px;object-fit:cover;border-radius:var(--r-sm);flex-shrink:0;">';
+  html += '<p style="font-size:13px;color:var(--gray-600);line-height:1.75;margin:0;">' + (d.extract || '').substring(0,400) + (d.extract.length>400?'…':'') + '</p>';
+  html += '</div></div>';
+
+  // ── Stats ────────────────────────────────────────────────────
+  const totalEntities = Object.values(d.entities).reduce(function(s,a){return s+a.length;},0);
+  html += '<div class="stat-grid">';
+  html += '<div class="stat-box"><div class="stat-box-num">' + totalEntities + '</div><div class="stat-box-label">Entities Found</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">' + d.topicLinks.all.length + '</div><div class="stat-box-label">Related Topics</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">' + d.cleanCats.length + '</div><div class="stat-box-label">Categories</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">' + d.facts.length + '</div><div class="stat-box-label">Key Facts</div></div>';
+  html += '</div>';
+
+  // ── Key Facts ────────────────────────────────────────────────
+  if (d.facts.length) {
+    html += '<div class="result-card" style="margin-bottom:14px;">';
+    html += '<div class="result-card-head"><h3><i class="fas fa-scroll" style="color:var(--gold)"></i> Key Facts & Statistics</h3></div>';
+    html += '<div class="result-card-body"><ul style="margin:0;padding-left:18px;">';
+    d.facts.forEach(function(f){ html += '<li style="font-size:13px;color:var(--gray-700);line-height:1.65;margin-bottom:5px;">' + f + '</li>'; });
+    html += '</ul></div></div>';
+  }
+
+  // ── Entities ─────────────────────────────────────────────────
+  const typeConfig = {
+    Person:       {icon:'fa-user',       color:'#92400e', bgCls:'et-person', label:'People Mentioned'},
+    Organisation: {icon:'fa-building',   color:'var(--teal-dark)', bgCls:'et-org',    label:'Organisations'},
+    Place:        {icon:'fa-map-marker-alt', color:'#065f46', bgCls:'et-place',  label:'Places & Locations'},
+    Date:         {icon:'fa-calendar',   color:'#6d28d9', bgCls:'et-brand',  label:'Dates & Time References'},
+    Number:       {icon:'fa-hashtag',    color:'var(--gray-600)', bgCls:'et-concept', label:'Numbers & Statistics'},
+  };
+  Object.entries(typeConfig).forEach(function(e) {
+    const k = e[0], cfg = e[1];
+    const items = d.entities[k] || [];
+    if (!items.length) return;
+    html += '<div class="result-card" style="margin-bottom:14px;">';
+    html += '<div class="result-card-head"><h3><i class="fas ' + cfg.icon + '" style="color:' + cfg.color + '"></i> ' + cfg.label + ' (' + items.length + ')</h3></div>';
+    html += '<div class="result-card-body"><div class="tag-cloud">';
+    items.forEach(function(item){ html += '<span class="entity-tag ' + cfg.bgCls + '">' + item + '</span>'; });
+    html += '</div></div></div>';
+  });
+
+  // ── Related Topics (clickable to drill down) ─────────────────
+  if (d.topicLinks.all.length) {
+    html += '<div class="result-card" style="margin-bottom:14px;">';
+    html += '<div class="result-card-head"><h3><i class="fas fa-project-diagram" style="color:var(--teal)"></i> Related Topics & Semantic Links (' + d.topicLinks.all.length + ')</h3><button onclick="copyAllLinks()" style="font-size:11px;padding:4px 10px;border:1px solid var(--gray-200);border-radius:var(--r-sm);background:var(--white);cursor:pointer;font-family:var(--font);color:var(--gray-500);"><i class="fas fa-copy"></i> Copy All</button></div>';
+    html += '<div class="result-card-body"><div class="tag-cloud">';
+    d.topicLinks.all.forEach(function(link) {
+      const safe = link.replace(/'/g,'').replace(/"/g,'');
+      html += '<span class="entity-tag et-org" style="cursor:pointer;" onclick="drillDown(\'' + safe + '\')" title="Click to research \'' + link + '\'">' + link + ' <i class="fas fa-search" style="font-size:9px;opacity:0.5;"></i></span>';
+    });
+    html += '</div></div></div>';
+  }
+
+  // ── Categories ───────────────────────────────────────────────
+  if (d.cleanCats.length) {
+    html += '<div class="result-card" style="margin-bottom:14px;">';
+    html += '<div class="result-card-head"><h3><i class="fas fa-folder-open" style="color:var(--gray-500)"></i> Wikipedia Categories (' + d.cleanCats.length + ')</h3></div>';
+    html += '<div class="result-card-body"><div class="tag-cloud">';
+    d.cleanCats.forEach(function(c){ html += '<span class="entity-tag et-concept">' + c + '</span>'; });
+    html += '</div></div></div>';
+  }
+
+  // ── Other search results ─────────────────────────────────────
+  if (d.searchResults && d.searchResults.length > 1) {
+    html += '<div class="result-card">';
+    html += '<div class="result-card-head"><h3><i class="fas fa-list" style="color:var(--gray-400)"></i> Related Wikipedia Articles</h3></div>';
+    html += '<div class="result-card-body">';
+    d.searchResults.slice(1).forEach(function(r) {
+      html += '<div style="padding:8px 0;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px;">';
+      html += '<button onclick="document.getElementById(\'wikiInput\').value=\'' + r.title.replace(/'/g,'') + '\';runWikiEntity();" style="flex-shrink:0;padding:4px 10px;background:var(--teal-light);border:1px solid rgba(14,165,233,0.2);border-radius:var(--r-sm);font-size:11px;font-weight:700;color:var(--teal-dark);cursor:pointer;font-family:var(--font);">Load</button>';
+      html += '<div><div style="font-size:13px;font-weight:700;color:var(--gray-900);">' + r.title + '</div>';
+      html += '<div style="font-size:12px;color:var(--gray-500);">' + (r.snippet||'').replace(/<[^>]+>/g,'').substring(0,100) + '…</div></div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  resultsEl.innerHTML = html;
+  document.getElementById('btnExportWiki').style.display = 'flex';
+}
+
+function drillDown(topic) {
+  document.getElementById('wikiInput').value = topic;
+  runWikiEntity();
+}
+
+function copyAllLinks() {
+  const links = (wikiData.topicLinks && wikiData.topicLinks.all) || [];
+  navigator.clipboard.writeText(links.join('\n')).then(function(){ alert('Copied ' + links.length + ' related topics to clipboard!'); }).catch(function(){ alert(links.join('\n')); });
 }
 
 function exportWikiCSV() {
-  if (!wikiData.topic) return;
   const rows = ['Item,Type'];
-  (wikiData.entities || []).forEach(function(e) { rows.push('"' + e + '","Named Entity"'); });
-  (wikiData.links || []).forEach(function(l) { rows.push('"' + l + '","Related Topic"'); });
-  (wikiData.categories || []).forEach(function(c) { rows.push('"' + c + '","Category"'); });
+  const d = wikiData;
+  Object.entries(d.entities||{}).forEach(function(e){ e[1].forEach(function(item){ rows.push('"'+item.replace(/"/g,'""')+'","'+e[0]+'"'); }); });
+  (d.topicLinks&&d.topicLinks.all||[]).forEach(function(l){ rows.push('"'+l.replace(/"/g,'""')+'","Related Topic"'); });
+  (d.cleanCats||[]).forEach(function(c){ rows.push('"'+c.replace(/"/g,'""')+'","Category"'); });
   const csv = rows.join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
-  a.download = 'wikipedia-entities-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'wikipedia-entities-'+new Date().toISOString().split('T')[0]+'.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
