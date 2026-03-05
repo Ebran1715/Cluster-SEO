@@ -43,31 +43,9 @@ const upload = multer({
 ===================== */
 function detectIntent(keyword) {
   const kw = keyword.toLowerCase().trim();
-
   if (kw.includes('best') || kw.includes('review') || kw.includes(' vs ') || kw.includes('top ') || kw.includes('compare')) return 'Commercial';
-
-  if (
-    kw.includes('buy') ||
-    kw.includes('price') ||
-    kw.includes('purchase') ||
-    kw.includes('order') ||
-    kw.includes('shop') ||
-    kw.includes('cost') ||
-    kw.includes('cheap') ||
-    kw.includes('discount') ||
-    kw.includes('deal')
-  ) return 'Transactional';
-
-  if (
-    kw.includes('login') ||
-    kw.includes('website') ||
-    kw.includes('site') ||
-    kw.includes('official') ||
-    kw.includes('app') ||
-    kw.includes('web') ||
-    kw.includes('sign in')
-  ) return 'Navigational';
-
+  if (kw.includes('buy') || kw.includes('price') || kw.includes('purchase') || kw.includes('order') || kw.includes('shop') || kw.includes('cost') || kw.includes('cheap') || kw.includes('discount') || kw.includes('deal')) return 'Transactional';
+  if (kw.includes('login') || kw.includes('website') || kw.includes('site') || kw.includes('official') || kw.includes('app') || kw.includes('web') || kw.includes('sign in')) return 'Navigational';
   return 'Informational';
 }
 
@@ -197,11 +175,7 @@ app.post('/api/process-csv', upload.single('file'), async (req, res) => {
 
 /* =====================
    API: KEYWORD SUGGESTIONS
-   Uses Google Suggest — response is text/javascript like:
-   window.google.ac.h(["query",["sug1","sug2",...]])
-   We fetch as text and parse with regex.
 ===================== */
-// Country code → Google gl/hl params
 const COUNTRY_PARAMS = {
   us: { gl: 'us', hl: 'en' },
   gb: { gl: 'gb', hl: 'en' },
@@ -224,20 +198,15 @@ async function fetchGoogleSuggest(query, gl = '', hl = 'en') {
       }
     });
 
-    // Google returns JSON array when client=firefox: ["query", ["sug1","sug2",...]]
     const text = await response.text();
-
-    // Parse: could be JSON array or JSONP
     let suggestions = [];
 
     try {
-      // Try direct JSON parse first (client=firefox returns clean JSON)
       const parsed = JSON.parse(text);
       if (Array.isArray(parsed) && Array.isArray(parsed[1])) {
         suggestions = parsed[1];
       }
     } catch {
-      // Fallback: extract array via regex for JSONP format
       const match = text.match(/\[.*?\[([^\]]+)\]/);
       if (match) {
         suggestions = match[1]
@@ -266,37 +235,23 @@ app.get('/api/suggest', async (req, res) => {
     const country = (req.query.country || 'global').toLowerCase();
     const { gl, hl } = COUNTRY_PARAMS[country] || COUNTRY_PARAMS['global'];
 
-    console.log(`[Suggest] Country: ${country} → gl=${gl||'(none)'} hl=${hl}`);
-
-    // 8 clean, meaningful variants — no trailing spaces or broken grammar
     const variants = [
-      q,                          // seed as-is
-      'best ' + q,                // commercial intent
-      'how to choose ' + q,       // informational (grammatically correct)
-      'buy ' + q,                 // transactional
-      q + ' review',              // commercial
-      q + ' vs',                  // comparison
-      q + ' for beginners',       // long-tail informational
-      q + ' price',               // transactional
+      q, 'best ' + q, 'how to choose ' + q, 'buy ' + q,
+      q + ' review', q + ' vs', q + ' for beginners', q + ' price',
     ];
 
-    console.log(`[Suggest] Fetching for: "${q}"`);
-
-    // Run all in parallel
     const results = await Promise.allSettled(
       variants.map(v => fetchGoogleSuggest(v, gl, hl).then(sugs => ({ variant: v, suggestions: sugs })))
     );
 
-    const seen     = new Set();
+    const seen = new Set();
     const keywords = [];
 
     results.forEach(r => {
       if (r.status === 'fulfilled') {
         const { variant, suggestions } = r.value;
-        console.log(`  variant "${variant}" → ${suggestions.length} suggestions`);
         suggestions.forEach(kw => {
           const key = kw.toLowerCase().trim();
-          // Skip if already seen, too short, or looks like a broken query
           if (!seen.has(key) && key.length > 3) {
             seen.add(key);
             keywords.push({ keyword: kw.trim(), source: variant });
@@ -305,12 +260,75 @@ app.get('/api/suggest', async (req, res) => {
       }
     });
 
-    console.log(`[Suggest] Total unique keywords: ${keywords.length}`);
-
     res.json({ success: true, keywords, total: keywords.length });
 
   } catch (err) {
     console.error('Suggest route error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/* =====================
+   OPTIONAL: ADDITIONAL ENDPOINTS (for future use)
+   These are placeholders - your HTML files work without them
+===================== */
+
+// SEO Audit endpoint (optional - your seo-audit.html works client-side)
+app.post('/api/seo-audit', async (req, res) => {
+  try {
+    const { html } = req.body;
+    if (!html) {
+      return res.status(400).json({ success: false, error: 'No HTML provided' });
+    }
+    // Your client-side already does this - this is just a placeholder
+    res.json({ success: true, message: 'SEO audit endpoint ready' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Competitor analysis endpoint (optional)
+app.post('/api/competitor-analysis', async (req, res) => {
+  try {
+    const { yourKeywords, competitorKeywords } = req.body;
+    res.json({ success: true, message: 'Competitor analysis endpoint ready' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Keyword gap endpoint (optional)
+app.post('/api/keyword-gap', async (req, res) => {
+  try {
+    const { yourKeywords, competitorKeywords } = req.body;
+    res.json({ success: true, message: 'Keyword gap endpoint ready' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Wikipedia entity endpoint (optional - your wikipedia-entity.html calls Wikipedia directly)
+app.get('/api/wikipedia-entity', async (req, res) => {
+  try {
+    const { topic } = req.query;
+    if (!topic) {
+      return res.status(400).json({ success: false, error: 'No topic provided' });
+    }
+    // Your client-side already calls Wikipedia directly - this is a proxy option
+    const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
+    const data = await response.json();
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Backlinks endpoint (optional - your backlinks.html is strategy-only)
+app.post('/api/backlinks', async (req, res) => {
+  try {
+    const { domain } = req.body;
+    res.json({ success: true, message: 'Backlinks endpoint ready' });
+  } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -325,7 +343,7 @@ app.use((req, res) => {
 /* =====================
    START SERVER
 ===================== */
-const PORT = process.env.PORT || 8001;
+const PORT = process.env.PORT || 8004;
 
 ['uploads', 'public'].forEach(dir => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -333,4 +351,17 @@ const PORT = process.env.PORT || 8001;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log('\n📝 Available Endpoints:');
+  console.log('   ✅ POST /api/process-keywords');
+  console.log('   ✅ POST /api/process-csv');
+  console.log('   ✅ GET  /api/suggest');
+  console.log('   ⚠️  All other endpoints are optional placeholders');
+  console.log('\n✅ Your HTML tools work client-side:');
+  console.log('   • backlinks.html - strategy guide (no API)');
+  console.log('   • competitor.html - client-side analysis');
+  console.log('   • entity-finder.html - client-side extraction');
+  console.log('   • keyword-gap.html - client-side gap analysis');
+  console.log('   • keyword-tracking.html - localStorage');
+  console.log('   • seo-audit.html - client-side HTML parsing');
+  console.log('   • wikipedia-entity.html - direct Wikipedia API');
 });

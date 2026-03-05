@@ -126,116 +126,256 @@ async function runWikiEntity() {
     resultsEl.innerHTML = '<div class="empty-state"><div style="width:40px;height:40px;border:3px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div><p style="color:var(--gray-400);">Loading article: "' + pageTitle + '"...</p></div>';
 
     // Step 2: Fetch summary + full content + links + categories in parallel
-    const [summaryRes, detailRes] = await Promise.all([
+    const [summaryRes, detailRes, fullTextRes] = await Promise.all([
       fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(pageTitle.replace(/ /g,'_'))),
-      fetch('https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=links|categories|extlinks|sections&pllimit=max&cllimit=max&format=json&origin=*&clshow=!hidden')
+      fetch('https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=links|categories|extlinks|sections&pllimit=max&cllimit=max&format=json&origin=*&clshow=!hidden'),
+      fetch('https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=extracts&explaintext=1&format=json&origin=*')
     ]);
+    
     const summary = await summaryRes.json();
-    const detail  = await detailRes.json();
+    const detail = await detailRes.json();
+    const fullTextData = await fullTextRes.json();
 
     const page = Object.values((detail.query && detail.query.pages) || {})[0] || {};
+    const fullPage = Object.values((fullTextData.query && fullTextData.query.pages) || {})[0] || {};
+    const fullText = fullPage.extract || summary.extract || '';
+    
     const rawLinks = (page.links || []).map(function(l){return l.title;}).filter(function(l){return !l.includes(':');});
-    const rawCats  = (page.categories || []).map(function(c){return c.title.replace(/^Category:/,'');});
+    const rawCats = (page.categories || []).map(function(c){return c.title.replace(/^Category:/,'');});
 
     const extract = summary.extract || '';
     const pageUrl = summary.content_urls && summary.content_urls.desktop && summary.content_urls.desktop.page;
     const thumbnail = summary.thumbnail && summary.thumbnail.source;
 
-    // Step 3: Deep NLP entity extraction from the full extract text
-    const entities = extractEntitiesFromText(extract, pageTitle);
+    // Step 3: Enhanced entity extraction from full text
+    const entities = extractEntitiesEnhanced(fullText, pageTitle);
 
     // Step 4: Classify links into semantic clusters
     const topicLinks = classifyLinks(rawLinks, pageTitle);
 
     // Step 5: Clean categories
     const cleanCats = rawCats
-      .filter(function(c){ return !/(Articles|Wikipedia|Pages|CS1|Use |All |Webarchive|Coordinates|Infobox|Good article|Featured)/.test(c); })
+      .filter(function(c){ return !/(Articles|Wikipedia|Pages|CS1|Use |All |Webarchive|Coordinates|Infobox|Good article|Featured|Stubs|Articles with)/.test(c); })
       .slice(0, 30);
 
-    // Step 6: Extract key facts from the extract
-    const facts = extractFacts(extract);
+    // Step 6: Extract key facts from the full text
+    const facts = extractFacts(fullText);
 
-    wikiData = { topic: pageTitle, extract, entities, topicLinks, cleanCats, facts, url: pageUrl, thumbnail, searchResults: results.slice(0,5) };
+    wikiData = { 
+      topic: pageTitle, 
+      extract: extract.substring(0, 500) + '...', 
+      fullText: fullText,
+      entities, 
+      topicLinks, 
+      cleanCats, 
+      facts, 
+      url: pageUrl, 
+      thumbnail, 
+      searchResults: results.slice(0,5) 
+    };
+    
     renderWikiResults();
 
   } catch(e) {
+    console.error('Wikipedia fetch error:', e);
     resultsEl.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error fetching Wikipedia data</h3><p>' + e.message + '</p></div>';
   }
 }
 
-function extractEntitiesFromText(text, excludeTitle) {
-  const result = { Person:[], Organisation:[], Place:[], Date:[], Number:[] };
-  if (!text) return result;
+// Enhanced entity extraction function
+function extractEntitiesEnhanced(text, excludeTitle) {
+  const result = { 
+    Person: [], 
+    Organisation: [], 
+    Place: [], 
+    Brand: [], 
+    Concept: [],
+    Date: [], 
+    Number: [] 
+  };
+  
+  if (!text || text.length < 50) return result;
 
   const seen = new Set([excludeTitle.toLowerCase()]);
+  
+  // Common stopwords to filter out
+  const stopwords = new Set([
+    'the','a','an','and','or','but','in','on','at','to','for','of','with','by',
+    'from','as','is','was','were','be','been','have','has','had','do','does','did',
+    'will','would','could','should','may','might','that','this','these','those',
+    'it','its','we','our','you','your','they','their','he','she','his','her',
+    'i','my','me','us','him','them','who','which','what','when','where','how',
+    'why','not','also','more','most','some','any','all','each','other','into',
+    'than','then','there','here','so','if','about','after','before','just',
+    'only','very','can','been','no','new','one','two','three','first','last','same','such'
+  ]);
 
-  // People — capitalised 2-3 word sequences near person signals
-  const personCtx = /(?:(?:born|died|founded by|led by|created by|by|written by|directed by|said)\s+)([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})/g;
-  let m;
-  while ((m = personCtx.exec(text)) !== null) {
-    const n = m[1].trim();
-    if (!seen.has(n.toLowerCase()) && n.split(' ').length >= 2) { result.Person.push(n); seen.add(n.toLowerCase()); }
-  }
+  // ===== PERSON DETECTION =====
   // Person titles
-  const titlePat = /\b(?:President|Prime Minister|King|Queen|Emperor|Pope|CEO|Dr\.?|Prof\.?|Sir|Lord|General|Captain|Senator)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})/g;
-  while ((m = titlePat.exec(text)) !== null) {
-    const n = m[1].trim();
-    if (!seen.has(n.toLowerCase())) { result.Person.push(n); seen.add(n.toLowerCase()); }
-  }
-
-  // Organisations — company/org suffixes or all-caps
-  const orgPat = /([A-Z][A-Za-z\s&]{2,40}(?:Corporation|Company|Inc|Ltd|University|Institute|Foundation|Association|Organization|Council|Agency|Authority|Group|Museum|Library|Academy))/g;
-  while ((m = orgPat.exec(text)) !== null) {
-    const n = m[1].trim();
-    if (!seen.has(n.toLowerCase())) { result.Organisation.push(n); seen.add(n.toLowerCase()); }
-  }
-  // ALL-CAPS abbreviations
-  const abbrPat = /\b([A-Z]{2,6})\b/g;
-  const skipAbbr = new Set(['AD','BC','AM','PM','US','UK','EU','UN','NATO','UNESCO','WHO','GDP','CEO','CTO','CFO','ISBN','DOI','PDF','HTML','CSS','API']);
-  while ((m = abbrPat.exec(text)) !== null) {
-    if (!skipAbbr.has(m[1]) && !seen.has(m[1].toLowerCase())) {
-      result.Organisation.push(m[1]);
-      seen.add(m[1].toLowerCase());
+  const personTitles = [
+    'President', 'Prime Minister', 'King', 'Queen', 'Emperor', 'Pope', 'CEO', 'CTO', 'CFO',
+    'Dr\\.?', 'Prof\\.?', 'Sir', 'Lord', 'Lady', 'General', 'Captain', 'Senator', 'Governor',
+    'Ambassador', 'Chancellor', 'Chief', 'Executive', 'Director', 'Manager', 'Founder',
+    'Co-founder', 'Chairman', 'Chairwoman', 'Secretary', 'Minister', 'Prince', 'Princess'
+  ];
+  
+  const titlePattern = new RegExp('\\b(' + personTitles.join('|') + ')\\s+([A-Z][a-z]+(?:\\s+[A-Z][a-z]+){0,2})', 'g');
+  let match;
+  while ((match = titlePattern.exec(text)) !== null) {
+    const name = match[2].trim();
+    if (name.length > 2 && !seen.has(name.toLowerCase())) {
+      result.Person.push(name);
+      seen.add(name.toLowerCase());
     }
   }
 
-  // Places — countries, cities, geographic terms
-  const placePat = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s+(?:City|Town|Country|State|Province|Island|River|Mountain|Ocean|Sea|Lake|Bay|Valley|Peninsula|Desert|Forest|Park)))/g;
-  while ((m = placePat.exec(text)) !== null) {
-    const n = m[1].trim();
-    if (!seen.has(n.toLowerCase())) { result.Place.push(n); seen.add(n.toLowerCase()); }
-  }
-  // Look for "in [Place]" patterns
-  const inPlacePat = /\bin\s+([A-Z][a-z]+(?:,\s*[A-Z][a-z]+)?)\b/g;
-  while ((m = inPlacePat.exec(text)) !== null) {
-    const n = m[1].trim();
-    if (n.length > 3 && !seen.has(n.toLowerCase())) { result.Place.push(n); seen.add(n.toLowerCase()); }
+  // Capitalized full names (First Last)
+  const namePattern = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\b/g;
+  while ((match = namePattern.exec(text)) !== null) {
+    const name = match[1].trim();
+    if (name.length > 3 && 
+        !stopwords.has(name.toLowerCase()) && 
+        !seen.has(name.toLowerCase()) &&
+        !name.includes('Wikipedia') &&
+        !name.includes('Category')) {
+      result.Person.push(name);
+      seen.add(name.toLowerCase());
+    }
   }
 
-  // Dates
-  const datePat = /\b(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}|\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}|\b\d{4}\b)/g;
+  // ===== ORGANISATION DETECTION =====
+  const orgSuffixes = [
+    'Inc\\.?', 'Ltd\\.?', 'LLC', 'Corp\\.?', 'Corporation', 'Company', 'Co\\.?',
+    'Group', 'Holdings', 'Technologies', 'Systems', 'Solutions', 'Services',
+    'University', 'College', 'Institute', 'Foundation', 'Association', 'Organization',
+    'Council', 'Agency', 'Authority', 'Bank', 'Fund', 'Trust', 'Airlines', 'Airways',
+    'Laboratory', 'Laboratories', 'Studio', 'Studios', 'Entertainment', 'Media',
+    'Network', 'Networks', 'Communications', 'Telecom', 'Pharmaceuticals', 'Healthcare'
+  ];
+  
+  const orgPattern = new RegExp('([A-Z][A-Za-z0-9&\'\\-\\s]{2,60})\\s+(' + orgSuffixes.join('|') + ')', 'g');
+  while ((match = orgPattern.exec(text)) !== null) {
+    const org = (match[1].trim() + ' ' + match[2].trim()).trim();
+    if (!seen.has(org.toLowerCase())) {
+      result.Organisation.push(org);
+      seen.add(org.toLowerCase());
+    }
+  }
+
+  // ALL-CAPS abbreviations (NASA, FBI, WHO, etc.)
+  const abbrPattern = /\b([A-Z]{2,8})\b/g;
+  const commonAbbrs = new Set([
+    'US','UK','EU','UN','NATO','UNESCO','WHO','GDP','CEO','CTO','CFO','COO','VP',
+    'HR','TV','CD','DVD','PDF','HTML','CSS','API','URL','HTTP','HTTPS','WWW',
+    'ISBN','DOI','IEEE','ACM','AI','ML','NLP','CNN','RNN','GPT','BERT'
+  ]);
+  
+  while ((match = abbrPattern.exec(text)) !== null) {
+    const abbr = match[1];
+    if (!commonAbbrs.has(abbr) && abbr.length >= 2 && !seen.has(abbr.toLowerCase())) {
+      result.Organisation.push(abbr);
+      seen.add(abbr.toLowerCase());
+    }
+  }
+
+  // ===== PLACE DETECTION =====
+  const placeKeywords = [
+    'City', 'Town', 'Village', 'Country', 'State', 'Province', 'County', 'District',
+    'Region', 'Street', 'Avenue', 'Road', 'Boulevard', 'Lane', 'Drive', 'Way',
+    'Park', 'Lake', 'River', 'Mountain', 'Mountains', 'Island', 'Islands', 'Peninsula',
+    'Valley', 'Forest', 'Desert', 'Ocean', 'Sea', 'Bay', 'Harbor', 'Gulf', 'Cape',
+    'National Park', 'Reserve', 'Monument', 'Memorial', 'Square', 'Plaza'
+  ];
+  
+  const placePattern = new RegExp('\\b([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)*)\\s+(' + placeKeywords.join('|') + ')', 'g');
+  while ((match = placePattern.exec(text)) !== null) {
+    const place = (match[1].trim() + ' ' + match[2].trim()).trim();
+    if (!seen.has(place.toLowerCase())) {
+      result.Place.push(place);
+      seen.add(place.toLowerCase());
+    }
+  }
+
+  // "in [Place]" pattern
+  const inPlacePattern = /\bin\s+([A-Z][a-z]+(?:[\s,]+[A-Z][a-z]+){0,2})/g;
+  while ((match = inPlacePattern.exec(text)) !== null) {
+    const place = match[1].trim().replace(/,/g, '').trim();
+    if (place.length > 3 && !seen.has(place.toLowerCase()) && !stopwords.has(place.toLowerCase())) {
+      result.Place.push(place);
+      seen.add(place.toLowerCase());
+    }
+  }
+
+  // ===== BRAND DETECTION =====
+  // Trademark symbols
+  const tmPattern = /([A-Z][A-Za-z0-9\s\-]{2,30})[™®©]/g;
+  while ((match = tmPattern.exec(text)) !== null) {
+    const brand = match[1].trim();
+    if (!seen.has(brand.toLowerCase())) {
+      result.Brand.push(brand);
+      seen.add(brand.toLowerCase());
+    }
+  }
+
+  // CamelCase words (product names)
+  const camelPattern = /\b([A-Z][a-z]+[A-Z][A-Za-z]+)\b/g;
+  while ((match = camelPattern.exec(text)) !== null) {
+    const brand = match[1];
+    if (!seen.has(brand.toLowerCase()) && brand.length > 3) {
+      result.Brand.push(brand);
+      seen.add(brand.toLowerCase());
+    }
+  }
+
+  // ===== DATE DETECTION =====
+  const datePattern = /\b(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}|\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}|\b\d{4}\b)\b/g;
   const datesSeen = new Set();
-  while ((m = datePat.exec(text)) !== null) {
-    if (!datesSeen.has(m[1])) { result.Date.push(m[1]); datesSeen.add(m[1]); }
+  while ((match = datePattern.exec(text)) !== null) {
+    const date = match[1];
+    if (!datesSeen.has(date)) {
+      result.Date.push(date);
+      datesSeen.add(date);
+    }
   }
 
-  // Numbers/Statistics
-  const numPat = /(\d[\d,]*(?:\.\d+)?)\s*(million|billion|trillion|thousand|percent|%|km|miles?|years?|meters?|kg|lb)/gi;
+  // ===== NUMBER/STATISTIC DETECTION =====
+  const numPattern = /(\d[\d,]*(?:\.\d+)?)\s*(million|billion|trillion|thousand|percent|%|km|miles?|years?|meters?|kg|lb|dollars?|euros?|pounds?|\$|€|£)/gi;
   const numsSeen = new Set();
-  while ((m = numPat.exec(text)) !== null) {
-    const s = m[1] + ' ' + m[2];
-    if (!numsSeen.has(s)) { result.Number.push(s); numsSeen.add(s); }
+  while ((match = numPattern.exec(text)) !== null) {
+    const stat = match[1] + ' ' + match[2];
+    if (!numsSeen.has(stat)) {
+      result.Number.push(stat);
+      numsSeen.add(stat);
+    }
   }
 
-  // Deduplicate and limit
-  Object.keys(result).forEach(function(k) {
-    const uniqSeen = new Set();
-    result[k] = result[k].filter(function(e) {
-      const key = e.toLowerCase().trim();
-      if (uniqSeen.has(key) || key.length < 2) return false;
-      uniqSeen.add(key); return true;
-    }).slice(0, 20);
+  // ===== CONCEPT DETECTION (frequent meaningful words) =====
+  const words = text.toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 5 && !stopwords.has(w) && !/^\d+$/.test(w));
+
+  const wordFreq = {};
+  words.forEach(w => {
+    wordFreq[w] = (wordFreq[w] || 0) + 1;
   });
+
+  Object.entries(wordFreq)
+    .filter(([word, count]) => count > 2 || word.length > 7)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 15)
+    .forEach(([word, count]) => {
+      const concept = word.charAt(0).toUpperCase() + word.slice(1);
+      if (!seen.has(word)) {
+        result.Concept.push(concept + ' (' + count + 'x)');
+      }
+    });
+
+  // Deduplicate and limit all categories
+  Object.keys(result).forEach(key => {
+    result[key] = [...new Set(result[key])].slice(0, 20);
+  });
+
   return result;
 }
 
@@ -263,10 +403,12 @@ function extractFacts(text) {
   const sentences = text.split(/(?<=[.!?])\s+/);
   // Look for factual sentences with numbers, dates, or key verbs
   sentences.forEach(function(s) {
-    if (s.length < 20 || s.length > 200) return;
-    if (/\b(\d{4}|\d+\s*(?:million|billion|percent|%|km|miles))\b/.test(s)) facts.push(s.trim());
+    if (s.length < 30 || s.length > 250) return;
+    if (/\b(\d{4}|\d+\s*(?:million|billion|trillion|percent|%|km|miles|years?|founded|established|created|invented|discovered|launched|released|acquired|merged)\b)/i.test(s)) {
+      facts.push(s.trim());
+    }
   });
-  return facts.slice(0, 6);
+  return facts.slice(0, 8);
 }
 
 function renderWikiResults() {
@@ -284,7 +426,7 @@ function renderWikiResults() {
   html += '</div></div>';
 
   // ── Stats ────────────────────────────────────────────────────
-  const totalEntities = Object.values(d.entities).reduce(function(s,a){return s+a.length;},0);
+  const totalEntities = Object.values(d.entities).reduce(function(s,a){return s + a.length;},0);
   html += '<div class="stat-grid">';
   html += '<div class="stat-box"><div class="stat-box-num">' + totalEntities + '</div><div class="stat-box-label">Entities Found</div></div>';
   html += '<div class="stat-box"><div class="stat-box-num">' + d.topicLinks.all.length + '</div><div class="stat-box-label">Related Topics</div></div>';
@@ -303,12 +445,15 @@ function renderWikiResults() {
 
   // ── Entities ─────────────────────────────────────────────────
   const typeConfig = {
-    Person:       {icon:'fa-user',       color:'#92400e', bgCls:'et-person', label:'People Mentioned'},
+    Person:       {icon:'fa-user',       color:'#92400e', bgCls:'et-person', label:'People'},
     Organisation: {icon:'fa-building',   color:'var(--teal-dark)', bgCls:'et-org',    label:'Organisations'},
-    Place:        {icon:'fa-map-marker-alt', color:'#065f46', bgCls:'et-place',  label:'Places & Locations'},
-    Date:         {icon:'fa-calendar',   color:'#6d28d9', bgCls:'et-brand',  label:'Dates & Time References'},
-    Number:       {icon:'fa-hashtag',    color:'var(--gray-600)', bgCls:'et-concept', label:'Numbers & Statistics'},
+    Place:        {icon:'fa-map-marker-alt', color:'#065f46', bgCls:'et-place',  label:'Places'},
+    Brand:        {icon:'fa-trademark',  color:'#6d28d9', bgCls:'et-brand',  label:'Brands & Products'},
+    Concept:      {icon:'fa-lightbulb',  color:'var(--gray-600)', bgCls:'et-concept', label:'Key Concepts'},
+    Date:         {icon:'fa-calendar',   color:'#7c3aed', bgCls:'et-brand',  label:'Dates'},
+    Number:       {icon:'fa-hashtag',    color:'#059669', bgCls:'et-concept', label:'Statistics'}
   };
+  
   Object.entries(typeConfig).forEach(function(e) {
     const k = e[0], cfg = e[1];
     const items = d.entities[k] || [];
@@ -324,10 +469,10 @@ function renderWikiResults() {
   if (d.topicLinks.all.length) {
     html += '<div class="result-card" style="margin-bottom:14px;">';
     html += '<div class="result-card-head"><h3><i class="fas fa-project-diagram" style="color:var(--teal)"></i> Related Topics & Semantic Links (' + d.topicLinks.all.length + ')</h3><button onclick="copyAllLinks()" style="font-size:11px;padding:4px 10px;border:1px solid var(--gray-200);border-radius:var(--r-sm);background:var(--white);cursor:pointer;font-family:var(--font);color:var(--gray-500);"><i class="fas fa-copy"></i> Copy All</button></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
+    html += '<div class="result-card-body"><div class="tag-cloud" style="max-height:300px;overflow-y:auto;">';
     d.topicLinks.all.forEach(function(link) {
-      const safe = link.replace(/'/g,'').replace(/"/g,'');
-      html += '<span class="entity-tag et-org" style="cursor:pointer;" onclick="drillDown(\'' + safe + '\')" title="Click to research \'' + link + '\'">' + link + ' <i class="fas fa-search" style="font-size:9px;opacity:0.5;"></i></span>';
+      const safe = link.replace(/'/g,'\\\'').replace(/"/g,'');
+      html += '<span class="entity-tag et-org" style="cursor:pointer;margin-bottom:5px;" onclick="drillDown(\'' + safe + '\')" title="Click to research \'' + link + '\'">' + link + ' <i class="fas fa-search" style="font-size:9px;opacity:0.5;"></i></span>';
     });
     html += '</div></div></div>';
   }
@@ -347,8 +492,9 @@ function renderWikiResults() {
     html += '<div class="result-card-head"><h3><i class="fas fa-list" style="color:var(--gray-400)"></i> Related Wikipedia Articles</h3></div>';
     html += '<div class="result-card-body">';
     d.searchResults.slice(1).forEach(function(r) {
+      const safeTitle = r.title.replace(/'/g,'\\\'');
       html += '<div style="padding:8px 0;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;gap:10px;">';
-      html += '<button onclick="document.getElementById(\'wikiInput\').value=\'' + r.title.replace(/'/g,'') + '\';runWikiEntity();" style="flex-shrink:0;padding:4px 10px;background:var(--teal-light);border:1px solid rgba(14,165,233,0.2);border-radius:var(--r-sm);font-size:11px;font-weight:700;color:var(--teal-dark);cursor:pointer;font-family:var(--font);">Load</button>';
+      html += '<button onclick="document.getElementById(\'wikiInput\').value=\'' + safeTitle + '\';runWikiEntity();" style="flex-shrink:0;padding:4px 10px;background:var(--teal-light);border:1px solid rgba(14,165,233,0.2);border-radius:var(--r-sm);font-size:11px;font-weight:700;color:var(--teal-dark);cursor:pointer;font-family:var(--font);">Load</button>';
       html += '<div><div style="font-size:13px;font-weight:700;color:var(--gray-900);">' + r.title + '</div>';
       html += '<div style="font-size:12px;color:var(--gray-500);">' + (r.snippet||'').replace(/<[^>]+>/g,'').substring(0,100) + '…</div></div>';
       html += '</div>';
@@ -367,19 +513,43 @@ function drillDown(topic) {
 
 function copyAllLinks() {
   const links = (wikiData.topicLinks && wikiData.topicLinks.all) || [];
-  navigator.clipboard.writeText(links.join('\n')).then(function(){ alert('Copied ' + links.length + ' related topics to clipboard!'); }).catch(function(){ alert(links.join('\n')); });
+  navigator.clipboard.writeText(links.join('\n')).then(function(){ 
+    alert('Copied ' + links.length + ' related topics to clipboard!'); 
+  }).catch(function(){ 
+    alert('Copy failed. Here are the links:\n\n' + links.join('\n')); 
+  });
 }
 
 function exportWikiCSV() {
   const rows = ['Item,Type'];
   const d = wikiData;
-  Object.entries(d.entities||{}).forEach(function(e){ e[1].forEach(function(item){ rows.push('"'+item.replace(/"/g,'""')+'","'+e[0]+'"'); }); });
-  (d.topicLinks&&d.topicLinks.all||[]).forEach(function(l){ rows.push('"'+l.replace(/"/g,'""')+'","Related Topic"'); });
-  (d.cleanCats||[]).forEach(function(c){ rows.push('"'+c.replace(/"/g,'""')+'","Category"'); });
+  
+  // Add entities
+  Object.entries(d.entities||{}).forEach(function([type, items]) {
+    items.forEach(function(item) {
+      rows.push('"' + item.replace(/"/g, '""') + '","' + type + '"');
+    });
+  });
+  
+  // Add related topics
+  (d.topicLinks && d.topicLinks.all || []).forEach(function(link) {
+    rows.push('"' + link.replace(/"/g, '""') + '","Related Topic"');
+  });
+  
+  // Add categories
+  (d.cleanCats || []).forEach(function(cat) {
+    rows.push('"' + cat.replace(/"/g, '""') + '","Category"');
+  });
+  
+  // Add facts
+  (d.facts || []).forEach(function(fact) {
+    rows.push('"' + fact.replace(/"/g, '""').substring(0,100) + '","Fact"');
+  });
+  
   const csv = rows.join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = 'wikipedia-entities-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+  a.download = 'wikipedia-entities-' + new Date().toISOString().split('T')[0] + '.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
