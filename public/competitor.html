@@ -64,7 +64,6 @@
     .ai-fail {background:#fee2e2;color:#991b1b;}
     .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
     .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
-    
   </style>
 </head>
 <body>
@@ -108,171 +107,139 @@
   </section>
 </div>
 <script src="shared-layout.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
+const API = '';
 let compData = {};
-
-function classifyIntent(kw) {
-  const k = kw.toLowerCase();
-  if (/\b(best|top|review|reviews|compare|comparison|vs|versus|rated|recommended|ranking)\b/.test(k)) return 'Commercial';
-  if (/\b(buy|purchase|order|shop|price|cost|cheap|discount|deal|coupon|promo|sale|pricing|affordable)\b/.test(k)) return 'Transactional';
-  if (/\b(login|sign in|sign up|register|account|download|app|website|official|portal|access|contact)\b/.test(k)) return 'Navigational';
-  return 'Informational';
-}
-
-function estimateDifficulty(kw) {
-  const words = kw.trim().split(/\s+/).length;
-  if (words === 1) return 'Hard';
-  if (words === 2) return 'Medium';
-  return 'Easy';
-}
 
 function parseKwList(text) {
   return text.split('\n')
-    .map(function(l) { const p = l.split(',').map(function(s) { return s.trim(); }); return { keyword: p[0], volume: p[1] ? parseInt(p[1]) || 0 : 0 }; })
-    .filter(function(k) { return k.keyword && k.keyword.length > 1; });
+    .map(function(l){ const p=l.split(',').map(function(s){return s.trim();}); return {keyword:p[0],volume:p[1]?parseInt(p[1])||0:0}; })
+    .filter(function(k){return k.keyword&&k.keyword.length>1;});
 }
 
-function runCompetitorAnalysis() {
+async function runCompetitorAnalysis() {
   const yours = parseKwList(document.getElementById('yourKws').value);
   const comps  = parseKwList(document.getElementById('compKws').value);
   if (!yours.length || !comps.length) { alert('Paste keywords in both columns.'); return; }
 
-  const yourSet  = new Set(yours.map(function(k) { return k.keyword.toLowerCase(); }));
-  const compSet  = new Set(comps.map(function(k) { return k.keyword.toLowerCase(); }));
+  const resultsEl = document.getElementById('competitorResults');
+  resultsEl.innerHTML = '<div class="empty-state"><div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:#ef4444;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--gray-400);">Analysing keywords...</p></div>';
 
-  const shared    = yours.filter(function(k) { return compSet.has(k.keyword.toLowerCase()); });
-  const onlyYours = yours.filter(function(k) { return !compSet.has(k.keyword.toLowerCase()); });
-  const onlyComp  = comps.filter(function(k) { return !yourSet.has(k.keyword.toLowerCase()); });
+  try {
+    const res = await fetch(API + '/api/competitor-analysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        yourKeywords:       yours.map(function(k){ return k.keyword + (k.volume ? ','+k.volume : ''); }),
+        competitorKeywords: comps.map(function(k){ return k.keyword + (k.volume ? ','+k.volume : ''); })
+      })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'API error');
 
-  // Jaccard similarity
-  const union = new Set([...yourSet, ...compSet]);
-  const overlapPct = Math.round((shared.length / union.size) * 100);
-
-  // Intent distribution
-  function buildDist(kws) {
-    const d = { Informational: [], Transactional: [], Commercial: [], Navigational: [] };
-    kws.forEach(function(k) { d[classifyIntent(k.keyword)].push(k); });
-    return d;
+    compData = data;
+    renderCompetitor(data);
+    document.getElementById('btnExportComp').style.display = 'flex';
+  } catch(err) {
+    resultsEl.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error</h3><p>' + err.message + '<br>Make sure your server is running.</p></div>';
   }
-  const yourDist = buildDist(yours);
-  const compDist = buildDist(comps);
+}
 
-  // Opportunity score: high-volume keywords only competitor has
-  const opportunities = onlyComp
-    .map(function(k) { return Object.assign({}, k, { intent: classifyIntent(k.keyword), difficulty: estimateDifficulty(k.keyword) }); })
-    .sort(function(a, b) { return (b.volume || 0) - (a.volume || 0) || a.difficulty.localeCompare(b.difficulty); });
-
-  const quickWins = opportunities.filter(function(k) { return k.difficulty === 'Easy'; }).slice(0, 10);
-
-  compData = { shared, onlyYours, onlyComp, yours, comps, opportunities, quickWins };
-
+function renderCompetitor(d) {
+  const s = d.stats;
   let html = '<div class="stat-grid">';
-  html += '<div class="stat-box"><div class="stat-box-num">' + yours.length + '</div><div class="stat-box-label">Your Keywords</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num">' + comps.length + '</div><div class="stat-box-label">Competitor Keywords</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--teal)">' + shared.length + '</div><div class="stat-box-label">Shared</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">' + onlyYours.length + '</div><div class="stat-box-label">Your Advantage</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">' + onlyComp.length + '</div><div class="stat-box-label">You\'re Missing</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num">' + overlapPct + '%</div><div class="stat-box-label">Keyword Overlap</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">'+s.yourKeywords+'</div><div class="stat-box-label">Your Keywords</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">'+s.compKeywords+'</div><div class="stat-box-label">Competitor Keywords</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--teal)">'+s.shared+'</div><div class="stat-box-label">Shared</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">'+s.yourAdvantage+'</div><div class="stat-box-label">Your Advantage</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">'+s.missing+'</div><div class="stat-box-label">You\'re Missing</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">'+s.overlapPct+'%</div><div class="stat-box-label">Keyword Overlap</div></div>';
   html += '</div>';
 
-  // Visual overlap diagram
-  const yourOnly = yours.length - shared.length;
-  const compOnly = comps.length - shared.length;
-  const total    = yourOnly + shared.length + compOnly;
-  const yourPct  = Math.round((yourOnly / total) * 100);
-  const sharedPct= Math.round((shared.length / total) * 100);
-  const compPct  = Math.round((compOnly / total) * 100);
-
+  // Overlap bar
+  const o = d.overlap;
   html += '<div class="result-card" style="margin-bottom:14px;">';
   html += '<div class="result-card-head"><h3><i class="fas fa-chart-bar"></i> Keyword Overlap Visualisation</h3></div>';
   html += '<div class="result-card-body">';
   html += '<div style="display:flex;height:32px;border-radius:var(--r);overflow:hidden;margin-bottom:12px;">';
-  html += '<div style="width:' + yourPct + '%;background:#059669;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;" title="Your advantage: ' + yourOnly + ' keywords">' + (yourPct > 8 ? yourOnly : '') + '</div>';
-  html += '<div style="width:' + sharedPct + '%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;" title="Shared: ' + shared.length + ' keywords">' + (sharedPct > 8 ? shared.length : '') + '</div>';
-  html += '<div style="width:' + compPct + '%;background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;" title="Competitor only: ' + compOnly + ' keywords">' + (compPct > 8 ? compOnly : '') + '</div>';
+  html += '<div style="width:'+o.yourPct+'%;background:#059669;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">'+(o.yourPct>8?d.onlyYours.length:'')+'</div>';
+  html += '<div style="width:'+o.sharedPct+'%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">'+(o.sharedPct>8?d.shared.length:'')+'</div>';
+  html += '<div style="width:'+o.compPct+'%;background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">'+(o.compPct>8?d.onlyComp.length:'')+'</div>';
   html += '</div>';
   html += '<div style="display:flex;gap:16px;font-size:12px;">';
-  html += '<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:#059669;border-radius:2px;display:inline-block;"></span> You only (' + yourOnly + ')</span>';
-  html += '<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:var(--teal);border-radius:2px;display:inline-block;"></span> Shared (' + shared.length + ')</span>';
-  html += '<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:#ef4444;border-radius:2px;display:inline-block;"></span> Competitor only (' + compOnly + ')</span>';
+  html += '<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:#059669;border-radius:2px;display:inline-block;"></span>You only ('+d.onlyYours.length+')</span>';
+  html += '<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:var(--teal);border-radius:2px;display:inline-block;"></span>Shared ('+d.shared.length+')</span>';
+  html += '<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:#ef4444;border-radius:2px;display:inline-block;"></span>Competitor only ('+d.onlyComp.length+')</span>';
   html += '</div></div></div>';
 
   // Intent comparison
-  const intentColors = { Informational: '#0ea5e9', Transactional: '#f59e0b', Commercial: '#10b981', Navigational: '#7c3aed' };
+  const intentColors = { Informational:'#0ea5e9', Transactional:'#f59e0b', Commercial:'#10b981', Navigational:'#7c3aed' };
   html += '<div class="result-card" style="margin-bottom:14px;">';
   html += '<div class="result-card-head"><h3><i class="fas fa-chart-pie"></i> Intent Strategy Comparison</h3></div>';
   html += '<div class="result-card-body">';
-  ['Transactional', 'Commercial', 'Informational', 'Navigational'].forEach(function(intent) {
-    const y = (yourDist[intent] || []).length;
-    const c = (compDist[intent] || []).length;
-    const yP = Math.round((y / Math.max(yours.length, 1)) * 100);
-    const cP = Math.round((c / Math.max(comps.length, 1)) * 100);
-    const diff = yP - cP;
-    const diffStr = diff > 0 ? '<span style="color:#059669;font-size:11px;font-weight:700;">You +' + diff + '%</span>' : diff < 0 ? '<span style="color:#ef4444;font-size:11px;font-weight:700;">Gap ' + Math.abs(diff) + '%</span>' : '<span style="color:var(--gray-400);font-size:11px;">Equal</span>';
+  (d.intentComparison || []).forEach(function(ic) {
+    const col  = intentColors[ic.intent];
+    const diff = ic.diff;
+    const tag  = diff>0 ? '<span style="color:#059669;font-size:11px;font-weight:700;">You +'+diff+'%</span>'
+               : diff<0 ? '<span style="color:#ef4444;font-size:11px;font-weight:700;">Gap '+Math.abs(diff)+'%</span>'
+               : '<span style="color:var(--gray-400);font-size:11px;">Equal</span>';
     html += '<div style="margin-bottom:14px;">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">';
-    html += '<span style="font-size:13px;font-weight:700;color:' + intentColors[intent] + '">' + intent + '</span>';
-    html += '<span style="font-size:12px;color:var(--gray-500);">You: ' + y + ' (' + yP + '%) &nbsp;|&nbsp; Competitor: ' + c + ' (' + cP + '%)</span>';
-    html += diffStr + '</div>';
+    html += '<span style="font-size:13px;font-weight:700;color:'+col+'">'+ic.intent+'</span>';
+    html += '<span style="font-size:12px;color:var(--gray-500);">You: '+ic.yourCount+' ('+ic.yourPct+'%) &nbsp;|&nbsp; Competitor: '+ic.compCount+' ('+ic.compPct+'%)</span>';
+    html += tag+'</div>';
     html += '<div style="display:grid;gap:3px;">';
-    html += '<div style="height:8px;background:var(--gray-100);border-radius:4px;position:relative;"><div style="position:absolute;inset:0;width:' + yP + '%;background:' + intentColors[intent] + ';border-radius:4px;opacity:1;"></div></div>';
-    html += '<div style="height:8px;background:var(--gray-100);border-radius:4px;position:relative;"><div style="position:absolute;inset:0;width:' + cP + '%;background:' + intentColors[intent] + ';border-radius:4px;opacity:0.35;"></div></div>';
+    html += '<div style="height:8px;background:var(--gray-100);border-radius:4px;position:relative;"><div style="position:absolute;inset:0;width:'+ic.yourPct+'%;background:'+col+';border-radius:4px;"></div></div>';
+    html += '<div style="height:8px;background:var(--gray-100);border-radius:4px;position:relative;"><div style="position:absolute;inset:0;width:'+ic.compPct+'%;background:'+col+';border-radius:4px;opacity:0.35;"></div></div>';
     html += '</div></div>';
   });
-  html += '<div style="display:flex;gap:12px;font-size:11px;color:var(--gray-400);margin-top:4px;">';
-  html += '<span>Solid = You &nbsp; Faded = Competitor</span></div>';
+  html += '<div style="font-size:11px;color:var(--gray-400);">Solid = You &nbsp; Faded = Competitor</div>';
   html += '</div></div>';
 
-  // Quick wins — easy keywords competitor has
-  if (quickWins.length) {
+  // Quick wins
+  if (d.quickWins && d.quickWins.length) {
+    const diffColor = {Easy:'#059669',Medium:'#f59e0b',Hard:'#ef4444'};
+    const intColor  = {Informational:'#0ea5e9',Transactional:'#f59e0b',Commercial:'#10b981',Navigational:'#7c3aed'};
     html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-bolt" style="color:var(--gold)"></i> Quick Wins — Easy Keywords You\'re Missing (' + quickWins.length + ')</h3></div>';
-    html += '<div class="result-card-body">';
-    html += '<p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">Long-tail keywords the competitor ranks for — lower competition, faster to rank.</p>';
+    html += '<div class="result-card-head"><h3><i class="fas fa-bolt" style="color:var(--gold)"></i> Quick Wins — Easy Keywords You\'re Missing ('+d.quickWins.length+')</h3></div>';
+    html += '<div class="result-card-body"><p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">Long-tail keywords the competitor ranks for — lower competition, faster to rank.</p>';
     html += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
     html += '<thead><tr style="background:var(--gray-50);"><th style="text-align:left;padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Keyword</th><th style="padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Intent</th><th style="padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Volume</th><th style="padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Difficulty</th></tr></thead>';
     html += '<tbody>';
-    quickWins.forEach(function(k, i) {
-      const diffColor = { Easy: '#059669', Medium: '#f59e0b', Hard: '#ef4444' };
-      const intentColor = { Informational: '#0ea5e9', Transactional: '#f59e0b', Commercial: '#10b981', Navigational: '#7c3aed' };
-      html += '<tr style="border-bottom:1px solid var(--gray-100);' + (i % 2 ? 'background:var(--gray-50)' : '') + '">';
-      html += '<td style="padding:8px 12px;font-weight:600;color:var(--gray-900);">' + k.keyword + '</td>';
-      html += '<td style="padding:8px 12px;"><span style="font-size:11px;font-weight:700;color:' + intentColor[k.intent] + '">' + k.intent + '</span></td>';
-      html += '<td style="padding:8px 12px;color:var(--gray-600);">' + (k.volume ? k.volume.toLocaleString() : '—') + '</td>';
-      html += '<td style="padding:8px 12px;"><span style="font-size:11px;font-weight:700;color:' + diffColor[k.difficulty] + '">' + k.difficulty + '</span></td>';
+    d.quickWins.forEach(function(k,i) {
+      html += '<tr style="border-bottom:1px solid var(--gray-100);'+(i%2?'background:var(--gray-50)':'')+'">';
+      html += '<td style="padding:8px 12px;font-weight:600;color:var(--gray-900);">'+k.keyword+'</td>';
+      html += '<td style="padding:8px 12px;"><span style="font-size:11px;font-weight:700;color:'+(intColor[k.intent]||'#666')+'">'+k.intent+'</span></td>';
+      html += '<td style="padding:8px 12px;color:var(--gray-600);">'+(k.volume?k.volume.toLocaleString():'—')+'</td>';
+      html += '<td style="padding:8px 12px;"><span style="font-size:11px;font-weight:700;color:'+(diffColor[k.difficulty]||'#666')+'">'+k.difficulty+'</span></td>';
       html += '</tr>';
     });
     html += '</tbody></table></div></div></div>';
   }
 
-  // Full missing keywords list
-  if (onlyComp.length) {
+  // All missing
+  const tagCls = {Informational:'et-org',Transactional:'et-person',Commercial:'et-place',Navigational:'et-brand'};
+  if (d.onlyComp && d.onlyComp.length) {
     html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> All Keywords You\'re Missing (' + onlyComp.length + ')</h3></div>';
+    html += '<div class="result-card-head"><h3><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> All Keywords You\'re Missing ('+d.onlyComp.length+')</h3></div>';
     html += '<div class="result-card-body"><div class="tag-cloud">';
-    onlyComp.slice(0, 60).forEach(function(k) {
-      const cls = { Informational: 'et-org', Transactional: 'et-person', Commercial: 'et-place', Navigational: 'et-brand' };
-      html += '<span class="entity-tag ' + cls[classifyIntent(k.keyword)] + '">' + k.keyword + '</span>';
-    });
-    if (onlyComp.length > 60) html += '<span class="entity-tag et-concept">+' + (onlyComp.length - 60) + ' more in CSV</span>';
+    d.onlyComp.slice(0,60).forEach(function(k){ html += '<span class="entity-tag '+(tagCls[k.intent]||'et-concept')+'">'+k.keyword+'</span>'; });
+    if (d.onlyComp.length>60) html += '<span class="entity-tag et-concept">+'+(d.onlyComp.length-60)+' more in CSV</span>';
     html += '</div></div></div>';
   }
 
-  // Your unique keywords (advantage)
-  if (onlyYours.length) {
+  // Your advantage
+  if (d.onlyYours && d.onlyYours.length) {
     html += '<div class="result-card">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-shield-alt" style="color:#059669"></i> Your Keyword Advantage (' + onlyYours.length + ' unique keywords)</h3></div>';
+    html += '<div class="result-card-head"><h3><i class="fas fa-shield-alt" style="color:#059669"></i> Your Keyword Advantage ('+d.onlyYours.length+' unique)</h3></div>';
     html += '<div class="result-card-body"><div class="tag-cloud">';
-    onlyYours.slice(0, 40).forEach(function(k) {
-      html += '<span class="entity-tag et-org">' + k.keyword + '</span>';
-    });
-    if (onlyYours.length > 40) html += '<span class="entity-tag et-concept">+' + (onlyYours.length - 40) + ' more</span>';
+    d.onlyYours.slice(0,40).forEach(function(k){ html += '<span class="entity-tag et-org">'+k.keyword+'</span>'; });
+    if (d.onlyYours.length>40) html += '<span class="entity-tag et-concept">+'+(d.onlyYours.length-40)+' more</span>';
     html += '</div></div></div>';
   }
 
   document.getElementById('competitorResults').innerHTML = html;
-  document.getElementById('btnExportComp').style.display = 'flex';
 }
 
 function clearCompetitor() {
@@ -285,22 +252,15 @@ function clearCompetitor() {
 
 function exportCompCSV() {
   const rows = ['Keyword,Category,Intent,Difficulty,Volume'];
-  (compData.onlyComp || []).forEach(function(k) {
-    rows.push('"' + k.keyword + '","Missing — Competitor Only","' + classifyIntent(k.keyword) + '","' + estimateDifficulty(k.keyword) + '",' + (k.volume || 0));
-  });
-  (compData.shared || []).forEach(function(k) {
-    rows.push('"' + k.keyword + '","Shared","' + classifyIntent(k.keyword) + '","' + estimateDifficulty(k.keyword) + '",' + (k.volume || 0));
-  });
-  (compData.onlyYours || []).forEach(function(k) {
-    rows.push('"' + k.keyword + '","Your Advantage","' + classifyIntent(k.keyword) + '","' + estimateDifficulty(k.keyword) + '",' + (k.volume || 0));
-  });
-  const csv = rows.join('\n');
+  (compData.onlyComp||[]).forEach(function(k){ rows.push('"'+k.keyword+'","Missing — Competitor Only","'+(k.intent||'')+'","'+(k.difficulty||'')+'","'+(k.volume||0)+'"'); });
+  (compData.shared||[]).forEach(function(k){ rows.push('"'+k.keyword+'","Shared","'+(k.intent||'')+'","","'+(k.volume||0)+'"'); });
+  (compData.onlyYours||[]).forEach(function(k){ rows.push('"'+k.keyword+'","Your Advantage","'+(k.intent||'')+'","'+(k.difficulty||'')+'","'+(k.volume||0)+'"'); });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  a.download = 'competitor-analysis-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.href = URL.createObjectURL(new Blob([rows.join('\n')], {type:'text/csv'}));
+  a.download = 'competitor-analysis-'+new Date().toISOString().split('T')[0]+'.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
-
 </script>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Entity & Attributes Finder — ClusterSEO Pro</title>
+  <title>Entity &amp; Attributes Finder — ClusterSEO Pro</title>
   <meta name="description" content="Extract entities, brands, people and places from any text for semantic SEO.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -56,7 +56,7 @@
 <body>
 <div class="page-wrap">
   <section class="tool-hero">
-    <h1><i class="fas fa-tags" style="margin-right:10px;"></i> Entity & Attributes Finder</h1>
+    <h1><i class="fas fa-tags" style="margin-right:10px;"></i> Entity &amp; Attributes Finder</h1>
     <p>Paste text to extract people, organisations, places, brands and key concepts</p>
     <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
   </section>
@@ -65,32 +65,11 @@
       <div class="browser-chrome">
         <div class="browser-bar">
           <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-          <div class="browser-url">clusterseo.pro — Entity & Attributes Finder</div>
+          <div class="browser-url">clusterseo.pro — Entity &amp; Attributes Finder</div>
         </div>
         <div class="app-inside">
-
           <div class="input-lbl"><i class="fas fa-tags"></i> Paste your text or article content</div>
-          <textarea class="kw-box" id="entityInput" rows="10" placeholder="Paste any article, blog post or text here...">Apple Inc. is an American multinational technology company headquartered in Cupertino, California. 
-Tim Cook is the current CEO, succeeding the company's co-founder Steve Jobs. 
-The company designs, develops, and sells consumer electronics, computer software, and online services. 
-Their major hardware products include the iPhone, iPad, MacBook, Apple Watch, and AirPods. 
-Software offerings include iOS, macOS, watchOS, and services like iCloud, Apple Music, Apple TV+, 
-and the App Store with over 1.8 million apps.
-
-The company was founded on April 1, 1976, by Steve Jobs, Steve Wozniak, and Ronald Wayne 
-to develop and sell personal computers. The Apple I was their first product, sold as an 
-assembled circuit board and lacking basic features like a keyboard or monitor. 
-In January 1977, the company was incorporated as Apple Computer, Inc. and sales of the Apple II 
-quickly made it one of the first highly successful mass-produced microcomputers.
-
-Today, Apple operates more than 500 retail stores in 25 countries, including flagship locations 
-in New York City's Fifth Avenue, London's Regent Street, Tokyo's Ginza district, and Shanghai's 
-Nanjing Road. The company has become one of the Big Five American information technology companies, 
-alongside Amazon, Google, Microsoft, and Meta.
-
-In recent years, Apple has focused on services and wearables, launching Apple Pay in 2014, 
-Apple Watch in 2015, and AirPods in 2016. The company's revenue reached $394.3 billion in 2022, 
-with a market capitalization exceeding $2.5 trillion, making it the world's most valuable company.</textarea>
+          <textarea class="kw-box" id="entityInput" rows="10" placeholder="Paste any article, blog post or text here..."></textarea>
           <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
             <button class="btn-run" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);" onclick="runEntityFinder()"><i class="fas fa-magic"></i> Extract Entities</button>
             <button class="btn-secondary" onclick="clearEntityTool()"><i class="fas fa-trash"></i> Clear</button>
@@ -99,299 +78,77 @@ with a market capitalization exceeding $2.5 trillion, making it the world's most
           <div id="entityResults" class="result-section">
             <div class="empty-state"><i class="fas fa-tags"></i><h3>No entities extracted yet</h3><p>Paste any text above and click Extract Entities</p></div>
           </div>
-
         </div>
       </div>
     </div>
   </section>
 </div>
 <script src="shared-layout.js"></script>
+
 <script>
+const API = '';
 let entityData = {};
 
-// Predefined lists for accurate entity detection
-const KNOWN_PEOPLE = [
-  'Tim Cook', 'Steve Jobs', 'Steve Wozniak', 'Ronald Wayne'
-];
-
-const KNOWN_ORGS = [
-  'Apple Inc.', 'Apple Computer, Inc.', 'Amazon', 'Google', 'Microsoft', 'Meta', 'Apple'
-];
-
-const KNOWN_PLACES = [
-  'Cupertino', 'California', 'New York City', 'Fifth Avenue', 'London', 
-  'Regent Street', 'Tokyo', 'Ginza', 'Shanghai', 'Nanjing Road', 'United States'
-];
-
-const KNOWN_BRANDS = [
-  'iPhone', 'iPad', 'MacBook', 'Apple Watch', 'AirPods', 'iOS', 'macOS', 
-  'watchOS', 'iCloud', 'Apple Music', 'Apple TV+', 'App Store', 'Apple Pay',
-  'Apple I', 'Apple II'
-];
-
-const KNOWN_CONCEPTS = [
-  'technology', 'software', 'services', 'consumer electronics', 'revenue', 
-  'market capitalization', 'personal computers', 'microcomputers', 'wearables'
-];
-
-// Person titles for detection
-const PERSON_TITLES = ['CEO', 'CTO', 'CFO', 'COO', 'President', 'Director', 
-  'Manager', 'Founder', 'Co-founder', 'Chairman', 'Senator', 'Governor', 
-  'General', 'Professor', 'Dr.', 'Prof.', 'Mr.', 'Mrs.', 'Ms.', 'Sir', 'Lord'];
-
-// Organisation suffixes
-const ORG_SUFFIXES = ['Inc.', 'Inc', 'Ltd.', 'Ltd', 'LLC', 'Corp.', 'Corp', 
-  'Corporation', 'Company', 'Co.', 'Co', 'Group', 'Holdings', 'Technologies',
-  'Systems', 'Solutions', 'Services', 'University', 'College', 'Institute',
-  'Foundation', 'Association', 'Organization', 'Council', 'Agency'];
-
-function runEntityFinder() {
+async function runEntityFinder() {
   const text = document.getElementById('entityInput').value.trim();
   if (!text) { alert('Please paste some text first.'); return; }
 
-  // Initialize entities
-  const entities = {
-    Person: [],
-    Organisation: [],
-    Place: [],
-    Brand: [],
-    Concept: []
-  };
+  document.getElementById('entityResults').innerHTML = '<div class="empty-state"><div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:#7c3aed;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--gray-400);">Extracting entities...</p></div>';
 
-  // ===== 1. DETECT PEOPLE =====
-  // Check known people first
-  KNOWN_PEOPLE.forEach(person => {
-    if (text.includes(person) && !entities.Person.includes(person)) {
-      entities.Person.push(person);
-    }
-  });
-
-  // Detect by titles
-  PERSON_TITLES.forEach(title => {
-    const regex = new RegExp(title + '\\s+([A-Z][a-z]+(?:\\s+[A-Z][a-z]+){0,2})', 'g');
-    let match;
-    while ((match = regex.exec(text)) !== null) {
-      const name = match[1].trim();
-      if (name.length > 2 && !entities.Person.includes(name)) {
-        entities.Person.push(name);
-      }
-    }
-  });
-
-  // ===== 2. DETECT ORGANISATIONS =====
-  // Check known organisations
-  KNOWN_ORGS.forEach(org => {
-    if (text.includes(org) && !entities.Organisation.includes(org)) {
-      entities.Organisation.push(org);
-    }
-  });
-
-  // Detect by suffixes
-  ORG_SUFFIXES.forEach(suffix => {
-    const regex = new RegExp('([A-Z][A-Za-z0-9&\\s-]{2,50})\\s+' + suffix.replace('.', '\\.'), 'g');
-    let match;
-    while ((match = regex.exec(text)) !== null) {
-      const org = (match[1].trim() + ' ' + suffix).trim();
-      if (!entities.Organisation.includes(org) && !entities.Person.includes(org)) {
-        entities.Organisation.push(org);
-      }
-    }
-  });
-
-  // ===== 3. DETECT PLACES =====
-  // Check known places
-  KNOWN_PLACES.forEach(place => {
-    if (text.includes(place) && !entities.Place.includes(place)) {
-      entities.Place.push(place);
-    }
-  });
-
-  // Detect "in [Place]" patterns
-  const placePatterns = [
-    /in\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})/g,
-    /located\s+in\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})/g,
-    /headquartered\s+in\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})/g
-  ];
-
-  placePatterns.forEach(pattern => {
-    let match;
-    while ((match = pattern.exec(text)) !== null) {
-      const place = match[1].trim();
-      if (place.length > 3 && !entities.Place.includes(place) && 
-          !entities.Person.includes(place) && !entities.Organisation.includes(place)) {
-        entities.Place.push(place);
-      }
-    }
-  });
-
-  // ===== 4. DETECT BRANDS =====
-  // Check known brands
-  KNOWN_BRANDS.forEach(brand => {
-    if (text.includes(brand) && !entities.Brand.includes(brand)) {
-      entities.Brand.push(brand);
-    }
-  });
-
-  // Detect trademark symbols
-  const trademarkRegex = /([A-Z][A-Za-z0-9\s-]{2,30})[™®©]/g;
-  let match;
-  while ((match = trademarkRegex.exec(text)) !== null) {
-    const brand = match[1].trim();
-    if (!entities.Brand.includes(brand)) {
-      entities.Brand.push(brand);
-    }
-  }
-
-  // ===== 5. DETECT CONCEPTS =====
-  // Check known concepts
-  KNOWN_CONCEPTS.forEach(concept => {
-    if (text.toLowerCase().includes(concept.toLowerCase())) {
-      const formatted = concept.split(' ').map(w => 
-        w.charAt(0).toUpperCase() + w.slice(1)
-      ).join(' ');
-      if (!entities.Concept.includes(formatted)) {
-        entities.Concept.push(formatted);
-      }
-    }
-  });
-
-  // Extract frequent meaningful words as concepts
-  const stopwords = new Set([
-    'the','a','an','and','or','but','in','on','at','to','for','of','with','by',
-    'from','as','is','was','were','be','been','have','has','had','do','does','did',
-    'will','would','could','should','may','might','that','this','these','those',
-    'it','its','we','our','you','your','they','their','he','she','his','her',
-    'i','my','me','us','him','them','who','which','what','when','where','how',
-    'why','not','also','more','most','some','any','all','each','other','into',
-    'than','then','there','here','so','if','about','after','before','just',
-    'only','very','can','been','no','new','one','two','three','first','last','same','such'
-  ]);
-
-  const words = text.toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 4 && !stopwords.has(w));
-
-  const wordFreq = {};
-  words.forEach(w => {
-    wordFreq[w] = (wordFreq[w] || 0) + 1;
-  });
-
-  Object.entries(wordFreq)
-    .filter(([word, count]) => count > 1 || word.length > 6)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 15)
-    .forEach(([word, count]) => {
-      const concept = word.charAt(0).toUpperCase() + word.slice(1);
-      if (!entities.Concept.includes(concept)) {
-        entities.Concept.push(concept + ' (' + count + 'x)');
-      }
+  try {
+    const res  = await fetch(API + '/api/extract-entities', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
     });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'API error');
 
-  // ===== 6. CLEANUP =====
-  // Remove duplicates and sort
-  Object.keys(entities).forEach(key => {
-    entities[key] = [...new Set(entities[key])].sort();
-  });
+    entityData = data.entities;
+    const totals = {
+      Person: data.entities.people?.length || 0,
+      Organisation: data.entities.organizations?.length || 0,
+      Place: data.entities.places?.length || 0,
+      Brand: data.entities.brands?.length || 0,
+      Concept: data.entities.concepts?.length || 0
+    };
+    const totalEntities = Object.values(totals).reduce((a,b) => a+b, 0);
 
-  // Ensure no cross-category contamination
-  entities.Person = entities.Person.filter(p => !KNOWN_ORGS.includes(p) && !KNOWN_PLACES.includes(p));
-  entities.Organisation = entities.Organisation.filter(o => !KNOWN_PEOPLE.includes(o) && !KNOWN_PLACES.includes(o));
-  entities.Place = entities.Place.filter(p => !KNOWN_PEOPLE.includes(p) && !KNOWN_ORGS.includes(p));
-  entities.Brand = entities.Brand.filter(b => !KNOWN_PEOPLE.includes(b) && !KNOWN_ORGS.includes(b) && !KNOWN_PLACES.includes(b));
-
-  // Calculate totals
-  const totals = {
-    Person: entities.Person.length,
-    Organisation: entities.Organisation.length,
-    Place: entities.Place.length,
-    Brand: entities.Brand.length,
-    Concept: entities.Concept.length
-  };
-  
-  const totalEntities = Object.values(totals).reduce((a, b) => a + b, 0);
-  entityData = entities;
-
-  // Show/hide export button
-  document.getElementById('btnExportEntityCSV').style.display = totalEntities > 0 ? 'flex' : 'none';
-
-  // ===== FINAL CLEANUP =====
-// Remove fragments and duplicates
-entities.Organisation = entities.Organisation.filter(org => {
-  // Remove "Tim Co" type fragments
-  if (org.includes('Tim') || org.includes('Steve')) return false;
-  // Normalize Apple Inc variations
-  if (org === 'Apple Inc' || org === 'Apple Inc.') return 'Apple Inc.';
-  return true;
-});
-
-// Deduplicate after normalization
-entities.Organisation = [...new Set(entities.Organisation.map(org => 
-  org === 'Apple Inc' ? 'Apple Inc.' : org
-))];
-
-  // Render results
-  renderResults(entities, totals, totalEntities);
+    document.getElementById('btnExportEntityCSV').style.display = totalEntities > 0 ? 'flex' : 'none';
+    renderResults(data.entities, totals, totalEntities);
+  } catch(err) {
+    document.getElementById('entityResults').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error</h3><p>'+err.message+'<br>Make sure your server is running.</p></div>';
+  }
 }
 
 function renderResults(entities, totals, totalEntities) {
-  const resultsDiv = document.getElementById('entityResults');
-  
   let html = '<div class="stat-grid">';
-  html += `<div class="stat-box"><div class="stat-box-num">${totals.Person}</div><div class="stat-box-label">People</div></div>`;
-  html += `<div class="stat-box"><div class="stat-box-num">${totals.Organisation}</div><div class="stat-box-label">Organisations</div></div>`;
-  html += `<div class="stat-box"><div class="stat-box-num">${totals.Place}</div><div class="stat-box-label">Places</div></div>`;
-  html += `<div class="stat-box"><div class="stat-box-num">${totals.Brand}</div><div class="stat-box-label">Brands</div></div>`;
-  html += `<div class="stat-box"><div class="stat-box-num">${totals.Concept}</div><div class="stat-box-label">Concepts</div></div>`;
-  html += `<div class="stat-box"><div class="stat-box-num">${totalEntities}</div><div class="stat-box-label">Total Entities</div></div>`;
+  html += '<div class="stat-box"><div class="stat-box-num">'+totals.Person+'</div><div class="stat-box-label">People</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">'+totals.Organisation+'</div><div class="stat-box-label">Organisations</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">'+totals.Place+'</div><div class="stat-box-label">Places</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">'+totals.Brand+'</div><div class="stat-box-label">Brands</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">'+totals.Concept+'</div><div class="stat-box-label">Concepts</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">'+totalEntities+'</div><div class="stat-box-label">Total Entities</div></div>';
   html += '</div>';
 
-  // People
-  if (entities.Person.length > 0) {
+  const cats = [
+    { key:'people',       icon:'fa-user',         color:'#92400e',          cls:'et-person', label:'People' },
+    { key:'organizations', icon:'fa-building',      color:'var(--teal-dark)', cls:'et-org',    label:'Organisations' },
+    { key:'places',        icon:'fa-map-marker-alt',color:'#065f46',          cls:'et-place',  label:'Places' },
+    { key:'brands',        icon:'fa-trademark',     color:'#6d28d9',          cls:'et-brand',  label:'Brands & Products' },
+    { key:'concepts',      icon:'fa-lightbulb',     color:'var(--gray-600)',  cls:'et-concept',label:'Key Concepts & Terms' }
+  ];
+
+  cats.forEach(function(cat) {
+    if (!entities[cat.key] || !entities[cat.key].length) return;
     html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-user" style="color:#92400e"></i> People (' + entities.Person.length + ' found)</h3></div>';
+    html += '<div class="result-card-head"><h3><i class="fas '+cat.icon+'" style="color:'+cat.color+'"></i> '+cat.label+' ('+entities[cat.key].length+' found)</h3></div>';
     html += '<div class="result-card-body"><div class="tag-cloud">';
-    entities.Person.forEach(p => html += '<span class="entity-tag et-person">' + p + '</span>');
+    entities[cat.key].forEach(function(item){ html += '<span class="entity-tag '+cat.cls+'">'+item+'</span>'; });
     html += '</div></div></div>';
-  }
+  });
 
-  // Organisations
-  if (entities.Organisation.length > 0) {
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-building" style="color:var(--teal-dark)"></i> Organisations (' + entities.Organisation.length + ' found)</h3></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    entities.Organisation.forEach(o => html += '<span class="entity-tag et-org">' + o + '</span>');
-    html += '</div></div></div>';
-  }
-
-  // Places
-  if (entities.Place.length > 0) {
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-map-marker-alt" style="color:#065f46"></i> Places (' + entities.Place.length + ' found)</h3></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    entities.Place.forEach(p => html += '<span class="entity-tag et-place">' + p + '</span>');
-    html += '</div></div></div>';
-  }
-
-  // Brands
-  if (entities.Brand.length > 0) {
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-trademark" style="color:#6d28d9"></i> Brands & Products (' + entities.Brand.length + ' found)</h3></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    entities.Brand.forEach(b => html += '<span class="entity-tag et-brand">' + b + '</span>');
-    html += '</div></div></div>';
-  }
-
-  // Concepts
-  if (entities.Concept.length > 0) {
-    html += '<div class="result-card">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-lightbulb" style="color:var(--gray-600)"></i> Key Concepts & Terms (' + entities.Concept.length + ' found)</h3></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    entities.Concept.forEach(c => html += '<span class="entity-tag et-concept">' + c + '</span>');
-    html += '</div></div></div>';
-  }
-
-  resultsDiv.innerHTML = html;
+  document.getElementById('entityResults').innerHTML = html;
 }
 
 function clearEntityTool() {
@@ -402,19 +159,22 @@ function clearEntityTool() {
 }
 
 function exportEntityCSV() {
-  const rows = ['Entity,Type'];
-  Object.entries(entityData).forEach(([type, items]) => {
-    items.forEach(item => {
-      rows.push('"' + item.replace(/"/g, '""') + '","' + type + '"');
+  const rows = ['Entity,Type,Notes'];
+  Object.entries(entityData).forEach(function(entry) {
+    const type = entry[0], items = entry[1];
+    items.forEach(function(item) {
+      const noteMatch = item.match(/\s*\((\d+x)\)$/);
+      const clean = noteMatch ? item.replace(/\s*\(\d+x\)$/,'').trim() : item;
+      const note  = noteMatch ? noteMatch[1] : '';
+      rows.push('"'+clean.replace(/"/g,'""')+'","'+type+'","'+note+'"');
     });
   });
-  const csv = rows.join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  a.download = 'entities-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.href = URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+  a.download = 'entities-'+new Date().toISOString().split('T')[0]+'.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
-
 </script>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>

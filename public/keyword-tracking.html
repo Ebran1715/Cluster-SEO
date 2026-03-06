@@ -116,65 +116,94 @@
   </section>
 </div>
 <script src="shared-layout.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-const TRACK_KEY = 'clusterseo_tracking';
 
-function getTrackingData() {
-  try { return JSON.parse(localStorage.getItem(TRACK_KEY) || '{}'); } catch(e) { return {}; }
-}
-function saveTrackingData(d) { localStorage.setItem(TRACK_KEY, JSON.stringify(d)); }
+<script>
+const API = '';
 
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('trackDate').value = new Date().toISOString().split('T')[0];
-  renderTracking();
+  loadAndRender();
 });
 
-function addTrackedKw() {
+async function loadAndRender() {
+  try {
+    const res  = await fetch(API + '/api/keyword-tracking');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    renderTracking(data.data);
+  } catch(err) {
+    document.getElementById('trackingResults').innerHTML =
+      '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i>' +
+      '<h3>Could not load tracking data</h3><p>' + err.message + '<br>Make sure your server is running.</p></div>';
+  }
+}
+
+async function addTrackedKw() {
   const kw  = document.getElementById('trackKw').value.trim();
   const pos = parseInt(document.getElementById('trackPos').value);
   const url = document.getElementById('trackUrl').value.trim();
   const dt  = document.getElementById('trackDate').value;
-  if (!kw)                      { alert('Enter a keyword.'); return; }
+
+  if (!kw)                          { alert('Enter a keyword.'); return; }
   if (!pos || pos < 1 || pos > 200) { alert('Enter a valid position (1–200).'); return; }
-  if (!dt)                      { alert('Select a date.'); return; }
+  if (!dt)                          { alert('Select a date.'); return; }
 
-  const data = getTrackingData();
-  if (!data[kw]) data[kw] = { url: '', entries: [] };
-  if (url) data[kw].url = url;
-  // Remove duplicate for same date
-  data[kw].entries = data[kw].entries.filter(function(e) { return e.date !== dt; });
-  data[kw].entries.push({ date: dt, pos: pos });
-  data[kw].entries.sort(function(a, b) { return a.date.localeCompare(b.date); });
-  saveTrackingData(data);
+  try {
+    const res  = await fetch(API + '/api/keyword-tracking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyword: kw, position: pos, url, date: dt })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
 
-  document.getElementById('trackKw').value  = '';
-  document.getElementById('trackPos').value = '';
-  renderTracking();
+    document.getElementById('trackKw').value  = '';
+    document.getElementById('trackPos').value = '';
+    renderTracking(data.data);
+  } catch(err) {
+    alert('Error saving entry: ' + err.message);
+  }
 }
 
-function deleteTrackedKw(btn) {
+async function deleteTrackedKw(btn) {
   const kw = btn.getAttribute('data-kw');
   if (!kw || !confirm('Delete all tracking data for "' + kw + '"?')) return;
-  const data = getTrackingData();
-  delete data[kw];
-  saveTrackingData(data);
-  renderTracking();
+
+  try {
+    const res  = await fetch(API + '/api/keyword-tracking/' + encodeURIComponent(kw), { method: 'DELETE' });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    renderTracking(data.data);
+  } catch(err) {
+    alert('Error deleting: ' + err.message);
+  }
 }
 
-function renderTracking() {
-  const data = getTrackingData();
-  const keys = Object.keys(data);
+async function clearAllTracking() {
+  if (!confirm('Delete ALL tracking data? This cannot be undone.')) return;
+  try {
+    const res  = await fetch(API + '/api/keyword-tracking', { method: 'DELETE' });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    renderTracking(data.data);
+  } catch(err) {
+    alert('Error clearing data: ' + err.message);
+  }
+}
+
+function renderTracking(data) {
+  const keys = Object.keys(data || {});
   const el   = document.getElementById('trackingResults');
 
   if (!keys.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-chart-line"></i><h3>No keywords tracked yet</h3><p>Add a keyword and its current ranking position above to begin tracking.</p></div>';
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-chart-line"></i>' +
+      '<h3>No keywords tracked yet</h3>' +
+      '<p>Add a keyword and its current ranking position above to begin tracking.<br>' +
+      '<span style="color:var(--teal);font-weight:600;">Data is now saved on your server — not just in this browser.</span></p></div>';
     return;
   }
 
-  // Summary stats
-  let totalKws = keys.length;
-  let improving = 0, declining = 0, stable = 0, top3 = 0, top10 = 0;
+  let improving = 0, declining = 0, top3 = 0, top10 = 0;
   keys.forEach(function(kw) {
     const entries = data[kw].entries || [];
     if (!entries.length) return;
@@ -185,139 +214,133 @@ function renderTracking() {
       const prev = entries[entries.length - 2].pos;
       if (latest < prev) improving++;
       else if (latest > prev) declining++;
-      else stable++;
     }
   });
 
   let html = '<div class="stat-grid" style="grid-template-columns:repeat(5,1fr);">';
-  html += '<div class="stat-box"><div class="stat-box-num">' + totalKws + '</div><div class="stat-box-label">Keywords Tracked</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">' + improving + '</div><div class="stat-box-label">Improving</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">' + declining + '</div><div class="stat-box-label">Declining</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--teal)">' + top3 + '</div><div class="stat-box-label">Top 3</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--gold)">' + top10 + '</div><div class="stat-box-label">Top 10</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num">'+keys.length+'</div><div class="stat-box-label">Tracked</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">'+improving+'</div><div class="stat-box-label">Improving</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">'+declining+'</div><div class="stat-box-label">Declining</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--teal)">'+top3+'</div><div class="stat-box-label">Top 3</div></div>';
+  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--gold)">'+top10+'</div><div class="stat-box-label">Top 10</div></div>';
   html += '</div>';
 
-  // Sort by latest position
   const sortedKeys = keys.slice().sort(function(a, b) {
-    const aLast = (data[a].entries || [{ pos: 999 }]).slice(-1)[0].pos;
-    const bLast = (data[b].entries || [{ pos: 999 }]).slice(-1)[0].pos;
+    const aLast = (data[a].entries || [{pos:999}]).slice(-1)[0].pos;
+    const bLast = (data[b].entries || [{pos:999}]).slice(-1)[0].pos;
     return aLast - bLast;
   });
 
   html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+
   sortedKeys.forEach(function(kw) {
     const kwData  = data[kw];
     const entries = kwData.entries || [];
     if (!entries.length) return;
+
     const latest = entries[entries.length - 1];
     const prev   = entries.length > 1 ? entries[entries.length - 2] : null;
-    const change = prev ? prev.pos - latest.pos : 0; // positive = rank improved (lower number)
+    const change = prev ? prev.pos - latest.pos : 0;
 
-    const posColor  = latest.pos <= 3 ? '#059669' : latest.pos <= 10 ? '#f59e0b' : latest.pos <= 20 ? '#0ea5e9' : '#94a3b8';
-    const posLabel  = latest.pos <= 3 ? 'Top 3' : latest.pos <= 10 ? 'Page 1' : latest.pos <= 20 ? 'Page 2' : 'Page 3+';
+    const posColor      = latest.pos <= 3 ? '#059669' : latest.pos <= 10 ? '#f59e0b' : latest.pos <= 20 ? '#0ea5e9' : '#94a3b8';
+    const posLabel      = latest.pos <= 3 ? 'Top 3'   : latest.pos <= 10 ? 'Page 1'  : latest.pos <= 20 ? 'Page 2'  : 'Page 3+';
     const posLabelColor = latest.pos <= 3 ? '#065f46' : latest.pos <= 10 ? '#92400e' : latest.pos <= 20 ? 'var(--teal-dark)' : 'var(--gray-500)';
     const posLabelBg    = latest.pos <= 3 ? '#d1fae5' : latest.pos <= 10 ? '#fef3c7' : latest.pos <= 20 ? 'var(--teal-light)' : 'var(--gray-100)';
 
     const changeHtml = change > 0
-      ? '<span style="color:#059669;font-weight:700;font-size:13px;display:flex;align-items:center;gap:3px;"><i class="fas fa-arrow-up"></i> +' + change + '</span>'
+      ? '<span style="color:#059669;font-weight:700;font-size:13px;display:flex;align-items:center;gap:3px;"><i class="fas fa-arrow-up"></i> +'+change+'</span>'
       : change < 0
-      ? '<span style="color:#ef4444;font-weight:700;font-size:13px;display:flex;align-items:center;gap:3px;"><i class="fas fa-arrow-down"></i> ' + Math.abs(change) + '</span>'
+      ? '<span style="color:#ef4444;font-weight:700;font-size:13px;display:flex;align-items:center;gap:3px;"><i class="fas fa-arrow-down"></i> '+Math.abs(change)+'</span>'
       : '<span style="color:var(--gray-400);font-size:12px;">No change</span>';
 
-    // SVG sparkline — y axis inverted because lower rank = better
-    const pts = entries.slice(-12);
-    const allPos = pts.map(function(e) { return e.pos; });
-    const maxP = Math.max.apply(null, allPos);
-    const minP = Math.min.apply(null, allPos);
-    const rangeP = Math.max(maxP - minP, 1);
+    const pts  = entries.slice(-12);
+    const allP = pts.map(function(e){ return e.pos; });
+    const maxP = Math.max.apply(null, allP);
+    const minP = Math.min.apply(null, allP);
+    const rng  = Math.max(maxP - minP, 1);
     const svgW = 120, svgH = 36;
     const svgPts = pts.map(function(e, i) {
-      const x = pts.length === 1 ? svgW / 2 : (i / (pts.length - 1)) * svgW;
-      const y = svgH - 4 - ((maxP - e.pos) / rangeP) * (svgH - 8);
+      const x = pts.length === 1 ? svgW/2 : (i / (pts.length-1)) * svgW;
+      const y = svgH - 4 - ((maxP - e.pos) / rng) * (svgH - 8);
       return x.toFixed(1) + ',' + y.toFixed(1);
     }).join(' ');
     const sparkColor = change > 0 ? '#059669' : change < 0 ? '#ef4444' : '#94a3b8';
-    const sparkline = pts.length > 1
-      ? '<svg width="' + svgW + '" height="' + svgH + '" style="flex-shrink:0;"><polyline points="' + svgPts + '" fill="none" stroke="' + sparkColor + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>'
+    const sparkline  = pts.length > 1
+      ? '<svg width="'+svgW+'" height="'+svgH+'" style="flex-shrink:0;"><polyline points="'+svgPts+'" fill="none" stroke="'+sparkColor+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>'
       : '<div style="font-size:10px;color:var(--gray-300);width:120px;text-align:center;">Add more entries to see trend</div>';
 
-    const safeKw = kw.replace(/['"<>&]/g, '');
+    const safeKw = kw.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
     html += '<div style="background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);padding:16px 18px;transition:all 0.2s;" onmouseover="this.style.borderColor=\'var(--gray-300)\';this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.06)\'" onmouseout="this.style.borderColor=\'var(--gray-200)\';this.style.boxShadow=\'none\'">';
     html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">';
 
-    // Rank number
     html += '<div style="text-align:center;flex-shrink:0;">';
-    html += '<div style="font-size:1.8rem;font-weight:800;color:' + posColor + ';line-height:1;">#' + latest.pos + '</div>';
-    html += '<div style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:100px;background:' + posLabelBg + ';color:' + posLabelColor + ';margin-top:3px;">' + posLabel + '</div>';
+    html += '<div style="font-size:1.8rem;font-weight:800;color:'+posColor+';line-height:1;">#'+latest.pos+'</div>';
+    html += '<div style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:100px;background:'+posLabelBg+';color:'+posLabelColor+';margin-top:3px;">'+posLabel+'</div>';
     html += '</div>';
 
-    // Keyword info
     html += '<div style="flex:1;min-width:120px;">';
-    html += '<div style="font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:3px;">' + kw + '</div>';
-    if (kwData.url) html += '<div style="font-size:11px;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">' + kwData.url + '</div>';
-    html += '<div style="margin-top:4px;">' + changeHtml + '</div>';
+    html += '<div style="font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:3px;">'+kw+'</div>';
+    if (kwData.url) html += '<div style="font-size:11px;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">'+kwData.url+'</div>';
+    html += '<div style="margin-top:4px;">'+changeHtml+'</div>';
     html += '</div>';
 
-    // Sparkline
     html += sparkline;
 
-    // Last updated + actions
     html += '<div style="text-align:right;flex-shrink:0;">';
-    html += '<div style="font-size:11px;color:var(--gray-400);margin-bottom:4px;">' + entries.length + ' data point' + (entries.length===1?'':'s') + '</div>';
-    html += '<div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Updated: ' + latest.date + '</div>';
-    html += '<button data-kw="' + safeKw + '" onclick="deleteTrackedKw(this)" style="background:none;border:1px solid var(--gray-200);padding:4px 10px;border-radius:var(--r-sm);font-size:11px;color:var(--gray-400);cursor:pointer;font-family:var(--font);transition:all 0.15s;" onmouseover="this.style.borderColor=\'#ef4444\';this.style.color=\'#ef4444\'" onmouseout="this.style.borderColor=\'var(--gray-200)\';this.style.color=\'var(--gray-400)\'"><i class="fas fa-trash"></i> Delete</button>';
+    html += '<div style="font-size:11px;color:var(--gray-400);margin-bottom:4px;">'+entries.length+' data point'+(entries.length===1?'':'s')+'</div>';
+    html += '<div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Updated: '+latest.date+'</div>';
+    html += '<button data-kw="'+safeKw+'" onclick="deleteTrackedKw(this)" style="background:none;border:1px solid var(--gray-200);padding:4px 10px;border-radius:var(--r-sm);font-size:11px;color:var(--gray-400);cursor:pointer;font-family:var(--font);transition:all 0.15s;" onmouseover="this.style.borderColor=\'#ef4444\';this.style.color=\'#ef4444\'" onmouseout="this.style.borderColor=\'var(--gray-200)\';this.style.color=\'var(--gray-400)\'"><i class="fas fa-trash"></i> Delete</button>';
     html += '</div>';
     html += '</div>';
 
-    // Full history row
     if (entries.length > 1) {
       html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);">';
       html += '<div style="font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Position History</div>';
       html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
-      entries.slice().reverse().slice(0, 8).forEach(function(e, i) {
+      entries.slice().reverse().slice(0,8).forEach(function(e,i){
         const c = i === 0 ? posColor : 'var(--gray-400)';
         html += '<div style="text-align:center;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 10px;">';
-        html += '<div style="font-size:13px;font-weight:700;color:' + c + '">#' + e.pos + '</div>';
-        html += '<div style="font-size:10px;color:var(--gray-400);">' + e.date + '</div>';
+        html += '<div style="font-size:13px;font-weight:700;color:'+c+'">#'+e.pos+'</div>';
+        html += '<div style="font-size:10px;color:var(--gray-400);">'+e.date+'</div>';
         html += '</div>';
       });
-      if (entries.length > 8) html += '<div style="font-size:11px;color:var(--gray-400);align-self:center;">+' + (entries.length-8) + ' more</div>';
+      if (entries.length > 8) html += '<div style="font-size:11px;color:var(--gray-400);align-self:center;">+'+(entries.length-8)+' more</div>';
       html += '</div></div>';
     }
 
     html += '</div>';
   });
+
   html += '</div>';
   el.innerHTML = html;
 }
 
-function clearAllTracking() {
-  if (!confirm('Delete ALL tracking data? This cannot be undone.')) return;
-  localStorage.removeItem(TRACK_KEY);
-  renderTracking();
-}
-
-function exportTrackingCSV() {
-  const data = getTrackingData();
-  const rows = ['Keyword,URL,Date,Position,Change'];
-  Object.entries(data).forEach(function(e) {
-    const kw  = e[0];
-    const entries = e[1].entries || [];
-    const url = e[1].url || '';
-    entries.forEach(function(entry, i) {
-      const prev   = i > 0 ? entries[i-1].pos : '';
-      const change = prev !== '' ? prev - entry.pos : '';
-      rows.push('"' + kw + '","' + url + '","' + entry.date + '",' + entry.pos + ',' + change);
+async function exportTrackingCSV() {
+  try {
+    const res  = await fetch(API + '/api/keyword-tracking');
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    const data = json.data;
+    const rows = ['Keyword,URL,Date,Position,Change'];
+    Object.entries(data).forEach(function(entry) {
+      const kw      = entry[0];
+      const kwData  = entry[1];
+      const entries = kwData.entries || [];
+      entries.forEach(function(e, i) {
+        const prev   = i > 0 ? entries[i-1].pos : '';
+        const change = prev !== '' ? prev - e.pos : '';
+        rows.push('"'+kw.replace(/"/g,'""')+'","'+(kwData.url||'')+'","'+e.date+'",'+e.pos+','+(change!==''?change:''));
+      });
     });
-  });
-  const csv = rows.join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  a.download = 'keyword-tracking-' + new Date().toISOString().split('T')[0] + '.csv';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
+    a.download = 'keyword-tracking-'+new Date().toISOString().split('T')[0]+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  } catch(err) {
+    alert('Export failed: ' + err.message);
+  }
 }
-
 </script>
 </body>
 </html>

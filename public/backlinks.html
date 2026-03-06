@@ -64,7 +64,6 @@
     .ai-fail {background:#fee2e2;color:#991b1b;}
     .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
     .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
-    
   </style>
 </head>
 <body>
@@ -92,7 +91,7 @@
           <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid rgba(245,158,11,0.3);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">
             <i class="fas fa-info-circle" style="color:#d97706;margin-top:2px;flex-shrink:0;"></i>
             <div style="font-size:13px;color:#92400e;line-height:1.6;">
-              <strong>Note:</strong> Live backlink data requires a paid API (Ahrefs, Moz or SEMrush). This tool provides a <strong>backlink strategy analysis framework</strong> and guidance based on your domain. Phase 2 will connect to a live backlink API.
+              <strong>Note:</strong> Live backlink data requires a paid API. This tool provides a <strong>backlink strategy analysis framework</strong> and guidance based on your domain.
             </div>
           </div>
 
@@ -106,165 +105,111 @@
   </section>
 </div>
 <script src="shared-layout.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
-function runBacklinks() {
+const API = '';
+
+async function runBacklinks() {
   const raw = document.getElementById('backlinkDomain').value.trim();
   if (!raw) { alert('Enter a domain first.'); return; }
-  const domain = raw.replace(/https?:\/\//,'').replace(/\/.*$/,'').toLowerCase();
-  const domainName = domain.split('.')[0];
-  const tld = domain.split('.').slice(1).join('.');
 
-  // ── Infer domain profile from TLD + name length ──────────────
-  const isCommercial = /shop|store|buy|deal|mart|market|price|cheap|sale/.test(domainName);
-  const isInfo       = /blog|news|info|guide|learn|wiki|review|tips|how/.test(domainName);
-  const isSaas       = /app|tool|soft|tech|ai|io|digital|cloud|hub/.test(domainName) || tld==='io';
-  const isLocal      = /local|city|town|near|area/.test(domainName) || ['co.uk','com.au','ca','in','co.nz'].includes(tld);
-  const isEdu        = tld === 'edu' || tld === 'ac.uk';
-  const isNonProfit  = tld === 'org' || tld === 'ngo';
+  document.getElementById('backlinkResults').innerHTML = '<div class="empty-state"><div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--gray-400);">Analysing domain profile...</p></div>';
 
-  // Domain type label
-  const domainType = isEdu?'Educational':isNonProfit?'Non-profit / Organisation':isLocal?'Local Business':isCommercial?'E-commerce':isInfo?'Blog / Media':isSaas?'SaaS / Tech':'Business Website';
+  try {
+    const res  = await fetch(API + '/api/backlinks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain: raw })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'API error');
+    renderBacklinks(data);
+  } catch(err) {
+    document.getElementById('backlinkResults').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error</h3><p>'+err.message+'<br>Make sure your server is running.</p></div>';
+  }
+}
 
-  // ── Free backlink data sources the user can check ────────────
-  const freeTools = [
-    { name:'Google Search Console', url:'https://search.google.com/search-console', desc:'Official Google data — shows all links Google has found pointing to your site. Most accurate source.', free:true, badge:'Official' },
-    { name:'Ahrefs Free Backlink Checker', url:'https://ahrefs.com/backlink-checker', desc:'Top 100 backlinks for any domain. Enter your domain to see referring domains, DR score and anchor text.', free:true, badge:'Free Tier' },
-    { name:'Moz Link Explorer', url:'https://moz.com/link-explorer', desc:'10 free queries/month. Shows Domain Authority, linking domains and top pages.', free:true, badge:'10 Free' },
-    { name:'Semrush Backlink Analytics', url:'https://www.semrush.com/analytics/backlinks/', desc:'10 free requests/day. Comprehensive backlink database with toxicity scores.', free:true, badge:'10/day' },
-    { name:'Majestic Free Tools', url:'https://majestic.com/reports/site-explorer', desc:'Shows Trust Flow, Citation Flow and top backlinks for any domain.', free:true, badge:'Free' },
-    { name:'OpenLinkProfiler', url:'https://www.openlinkprofiler.org/', desc:'Completely free backlink checker. Good for quick overviews.', free:true, badge:'100% Free' },
-  ];
+function renderBacklinks(d) {
+  const typeColors = {'Educational':'#0ea5e9','Non-profit / Organisation':'#059669','Local Business':'#f59e0b','E-commerce':'#7c3aed','Blog / Media':'#ef4444','SaaS / Tech':'#8b5cf6','Business Website':'#64748b'};
+  const col = typeColors[d.domainType] || '#64748b';
 
-  // ── What to analyse in your backlink profile ──────────────────
-  const analysisAreas = [
-    {
-      icon:'fa-star', title:'Domain Rating / Authority', color:'#0ea5e9',
-      what:'A score (0–100) showing how strong your backlink profile is compared to all websites.',
-      good:'DR 50+ is strong. Under 20 means significant link building needed.',
-      howToCheck:'Check in Ahrefs Free Checker or Moz Link Explorer.'
-    },
-    {
-      icon:'fa-sitemap', title:'Referring Domains', color:'#7c3aed',
-      what:'The number of unique websites linking to you. More unique domains = stronger authority.',
-      good:'Quality matters more than quantity. 50 links from 50 different domains beats 500 links from 1 site.',
-      howToCheck:'Google Search Console > Links > Top linking sites.'
-    },
-    {
-      icon:'fa-tag', title:'Anchor Text Distribution', color:'#f59e0b',
-      what:'The clickable text used in links pointing to your site.',
-      good:'Healthy mix: 40% branded, 20% naked URL, 15% generic, 15% partial match, 10% exact match.',
-      howToCheck:'Ahrefs, Semrush or Majestic all show anchor text breakdown.'
-    },
-    {
-      icon:'fa-skull-crossbones', title:'Toxic / Spammy Links', color:'#ef4444',
-      what:'Links from low-quality, spammy or irrelevant websites that can hurt your rankings.',
-      good:'Use Google Disavow Tool if you have a manual penalty. Semrush Toxicity Score highlights risky links.',
-      howToCheck:'Semrush Backlink Audit tool (free trial available).'
-    },
-    {
-      icon:'fa-chart-line', title:'Link Velocity', color:'#10b981',
-      what:'The rate at which you gain (or lose) backlinks over time.',
-      good:'Steady organic growth is ideal. Sudden spikes can look unnatural to Google.',
-      howToCheck:'Ahrefs "New & Lost" backlinks chart shows velocity trends.'
-    },
-    {
-      icon:'fa-file-alt', title:'Linked Pages', color:'#64748b',
-      what:'Which of your pages receive the most backlinks.',
-      good:'Homepage usually has most links, but deep content pages with backlinks signal topical authority.',
-      howToCheck:'Google Search Console > Links > Top linked pages.'
-    },
-  ];
-
-  // ── Link building strategies tailored to domain type ─────────
-  const strategies = getStrategiesByType(domainType, domainName, domain);
-
-  // ── Healthy anchor text guide ─────────────────────────────────
-  const anchorGuide = [
-    { type:'Branded (' + domainName + ')', pct:40, color:['#0ea5e9','#0284c7'], note:'Most natural — what people call your brand.' },
-    { type:'Naked URL (' + domain + ')', pct:20, color:['#7c3aed','#6d28d9'], note:'Plain URL as anchor text.' },
-    { type:'Generic (click here, read more)', pct:15, color:['#94a3b8','#64748b'], note:'Natural variation — not manipulative.' },
-    { type:'Partial match keyword', pct:15, color:['#10b981','#059669'], note:'Contains keyword but not exact phrase.' },
-    { type:'Exact match keyword', pct:10, color:['#f59e0b','#d97706'], note:'Too many exact match anchors triggers Penguin.' },
-  ];
-
-  // ── RENDER ────────────────────────────────────────────────────
   let html = '';
 
   // Domain profile card
-  html += '<div class="result-card" style="margin-bottom:14px;background:linear-gradient(135deg,#f8fafc,#f0f9ff);">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-globe"></i> Domain Profile: ' + domain + '</h3></div>';
-  html += '<div class="result-card-body" style="display:flex;gap:16px;flex-wrap:wrap;">';
-  html += '<div class="stat-box" style="flex:1;min-width:100px;"><div class="stat-box-num" style="font-size:1rem;">' + domain + '</div><div class="stat-box-label">Domain</div></div>';
-  html += '<div class="stat-box" style="flex:1;min-width:100px;"><div class="stat-box-num" style="font-size:1rem;">' + domainType + '</div><div class="stat-box-label">Detected Type</div></div>';
-  html += '<div class="stat-box" style="flex:1;min-width:100px;"><div class="stat-box-num" style="font-size:1rem;">.' + tld + '</div><div class="stat-box-label">TLD</div></div>';
-  html += '</div></div>';
-
-  // Notice — live data
-  html += '<div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid rgba(245,158,11,0.3);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;">';
-  html += '<i class="fas fa-info-circle" style="color:#d97706;flex-shrink:0;margin-top:2px;"></i>';
-  html += '<div style="font-size:13px;color:#92400e;line-height:1.6;"><strong>To get real backlink data:</strong> Use the free tools listed below — they have live databases. This tool provides strategy guidance and tells you exactly what to analyse and how to interpret your results.</div>';
-  html += '</div>';
-
-  // Free tools to check
   html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-tools" style="color:var(--teal)"></i> Free Tools to Check Your Backlinks</h3></div>';
-  html += '<div class="result-card-body" style="display:flex;flex-direction:column;gap:10px;">';
-  freeTools.forEach(function(t) {
-    html += '<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);">';
-    html += '<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;">' + t.name + '<span style="font-size:10px;font-weight:700;padding:2px 7px;background:var(--teal-light);color:var(--teal-dark);border-radius:100px;">' + t.badge + '</span></div>';
-    html += '<div style="font-size:12px;color:var(--gray-500);margin-top:2px;">' + t.desc + '</div></div>';
-    html += '<a href="' + t.url + '?site=' + encodeURIComponent(domain) + '" target="_blank" rel="noopener" style="flex-shrink:0;padding:7px 14px;background:var(--teal);color:white;border-radius:var(--r-sm);font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;">Check Now <i class="fas fa-external-link-alt"></i></a>';
+  html += '<div class="result-card-head"><h3><i class="fas fa-globe"></i> Domain Profile</h3></div>';
+  html += '<div class="result-card-body">';
+  html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">';
+  html += '<div style="font-size:1.4rem;font-weight:800;color:var(--gray-900);font-family:var(--mono);">'+d.domain+'</div>';
+  html += '<span style="padding:4px 12px;background:'+col+'20;color:'+col+';border:1px solid '+col+'40;border-radius:100px;font-size:12px;font-weight:700;">'+d.domainType+'</span>';
+  html += '<span style="padding:4px 10px;background:var(--gray-100);color:var(--gray-500);border-radius:100px;font-size:11px;font-weight:600;">.'+d.tld+'</span>';
+  html += '</div></div></div>';
+
+  // Free tools
+  html += '<div class="result-card" style="margin-bottom:14px;">';
+  html += '<div class="result-card-head"><h3><i class="fas fa-tools"></i> Free Backlink Tools — Check Your Profile</h3></div>';
+  html += '<div class="result-card-body">';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;">';
+  (d.freeTools||[]).forEach(function(tool) {
+    html += '<a href="'+tool.url+'" target="_blank" rel="noopener" style="display:block;padding:12px 14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);text-decoration:none;transition:all 0.2s;" onmouseover="this.style.borderColor=\'var(--teal)\'" onmouseout="this.style.borderColor=\'var(--gray-200)\'">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+    html += '<span style="font-size:13px;font-weight:700;color:var(--gray-900);">'+tool.name+'</span>';
+    html += '<span style="font-size:10px;font-weight:700;background:var(--teal-light);color:var(--teal-dark);padding:2px 7px;border-radius:100px;">'+tool.badge+'</span>';
+    html += '</div>';
+    html += '<span style="font-size:11px;color:var(--gray-500);">'+tool.desc+'</span>';
+    html += '</a>';
+  });
+  html += '</div></div></div>';
+
+  // Analysis areas
+  html += '<div class="result-card" style="margin-bottom:14px;">';
+  html += '<div class="result-card-head"><h3><i class="fas fa-search"></i> What to Analyse</h3></div>';
+  html += '<div class="result-card-body">';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;">';
+  (d.analysisAreas||[]).forEach(function(area) {
+    html += '<div style="padding:14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);border-left:3px solid '+area.color+';">';
+    html += '<div style="font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:5px;display:flex;align-items:center;gap:7px;"><i class="fas '+area.icon+'" style="color:'+area.color+'"></i>'+area.title+'</div>';
+    html += '<div style="font-size:11px;color:var(--gray-500);margin-bottom:5px;">'+area.what+'</div>';
+    html += '<div style="font-size:11px;color:var(--gray-600);font-weight:500;">✓ '+area.good+'</div>';
+    if (area.howToCheck) html += '<div style="font-size:10px;color:var(--teal-dark);margin-top:4px;">🔍 '+area.howToCheck+'</div>';
     html += '</div>';
   });
-  html += '</div></div>';
+  html += '</div></div></div>';
 
-  // What to analyse
+  // Strategies
   html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-microscope" style="color:#7c3aed"></i> What to Analyse in Your Backlink Profile</h3></div>';
+  html += '<div class="result-card-head"><h3><i class="fas fa-chess-knight"></i> Link Building Strategy for '+d.domainType+'</h3></div>';
   html += '<div class="result-card-body">';
-  analysisAreas.forEach(function(area) {
+  const prioColors = {High:'#059669',Medium:'#f59e0b',Low:'#0ea5e9'};
+  (d.strategies||[]).forEach(function(st) {
+    const pc = prioColors[st.priority]||'#64748b';
     html += '<div class="audit-item">';
-    html += '<div class="audit-icon" style="background:' + area.color + '20;color:' + area.color + ';width:32px;height:32px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">';
-    html += '<i class="fas ' + area.icon + '"></i></div>';
+    html += '<div class="audit-icon" style="background:'+pc+'20;color:'+pc+'"><i class="fas '+st.icon+'"></i></div>';
     html += '<div style="flex:1;">';
-    html += '<div class="audit-title" style="color:' + area.color + '">' + area.title + '</div>';
-    html += '<div class="audit-detail"><strong>What it is:</strong> ' + area.what + '</div>';
-    html += '<div class="audit-detail" style="margin-top:3px;"><strong>What\'s good:</strong> ' + area.good + '</div>';
-    html += '<div style="font-size:11px;color:var(--teal-dark);margin-top:4px;padding:3px 8px;background:var(--teal-light);border-radius:var(--r-sm);display:inline-block;"><i class="fas fa-search" style="margin-right:3px;"></i>' + area.howToCheck + '</div>';
-    html += '</div></div>';
-  });
-  html += '</div></div>';
-
-  // Link building strategies
-  html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-map-signs" style="color:#059669"></i> Link Building Strategy for ' + domainType + '</h3></div>';
-  html += '<div class="result-card-body">';
-  strategies.forEach(function(s) {
-    const prioColor = s.priority==='High'?'#059669':s.priority==='Medium'?'#f59e0b':'#94a3b8';
-    html += '<div class="audit-item">';
-    html += '<div class="audit-icon" style="background:' + prioColor + '20;color:' + prioColor + ';width:32px;height:32px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">';
-    html += '<i class="fas ' + s.icon + '"></i></div>';
-    html += '<div style="flex:1;">';
-    html += '<div class="audit-title" style="display:flex;align-items:center;gap:8px;">' + s.title + '<span style="font-size:10px;font-weight:700;color:' + prioColor + ';">' + s.priority + ' Priority</span></div>';
-    html += '<div class="audit-detail">' + s.desc + '</div>';
-    if (s.examples) html += '<div style="font-size:11px;color:var(--gray-400);margin-top:4px;font-style:italic;">Examples: ' + s.examples + '</div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">';
+    html += '<span class="audit-title">'+st.title+'</span>';
+    html += '<span style="font-size:10px;font-weight:700;background:'+pc+'20;color:'+pc+';padding:2px 7px;border-radius:100px;">'+st.priority+'</span>';
+    html += '</div>';
+    html += '<div class="audit-detail">'+st.desc+'</div>';
     html += '</div></div>';
   });
   html += '</div></div>';
 
   // Anchor text guide
   html += '<div class="result-card">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-balance-scale" style="color:#f59e0b"></i> Healthy Anchor Text Distribution</h3></div>';
+  html += '<div class="result-card-head"><h3><i class="fas fa-link"></i> Ideal Anchor Text Distribution</h3></div>';
   html += '<div class="result-card-body">';
-  anchorGuide.forEach(function(a) {
+  let total = 0;
+  (d.anchorGuide||[]).forEach(function(a){ total += a.pct; });
+  (d.anchorGuide||[]).forEach(function(a) {
+    const fill = Math.round((a.pct/Math.max(total,1))*100);
     html += '<div style="margin-bottom:12px;">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
-    html += '<span style="font-size:12px;font-weight:700;color:var(--gray-700);">' + a.type + '</span>';
-    html += '<span style="font-size:13px;font-weight:800;color:' + a.color[0] + ';">' + a.pct + '%</span></div>';
-    html += '<div style="height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-bottom:3px;">';
-    html += '<div style="width:' + a.pct + '%;height:100%;background:linear-gradient(90deg,' + a.color[0] + ',' + a.color[1] + ');border-radius:4px;"></div></div>';
-    html += '<div style="font-size:11px;color:var(--gray-400);">' + a.note + '</div>';
+    html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">';
+    html += '<span style="font-size:12px;font-weight:600;color:var(--gray-900);">'+a.type+'</span>';
+    html += '<span style="font-size:12px;font-weight:700;color:var(--teal);">'+a.pct+'%</span></div>';
+    html += '<div style="height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;">';
+    html += '<div style="height:100%;width:'+fill+'%;background:linear-gradient(90deg,var(--teal),var(--teal-dark));border-radius:4px;"></div></div>';
+    if (a.note) html += '<div style="font-size:11px;color:var(--gray-400);margin-top:2px;">'+a.note+'</div>';
     html += '</div>';
   });
   html += '</div></div>';
@@ -272,38 +217,11 @@ function runBacklinks() {
   document.getElementById('backlinkResults').innerHTML = html;
 }
 
-function getStrategiesByType(type, name, domain) {
-  const base = [
-    { icon:'fa-newspaper', priority:'High', title:'Create Linkable Assets', desc:'Original research, data studies, comprehensive guides, free tools, infographics. These earn natural backlinks because people want to reference them.', examples:'Industry survey, free calculator, ultimate guide, original statistics' },
-    { icon:'fa-handshake', priority:'High', title:'Guest Posting', desc:'Write expert articles for authoritative sites in your niche. Target DR 40+ sites with real audiences. Include 1–2 natural contextual links back to relevant pages.', examples:'Industry blogs, niche publications, partner websites' },
-    { icon:'fa-bell', priority:'Medium', title:'Brand Mention Monitoring', desc:'Set up Google Alerts for "' + name + '" and "' + domain + '". When people mention you without linking, reach out and request the link. Easy wins from existing coverage.', examples:'Google Alerts, Mention.com, Ahrefs Alerts' },
-    { icon:'fa-link', priority:'Medium', title:'Broken Link Building', desc:'Find broken links on authority sites in your niche using Ahrefs or Check My Links extension. Offer your content as a replacement. High acceptance rate.', examples:'Resource pages, industry directories, Wikipedia dead links' },
-    { icon:'fa-comments', priority:'Medium', title:'HARO / Expert Quotes', desc:'Sign up at helpareporter.com and respond to journalist queries in your niche. Earn high-authority .gov, .edu and press links from major publications.', examples:'Forbes, TechCrunch, industry publications' },
-  ];
-
-  const typeSpecific = {
-    'E-commerce': [
-      { icon:'fa-tag', priority:'High', title:'Product Review Outreach', desc:'Send products to bloggers, YouTubers and influencers in your niche for honest reviews. Reviews earn links and referral traffic.', examples:'Niche bloggers, comparison sites, best-of lists' },
-      { icon:'fa-list', priority:'High', title:'Get Listed on Comparison Sites', desc:'Ensure your product/service appears on comparison and directory sites like G2, Capterra, Trustpilot, Product Hunt.', examples:'G2, Capterra, Trustpilot, industry directories' },
-    ],
-    'SaaS / Tech': [
-      { icon:'fa-code', priority:'High', title:'Developer / Integration Partners', desc:'Build integrations with popular tools. Get listed in their marketplace or integration directory. Often provides high-authority followed links.', examples:'Zapier, Make.com, Notion marketplace' },
-      { icon:'fa-trophy', priority:'Medium', title:'Product Hunt Launch', desc:'A successful Product Hunt launch earns coverage from tech blogs and a strong .producthunt.com link.', examples:'ProductHunt.com, BetaList, SaaSHub' },
-    ],
-    'Blog / Media': [
-      { icon:'fa-chart-bar', priority:'High', title:'Original Data & Research', desc:'Publish annual industry reports or original data. Journalists and bloggers link to primary data sources constantly.', examples:'Annual surveys, trend reports, original statistics' },
-      { icon:'fa-users', priority:'Medium', title:'Expert Roundups', desc:'Host roundup posts featuring quotes from industry experts. They share and link to the post, generating links and traffic.', examples:'Industry roundups, prediction posts, top-tips compilations' },
-    ],
-    'Local Business': [
-      { icon:'fa-map-pin', priority:'High', title:'Local Directory Citations', desc:'Ensure consistent NAP (Name, Address, Phone) across all local directories. Each citation is a link and boosts local SEO.', examples:'Google Business Profile, Yelp, Bing Places, Yell.com, Yellow Pages' },
-      { icon:'fa-building', priority:'High', title:'Chamber of Commerce & Associations', desc:'Join your local Chamber of Commerce and industry associations. They often provide followed backlinks from high-authority .org domains.', examples:'Local chamber, BNI, trade associations, professional bodies' },
-    ],
-  };
-
-  const extra = typeSpecific[type] || [];
-  return [...extra, ...base].slice(0, 7);
+function clearBacklinks() {
+  document.getElementById('backlinkDomain').value = '';
+  document.getElementById('backlinkResults').innerHTML = '<div class="empty-state"><i class="fas fa-link"></i><h3>Enter your domain above</h3><p>Type your domain and click Analyse Profile</p></div>';
 }
-
 </script>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>

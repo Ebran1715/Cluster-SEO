@@ -5,7 +5,7 @@ import type View from './view/three.d.ts'
 declare function nlp<PluginTypes = {}>(text: string, lexicon?: Lexicon): View & PluginTypes
 
 // Constructor
-declare module nlp {
+declare namespace nlp {
   /** interpret text without tagging */
   export function tokenize(text: string, lexicon?: Lexicon): View
   /** scan through text with minimal analysis */
