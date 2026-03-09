@@ -1,345 +1,465 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Keyword Position Tracker — ClusterSEO Pro</title>
-  <meta name="description" content="Track keyword rankings over time. Add positions, view history, spot trends.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="shared.css">
-  <style>
-    .tool-hero {background:linear-gradient(135deg, #f59e0b, #d97706);padding:52px 28px 40px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
-    .tool-hero h1 {font-size:2rem;font-weight:800;color:var(--white);letter-spacing:-0.03em;margin-bottom:8px;}
-    .tool-hero p {font-size:14px;color:rgba(255,255,255,0.5);}
-    .tool-back {display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.2s;}
-    .tool-back:hover {background:rgba(255,255,255,0.18);}
-    .tool-section {padding:40px 28px 72px;}
-    .tool-inner {max-width:1100px;margin:0 auto;}
-    .browser-chrome {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xl);}
-    .browser-bar {background:var(--gray-100);border-bottom:1px solid var(--gray-200);padding:12px 18px;display:flex;align-items:center;gap:12px;}
-    .browser-dots {display:flex;gap:6px;}
-    .browser-dots span {width:12px;height:12px;border-radius:50%;}
-    .dot-r{background:#ff5f57;}.dot-y{background:#ffbd2e;}.dot-g{background:#28c840;}
-    .browser-url {flex:1;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 12px;font-size:12px;color:var(--gray-400);font-family:var(--mono);}
-    .app-inside {padding:28px;}
-    .input-lbl {font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-    textarea.kw-box {width:100%;border:1px solid var(--gray-200);border-radius:var(--r);padding:13px;font-size:13px;font-family:var(--mono);color:var(--gray-700);background:var(--white);resize:vertical;line-height:1.6;transition:border-color 0.2s;outline:none;}
-    textarea.kw-box:focus {border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
-    .btn-run {padding:12px 28px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;color:white;transition:all 0.2s;}
-    .btn-run:hover {opacity:0.88;transform:translateY(-1px);}
-    .btn-secondary {padding:10px 20px;border:1px solid var(--gray-200);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--gray-600);background:var(--white);transition:all 0.2s;}
-    .btn-secondary:hover {border-color:var(--teal);color:var(--teal);}
-    .result-section {margin-top:24px;}
-    .result-card {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);overflow:hidden;}
-    .result-card-head {padding:14px 18px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
-    .result-card-head h3 {font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
-    .result-card-body {padding:18px;}
-    .empty-state {text-align:center;padding:48px 24px;color:var(--gray-400);}
-    .empty-state i {font-size:2.5rem;color:var(--gray-200);display:block;margin-bottom:12px;}
-    .empty-state h3 {font-size:15px;font-weight:700;color:var(--gray-600);margin-bottom:6px;}
-    .stat-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
-    .stat-box {background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;}
-    .stat-box-num {font-size:1.5rem;font-weight:800;color:var(--gray-900);line-height:1;}
-    .stat-box-label {font-size:11px;color:var(--gray-400);font-weight:500;margin-top:4px;}
-    .tag-cloud {display:flex;flex-wrap:wrap;gap:8px;}
-    .entity-tag {display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid transparent;}
-    .et-person {background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,0.2);}
-    .et-org {background:var(--teal-light);color:var(--teal-dark);border-color:rgba(14,165,233,0.2);}
-    .et-place {background:var(--green-light);color:#065f46;border-color:rgba(16,185,129,0.2);}
-    .et-brand {background:#ede9fe;color:#6d28d9;border-color:rgba(124,58,237,0.2);}
-    .et-concept {background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-200);}
-    .score-bar {height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-top:6px;}
-    .score-fill {height:100%;border-radius:4px;transition:width 0.6s ease;}
-    .score-good {background:linear-gradient(90deg,var(--green),#34d399);}
-    .score-med  {background:linear-gradient(90deg,var(--gold),#fbbf24);}
-    .score-bad  {background:linear-gradient(90deg,var(--red),#f87171);}
-    .audit-item {display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);}
-    .audit-item:last-child {border-bottom:none;}
-    .audit-icon {width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;}
-    .ai-pass {background:#d1fae5;color:#065f46;}
-    .ai-warn {background:#fef3c7;color:#92400e;}
-    .ai-fail {background:#fee2e2;color:#991b1b;}
-    .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
-    .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keyword Position Tracker — ClusterSEO Pro</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+:root{--amber:#f59e0b;--amber-dark:#d97706;--green:#10b981;--red:#ef4444;--teal:#0ea5e9;--indigo:#6366f1;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-700:#334155;--gray-900:#0f172a;--white:#fff;--font:"Sora",sans-serif;--mono:"JetBrains Mono",monospace;--shadow:0 20px 60px rgba(0,0,0,0.1);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:#f0f4f8;color:var(--gray-900);min-height:100vh;}
+.tool-hero{background:linear-gradient(135deg,#f59e0b,#d97706);padding:52px 28px 40px;text-align:center;}
+.tool-hero h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:8px;}
+.tool-hero p{font-size:14px;color:rgba(255,255,255,0.65);margin-bottom:14px;}
+.tool-back{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;text-decoration:none;}
+.tool-section{padding:36px 20px 80px;}
+.tool-inner{max-width:1160px;margin:0 auto;}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:20px;}
+.card-head{background:var(--gray-50);border-bottom:1px solid var(--gray-200);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.card-title{font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
+.card-body{padding:22px;}
+.input-grid{display:grid;grid-template-columns:1fr 1fr 90px 140px auto;gap:10px;align-items:end;}
+@media(max-width:900px){.input-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.input-grid{grid-template-columns:1fr;}}
+.lbl{font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+input[type=text],input[type=number],input[type=date]{width:100%;padding:10px 13px;border:1.5px solid var(--gray-200);border-radius:9px;font-size:13px;font-family:var(--font);color:var(--gray-700);background:#fafbfc;outline:none;transition:border-color .2s;}
+input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.1);}
+textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:9px;padding:12px 13px;font-size:12.5px;font-family:var(--mono);color:var(--gray-700);background:#fafbfc;resize:vertical;line-height:1.65;outline:none;transition:border-color .2s;}
+textarea:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.1);}
+.btn{padding:11px 22px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:7px;transition:all .2s;white-space:nowrap;}
+.btn-amber{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;}
+.btn-amber:hover{opacity:.88;transform:translateY(-1px);}
+.btn-amber:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-sec{background:#fff;border:1.5px solid var(--gray-200);color:var(--gray-600);padding:9px 16px;font-size:12.5px;border-radius:9px;font-family:var(--font);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
+.btn-sec:hover{border-color:var(--amber);color:var(--amber);}
+.btn-danger{background:#fff;border:1.5px solid #fca5a5;color:#ef4444;padding:9px 16px;font-size:12.5px;border-radius:9px;font-family:var(--font);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
+.btn-danger:hover{background:#fef2f2;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+.tabs{display:flex;gap:4px;background:var(--gray-100);padding:4px;border-radius:10px;margin-bottom:20px;flex-wrap:wrap;}
+.tab{padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--gray-600);font-family:var(--font);transition:all .15s;display:flex;align-items:center;gap:5px;}
+.tab.active{background:#fff;color:var(--amber-dark);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+.stat-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;padding:14px;text-align:center;}
+.stat-num{font-size:1.7rem;font-weight:800;line-height:1;}
+.stat-label{font-size:10px;color:var(--gray-400);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.04em;}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.filter-input{padding:7px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:12.5px;font-family:var(--font);color:var(--gray-700);background:#fff;outline:none;}
+.filter-input:focus{border-color:var(--amber);}
+.kw-row{background:#fff;border:1.5px solid var(--gray-200);border-radius:12px;padding:16px 18px;margin-bottom:10px;transition:all .2s;}
+.kw-row:hover{border-color:var(--amber);box-shadow:0 2px 12px rgba(245,158,11,.08);}
+.kw-row.top3{border-left:4px solid #059669;}
+.kw-row.page1{border-left:4px solid #f59e0b;}
+.kw-row.page2{border-left:4px solid #0ea5e9;}
+.kw-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.pos-badge{text-align:center;flex-shrink:0;min-width:54px;}
+.pos-num{font-size:1.9rem;font-weight:800;line-height:1;}
+.pos-lbl{font-size:9px;font-weight:700;padding:2px 6px;border-radius:100px;margin-top:3px;display:inline-block;}
+.kw-info{flex:1;min-width:120px;}
+.kw-name{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:3px;}
+.kw-url{font-size:11px;color:var(--gray-400);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;}
+.change-badge{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;margin-top:3px;}
+.ch-up{color:#059669;}
+.ch-down{color:#ef4444;}
+.ch-flat{color:var(--gray-400);font-size:12px;}
+.kw-history{margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);}
+.hist-label{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;}
+.hist-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.hist-chip{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:7px;padding:5px 10px;text-align:center;}
+.hist-pos{font-size:12px;font-weight:700;}
+.hist-date{font-size:9px;color:var(--gray-400);}
+.bulk-hint{font-size:11.5px;color:var(--gray-400);line-height:1.6;margin-bottom:10px;}
+.bulk-hint code{background:var(--gray-100);padding:1px 5px;border-radius:4px;font-family:var(--mono);}
+.empty-state{text-align:center;padding:52px 24px;color:var(--gray-400);}
+.empty-state i{font-size:2.8rem;color:var(--gray-200);display:block;margin-bottom:12px;}
+.empty-state h3{font-size:15px;font-weight:700;color:var(--gray-500);margin-bottom:6px;}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.no-results{text-align:center;padding:32px;color:var(--gray-400);font-size:13px;}
+</style>
 </head>
 <body>
 <div class="page-wrap">
-  <section class="tool-hero">
-    <h1><i class="fas fa-chart-line" style="margin-right:10px;"></i> Keyword Position Tracker</h1>
-    <p>Manually track keyword rankings over time and visualise position changes</p>
-    <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
-  </section>
-  <section class="tool-section">
-    <div class="tool-inner">
-      <div class="browser-chrome">
-        <div class="browser-bar">
-          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-          <div class="browser-url">clusterseo.pro — Keyword Position Tracker</div>
+<section class="tool-hero">
+  <h1><i class="fas fa-chart-line" style="margin-right:10px;"></i> Keyword Position Tracker</h1>
+  <p>Manually log rankings over time — track trends, spot wins and catch declines early</p>
+  <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
+</section>
+<section class="tool-section">
+<div class="tool-inner">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><i class="fas fa-plus-circle" style="color:var(--amber);"></i> Add / Update Keyword</div>
+      <div style="font-size:12px;color:var(--gray-400);">Data saved on your server</div>
+    </div>
+    <div class="card-body">
+      <div class="tabs" id="addTabs">
+        <button class="tab active" data-tab="single" onclick="switchAddTab('single')"><i class="fas fa-keyboard"></i> Single Entry</button>
+        <button class="tab" data-tab="bulk" onclick="switchAddTab('bulk')"><i class="fas fa-list"></i> Bulk Paste</button>
+      </div>
+      <div id="add-single" class="tab-panel active">
+        <div class="input-grid">
+          <div>
+            <div class="lbl"><i class="fas fa-key"></i> Keyword</div>
+            <input type="text" id="trackKw" placeholder="e.g. best running shoes" onkeydown="if(event.key==='Enter')addSingle()">
+          </div>
+          <div>
+            <div class="lbl"><i class="fas fa-link"></i> Page URL <span style="font-weight:400;color:var(--gray-400);margin-left:4px;">(optional)</span></div>
+            <input type="text" id="trackUrl" placeholder="e.g. /running-shoes">
+          </div>
+          <div>
+            <div class="lbl"><i class="fas fa-hashtag"></i> Position</div>
+            <input type="number" id="trackPos" placeholder="1-200" min="1" max="200" onkeydown="if(event.key==='Enter')addSingle()">
+          </div>
+          <div>
+            <div class="lbl"><i class="fas fa-calendar"></i> Date</div>
+            <input type="date" id="trackDate">
+          </div>
+          <div>
+            <div class="lbl" style="visibility:hidden;">x</div>
+            <button class="btn btn-amber" id="btnAdd" onclick="addSingle()"><i class="fas fa-plus"></i> Add</button>
+          </div>
         </div>
-        <div class="app-inside">
-
-          <div style="display:grid;grid-template-columns:1fr 1fr auto auto auto;gap:10px;align-items:end;margin-bottom:20px;flex-wrap:wrap;">
-            <div>
-              <div class="input-lbl"><i class="fas fa-key"></i> Keyword</div>
-              <input type="text" id="trackKw" placeholder="e.g. best running shoes" style="width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'" onkeydown="if(event.key==='Enter')addTrackedKw()">
-            </div>
-            <div>
-              <div class="input-lbl"><i class="fas fa-link"></i> Page URL <span style="color:var(--gray-300);font-weight:400;">(optional)</span></div>
-              <input type="text" id="trackUrl" placeholder="e.g. /running-shoes" style="width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'">
-            </div>
-            <div>
-              <div class="input-lbl"><i class="fas fa-hashtag"></i> Position</div>
-              <input type="number" id="trackPos" placeholder="1–100" min="1" max="200" style="width:80px;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'" onkeydown="if(event.key==='Enter')addTrackedKw()">
-            </div>
-            <div>
-              <div class="input-lbl"><i class="fas fa-calendar"></i> Date</div>
-              <input type="date" id="trackDate" style="padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'">
-            </div>
-            <button class="btn-run" style="background:linear-gradient(135deg,#f59e0b,#d97706);height:42px;margin-top:auto;" onclick="addTrackedKw()"><i class="fas fa-plus"></i> Add</button>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-            <button class="btn-secondary" onclick="exportTrackingCSV()"><i class="fas fa-download"></i> Export CSV</button>
-            <button class="btn-secondary" onclick="clearAllTracking()" style="color:var(--red);border-color:var(--red);"><i class="fas fa-trash"></i> Clear All</button>
-          </div>
-          <div id="trackingResults">
-            <div class="empty-state"><i class="fas fa-chart-line"></i><h3>No keywords tracked yet</h3><p>Add keywords with their current positions above to start tracking</p></div>
-          </div>
-
+      </div>
+      <div id="add-bulk" class="tab-panel">
+        <div class="bulk-hint">
+          One keyword per line. Format: <code>keyword, position</code> or <code>keyword, position, /url</code><br>
+          Example: <code>best running shoes, 4</code> &nbsp;or&nbsp; <code>trail running shoes, 12, /trail-shoes</code>
+        </div>
+        <textarea id="bulkText" rows="8" placeholder="best running shoes, 4&#10;trail running shoes, 12, /trail-shoes&#10;running shoe reviews, 7&#10;cheap running shoes, 18"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-amber" id="btnBulk" onclick="addBulk()"><i class="fas fa-upload"></i> Add All</button>
+          <span style="font-size:12px;color:var(--gray-400);">Uses today as the date</span>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+  <div id="results">
+    <div class="empty-state"><i class="fas fa-chart-line"></i><h3>No keywords tracked yet</h3><p>Add keywords and their positions above to start tracking.</p></div>
+  </div>
+</div>
+</section>
 </div>
 <script src="shared-layout.js"></script>
-
 <script>
-const API = '';
+const API = "";
+let allData = {};
+let sortBy = "position";
+let filterText = "";
+let filterPage = "all";
 
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('trackDate').value = new Date().toISOString().split('T')[0];
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("trackDate").value = today();
   loadAndRender();
 });
 
+function today() { return new Date().toISOString().split("T")[0]; }
+function escH(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function switchAddTab(id) {
+  document.querySelectorAll("#addTabs .tab").forEach(t => t.classList.toggle("active", t.dataset.tab === id));
+  document.getElementById("add-single").classList.toggle("active", id === "single");
+  document.getElementById("add-bulk").classList.toggle("active", id === "bulk");
+}
+
 async function loadAndRender() {
   try {
-    const res  = await fetch(API + '/api/keyword-tracking');
+    const res  = await fetch(API + "/api/keyword-tracking");
     const data = await res.json();
     if (!data.success) throw new Error(data.error);
-    renderTracking(data.data);
+    allData = data.data || {};
+    renderResults(allData);
   } catch(err) {
-    document.getElementById('trackingResults').innerHTML =
-      '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i>' +
-      '<h3>Could not load tracking data</h3><p>' + err.message + '<br>Make sure your server is running.</p></div>';
+    document.getElementById("results").innerHTML =
+      "<div class=\"empty-state\"><i class=\"fas fa-exclamation-circle\" style=\"color:var(--red);\"></i><h3>Could not load data</h3><p>" + escH(err.message) + "<br>Make sure your server is running.</p></div>";
   }
 }
 
-async function addTrackedKw() {
-  const kw  = document.getElementById('trackKw').value.trim();
-  const pos = parseInt(document.getElementById('trackPos').value);
-  const url = document.getElementById('trackUrl').value.trim();
-  const dt  = document.getElementById('trackDate').value;
-
-  if (!kw)                          { alert('Enter a keyword.'); return; }
-  if (!pos || pos < 1 || pos > 200) { alert('Enter a valid position (1–200).'); return; }
-  if (!dt)                          { alert('Select a date.'); return; }
-
+async function addSingle() {
+  const kw  = document.getElementById("trackKw").value.trim();
+  const pos = parseInt(document.getElementById("trackPos").value);
+  const url = document.getElementById("trackUrl").value.trim();
+  const dt  = document.getElementById("trackDate").value;
+  if (!kw)                          { alert("Enter a keyword."); return; }
+  if (!pos || pos < 1 || pos > 200) { alert("Enter a valid position (1-200)."); return; }
+  if (!dt)                          { alert("Select a date."); return; }
+  const btn = document.getElementById("btnAdd");
+  btn.disabled = true; btn.innerHTML = "<span class=\"spin\"></span> Saving...";
   try {
-    const res  = await fetch(API + '/api/keyword-tracking', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ keyword: kw, position: pos, url, date: dt })
+    const res  = await fetch(API + "/api/keyword-tracking", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({keyword:kw, position:pos, url, date:dt})
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.error);
-
-    document.getElementById('trackKw').value  = '';
-    document.getElementById('trackPos').value = '';
-    renderTracking(data.data);
-  } catch(err) {
-    alert('Error saving entry: ' + err.message);
-  }
+    allData = data.data;
+    document.getElementById("trackKw").value  = "";
+    document.getElementById("trackPos").value = "";
+    document.getElementById("trackUrl").value = "";
+    renderResults(allData);
+  } catch(err) { alert("Error: " + err.message); }
+  btn.disabled = false; btn.innerHTML = "<i class=\"fas fa-plus\"></i> Add";
 }
 
-async function deleteTrackedKw(btn) {
-  const kw = btn.getAttribute('data-kw');
-  if (!kw || !confirm('Delete all tracking data for "' + kw + '"?')) return;
-
+async function addBulk() {
+  const lines = document.getElementById("bulkText").value.trim().split("\n").map(l=>l.trim()).filter(l=>l);
+  if (!lines.length) { alert("Paste some keywords first."); return; }
+  const entries = [];
+  const dt = today();
+  for (const line of lines) {
+    const parts = line.split(",").map(p=>p.trim());
+    if (parts.length < 2) continue;
+    const kw  = parts[0];
+    const pos = parseInt(parts[1]);
+    const url = parts[2] || "";
+    if (!kw || !pos || pos < 1) continue;
+    entries.push({keyword:kw, position:pos, url, date:dt});
+  }
+  if (!entries.length) { alert("No valid entries found. Format: keyword, position"); return; }
+  const btn = document.getElementById("btnBulk");
+  btn.disabled = true; btn.innerHTML = "<span class=\"spin\"></span> Adding...";
   try {
-    const res  = await fetch(API + '/api/keyword-tracking/' + encodeURIComponent(kw), { method: 'DELETE' });
+    const res  = await fetch(API + "/api/keyword-tracking/bulk", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({entries})
+    });
     const data = await res.json();
     if (!data.success) throw new Error(data.error);
-    renderTracking(data.data);
-  } catch(err) {
-    alert('Error deleting: ' + err.message);
-  }
+    allData = data.data;
+    document.getElementById("bulkText").value = "";
+    renderResults(allData);
+  } catch(err) { alert("Error: " + err.message); }
+  btn.disabled = false; btn.innerHTML = "<i class=\"fas fa-upload\"></i> Add All";
 }
 
-async function clearAllTracking() {
-  if (!confirm('Delete ALL tracking data? This cannot be undone.')) return;
+async function deleteKw(kw) {
+  if (!confirm("Delete all tracking data for \"" + kw + "\"?")) return;
   try {
-    const res  = await fetch(API + '/api/keyword-tracking', { method: 'DELETE' });
+    const res  = await fetch(API + "/api/keyword-tracking/" + encodeURIComponent(kw), {method:"DELETE"});
     const data = await res.json();
     if (!data.success) throw new Error(data.error);
-    renderTracking(data.data);
-  } catch(err) {
-    alert('Error clearing data: ' + err.message);
-  }
+    allData = data.data;
+    renderResults(allData);
+  } catch(err) { alert("Error: " + err.message); }
 }
 
-function renderTracking(data) {
+async function clearAll() {
+  if (!confirm("Delete ALL tracking data? This cannot be undone.")) return;
+  try {
+    const res  = await fetch(API + "/api/keyword-tracking", {method:"DELETE"});
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    allData = {};
+    renderResults({});
+  } catch(err) { alert("Error: " + err.message); }
+}
+
+function applySort()   { sortBy = document.getElementById("sortBy").value; renderKwList(allData); }
+function applyFilter() {
+  filterText = document.getElementById("filterText").value.toLowerCase();
+  filterPage = document.getElementById("filterPage").value;
+  renderKwList(allData);
+}
+
+function renderResults(data) {
   const keys = Object.keys(data || {});
-  const el   = document.getElementById('trackingResults');
-
   if (!keys.length) {
-    el.innerHTML = '<div class="empty-state"><i class="fas fa-chart-line"></i>' +
-      '<h3>No keywords tracked yet</h3>' +
-      '<p>Add a keyword and its current ranking position above to begin tracking.<br>' +
-      '<span style="color:var(--teal);font-weight:600;">Data is now saved on your server — not just in this browser.</span></p></div>';
+    document.getElementById("results").innerHTML =
+      "<div class=\"empty-state\"><i class=\"fas fa-chart-line\"></i><h3>No keywords tracked yet</h3><p>Add keywords and their positions above to begin tracking.</p></div>";
     return;
   }
-
-  let improving = 0, declining = 0, top3 = 0, top10 = 0;
-  keys.forEach(function(kw) {
-    const entries = data[kw].entries || [];
-    if (!entries.length) return;
-    const latest = entries[entries.length - 1].pos;
-    if (latest <= 3)  top3++;
-    if (latest <= 10) top10++;
-    if (entries.length > 1) {
-      const prev = entries[entries.length - 2].pos;
+  let improving=0, declining=0, top3=0, page1=0, stable=0;
+  keys.forEach(kw => {
+    const e = data[kw].entries||[];
+    if (!e.length) return;
+    const latest = e[e.length-1].pos;
+    if (latest<=3)  top3++;
+    if (latest<=10) page1++;
+    if (e.length>1) {
+      const prev = e[e.length-2].pos;
       if (latest < prev) improving++;
       else if (latest > prev) declining++;
+      else stable++;
     }
   });
 
-  let html = '<div class="stat-grid" style="grid-template-columns:repeat(5,1fr);">';
-  html += '<div class="stat-box"><div class="stat-box-num">'+keys.length+'</div><div class="stat-box-label">Tracked</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">'+improving+'</div><div class="stat-box-label">Improving</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">'+declining+'</div><div class="stat-box-label">Declining</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--teal)">'+top3+'</div><div class="stat-box-label">Top 3</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--gold)">'+top10+'</div><div class="stat-box-label">Top 10</div></div>';
-  html += '</div>';
+  const statsHtml =
+    "<div class=\"stat-grid\">" +
+    statBox(keys.length,"Tracked","var(--gray-900)") +
+    statBox(top3,"Top 3","#059669") +
+    statBox(page1,"Page 1","#f59e0b") +
+    statBox(improving,"Improving","#059669") +
+    statBox(declining,"Declining","#ef4444") +
+    statBox(stable,"Stable","#94a3b8") +
+    "</div>";
 
-  const sortedKeys = keys.slice().sort(function(a, b) {
-    const aLast = (data[a].entries || [{pos:999}]).slice(-1)[0].pos;
-    const bLast = (data[b].entries || [{pos:999}]).slice(-1)[0].pos;
-    return aLast - bLast;
+  document.getElementById("results").innerHTML =
+    "<div class=\"card\">" +
+    "<div class=\"card-head\">" +
+    "<div class=\"card-title\"><i class=\"fas fa-chart-bar\" style=\"color:var(--amber);\"></i> Tracking Dashboard</div>" +
+    "<div style=\"display:flex;gap:8px;flex-wrap:wrap;\">" +
+    "<button class=\"btn-sec\" onclick=\"exportCSV()\"><i class=\"fas fa-download\"></i> Export CSV</button>" +
+    "<button class=\"btn-danger\" onclick=\"clearAll()\"><i class=\"fas fa-trash\"></i> Clear All</button>" +
+    "</div></div>" +
+    "<div class=\"card-body\">" +
+    statsHtml +
+    "<div class=\"filters\">" +
+    "<input class=\"filter-input\" id=\"filterText\" placeholder=\"Search keywords...\" oninput=\"applyFilter()\" style=\"min-width:180px;\">" +
+    "<select class=\"filter-input\" id=\"filterPage\" onchange=\"applyFilter()\">" +
+    "<option value=\"all\">All Positions</option>" +
+    "<option value=\"top3\">Top 3 Only</option>" +
+    "<option value=\"page1\">Page 1 (1-10)</option>" +
+    "<option value=\"page2\">Page 2 (11-20)</option>" +
+    "<option value=\"beyond\">Beyond Page 2</option>" +
+    "<option value=\"improving\">Improving</option>" +
+    "<option value=\"declining\">Declining</option>" +
+    "</select>" +
+    "<select class=\"filter-input\" id=\"sortBy\" onchange=\"applySort()\">" +
+    "<option value=\"position\">Sort: Best Position</option>" +
+    "<option value=\"change\">Sort: Biggest Gain</option>" +
+    "<option value=\"decline\">Sort: Biggest Drop</option>" +
+    "<option value=\"az\">Sort: A to Z</option>" +
+    "<option value=\"entries\">Sort: Most Entries</option>" +
+    "</select>" +
+    "</div>" +
+    "<div id=\"kwList\"></div>" +
+    "</div></div>";
+
+  renderKwList(data);
+}
+
+function renderKwList(data) {
+  let keys = Object.keys(data||{});
+  if (!keys.length) return;
+
+  keys = keys.filter(kw => {
+    const e = data[kw].entries||[];
+    if (!e.length) return false;
+    const latest = e[e.length-1].pos;
+    const prev   = e.length>1 ? e[e.length-2].pos : latest;
+    const change = prev - latest;
+    if (filterText && !kw.toLowerCase().includes(filterText)) return false;
+    if (filterPage==="top3"      && latest>3)           return false;
+    if (filterPage==="page1"     && latest>10)          return false;
+    if (filterPage==="page2"     && (latest<11||latest>20)) return false;
+    if (filterPage==="beyond"    && latest<=20)         return false;
+    if (filterPage==="improving" && change<=0)          return false;
+    if (filterPage==="declining" && change>=0)          return false;
+    return true;
   });
 
-  html += '<div style="display:flex;flex-direction:column;gap:10px;">';
+  keys.sort((a,b) => {
+    const ae=data[a].entries||[]; const be=data[b].entries||[];
+    const aL=ae.length?ae[ae.length-1].pos:999;
+    const bL=be.length?be[be.length-1].pos:999;
+    const aP=ae.length>1?ae[ae.length-2].pos:aL;
+    const bP=be.length>1?be[be.length-2].pos:bL;
+    if (sortBy==="position") return aL-bL;
+    if (sortBy==="change")   return (bP-bL)-(aP-aL);
+    if (sortBy==="decline")  return (aP-aL)-(bP-bL);
+    if (sortBy==="az")       return a.localeCompare(b);
+    if (sortBy==="entries")  return be.length-ae.length;
+    return aL-bL;
+  });
 
-  sortedKeys.forEach(function(kw) {
+  const el = document.getElementById("kwList");
+  if (!el) return;
+  if (!keys.length) { el.innerHTML="<div class=\"no-results\">No keywords match the current filters.</div>"; return; }
+
+  let html = "";
+  keys.forEach(kw => {
     const kwData  = data[kw];
-    const entries = kwData.entries || [];
+    const entries = kwData.entries||[];
     if (!entries.length) return;
-
-    const latest = entries[entries.length - 1];
-    const prev   = entries.length > 1 ? entries[entries.length - 2] : null;
+    const latest = entries[entries.length-1];
+    const prev   = entries.length>1 ? entries[entries.length-2] : null;
     const change = prev ? prev.pos - latest.pos : 0;
 
-    const posColor      = latest.pos <= 3 ? '#059669' : latest.pos <= 10 ? '#f59e0b' : latest.pos <= 20 ? '#0ea5e9' : '#94a3b8';
-    const posLabel      = latest.pos <= 3 ? 'Top 3'   : latest.pos <= 10 ? 'Page 1'  : latest.pos <= 20 ? 'Page 2'  : 'Page 3+';
-    const posLabelColor = latest.pos <= 3 ? '#065f46' : latest.pos <= 10 ? '#92400e' : latest.pos <= 20 ? 'var(--teal-dark)' : 'var(--gray-500)';
-    const posLabelBg    = latest.pos <= 3 ? '#d1fae5' : latest.pos <= 10 ? '#fef3c7' : latest.pos <= 20 ? 'var(--teal-light)' : 'var(--gray-100)';
+    const posColor = latest.pos<=3?"#059669":latest.pos<=10?"#f59e0b":latest.pos<=20?"#0ea5e9":"#94a3b8";
+    const posLbl   = latest.pos<=3?"Trophy Top 3":latest.pos<=10?"Page 1":latest.pos<=20?"Page 2":"Page 3+";
+    const posLblBg = latest.pos<=3?"#d1fae5":latest.pos<=10?"#fef3c7":latest.pos<=20?"#e0f2fe":"#f1f5f9";
+    const posLblC  = latest.pos<=3?"#065f46":latest.pos<=10?"#92400e":latest.pos<=20?"#075985":"#64748b";
+    const rowCls   = latest.pos<=3?"top3":latest.pos<=10?"page1":latest.pos<=20?"page2":"";
 
-    const changeHtml = change > 0
-      ? '<span style="color:#059669;font-weight:700;font-size:13px;display:flex;align-items:center;gap:3px;"><i class="fas fa-arrow-up"></i> +'+change+'</span>'
-      : change < 0
-      ? '<span style="color:#ef4444;font-weight:700;font-size:13px;display:flex;align-items:center;gap:3px;"><i class="fas fa-arrow-down"></i> '+Math.abs(change)+'</span>'
-      : '<span style="color:var(--gray-400);font-size:12px;">No change</span>';
+    const changeHtml = change>0
+      ? "<span class=\"change-badge ch-up\"><i class=\"fas fa-arrow-up\"></i> +" + change + " positions</span>"
+      : change<0
+      ? "<span class=\"change-badge ch-down\"><i class=\"fas fa-arrow-down\"></i> " + Math.abs(change) + " positions</span>"
+      : prev ? "<span class=\"change-badge ch-flat\">No change</span>" : "";
 
-    const pts  = entries.slice(-12);
-    const allP = pts.map(function(e){ return e.pos; });
-    const maxP = Math.max.apply(null, allP);
-    const minP = Math.min.apply(null, allP);
-    const rng  = Math.max(maxP - minP, 1);
-    const svgW = 120, svgH = 36;
-    const svgPts = pts.map(function(e, i) {
-      const x = pts.length === 1 ? svgW/2 : (i / (pts.length-1)) * svgW;
-      const y = svgH - 4 - ((maxP - e.pos) / rng) * (svgH - 8);
-      return x.toFixed(1) + ',' + y.toFixed(1);
-    }).join(' ');
-    const sparkColor = change > 0 ? '#059669' : change < 0 ? '#ef4444' : '#94a3b8';
-    const sparkline  = pts.length > 1
-      ? '<svg width="'+svgW+'" height="'+svgH+'" style="flex-shrink:0;"><polyline points="'+svgPts+'" fill="none" stroke="'+sparkColor+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg>'
-      : '<div style="font-size:10px;color:var(--gray-300);width:120px;text-align:center;">Add more entries to see trend</div>';
+    const pts  = entries.slice(-14);
+    const allP = pts.map(e=>e.pos);
+    const maxP = Math.max(...allP);
+    const minP = Math.min(...allP);
+    const rng  = Math.max(maxP-minP,1);
+    const W=140, H=38;
+    const coords = pts.map((e,i) => {
+      const x = pts.length===1 ? W/2 : (i/(pts.length-1))*W;
+      const y = H-4 - ((maxP-e.pos)/rng)*(H-8);
+      return x.toFixed(1)+","+y.toFixed(1);
+    }).join(" ");
+    const lineColor = change>0?"#059669":change<0?"#ef4444":"#94a3b8";
+    const spark = pts.length>1
+      ? "<svg width=\"" + W + "\" height=\"" + H + "\" style=\"flex-shrink:0;\"><polyline points=\"" + coords + "\" fill=\"none\" stroke=\"" + lineColor + "\" stroke-width=\"2.5\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/></svg>"
+      : "<div style=\"width:140px;font-size:10px;color:var(--gray-300);text-align:center;\">Add more entries</div>";
 
-    const safeKw = kw.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const histChips = entries.length>1
+      ? "<div class=\"kw-history\"><div class=\"hist-label\">Position History</div><div class=\"hist-chips\">" +
+        entries.slice().reverse().slice(0,10).map((e,i) =>
+          "<div class=\"hist-chip\"><div class=\"hist-pos\" style=\"color:" + (i===0?posColor:"var(--gray-600)") + ";\">#" + e.pos + "</div><div class=\"hist-date\">" + e.date + "</div></div>"
+        ).join("") +
+        (entries.length>10 ? "<div style=\"font-size:11px;color:var(--gray-400);align-self:center;\">+" + (entries.length-10) + " more</div>" : "") +
+        "</div></div>"
+      : "";
 
-    html += '<div style="background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);padding:16px 18px;transition:all 0.2s;" onmouseover="this.style.borderColor=\'var(--gray-300)\';this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.06)\'" onmouseout="this.style.borderColor=\'var(--gray-200)\';this.style.boxShadow=\'none\'">';
-    html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">';
+    const safeKw = kw.replace(/\\/g,"\\\\").replace(/"/g,"&quot;");
 
-    html += '<div style="text-align:center;flex-shrink:0;">';
-    html += '<div style="font-size:1.8rem;font-weight:800;color:'+posColor+';line-height:1;">#'+latest.pos+'</div>';
-    html += '<div style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:100px;background:'+posLabelBg+';color:'+posLabelColor+';margin-top:3px;">'+posLabel+'</div>';
-    html += '</div>';
-
-    html += '<div style="flex:1;min-width:120px;">';
-    html += '<div style="font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:3px;">'+kw+'</div>';
-    if (kwData.url) html += '<div style="font-size:11px;color:var(--gray-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">'+kwData.url+'</div>';
-    html += '<div style="margin-top:4px;">'+changeHtml+'</div>';
-    html += '</div>';
-
-    html += sparkline;
-
-    html += '<div style="text-align:right;flex-shrink:0;">';
-    html += '<div style="font-size:11px;color:var(--gray-400);margin-bottom:4px;">'+entries.length+' data point'+(entries.length===1?'':'s')+'</div>';
-    html += '<div style="font-size:11px;color:var(--gray-400);margin-bottom:8px;">Updated: '+latest.date+'</div>';
-    html += '<button data-kw="'+safeKw+'" onclick="deleteTrackedKw(this)" style="background:none;border:1px solid var(--gray-200);padding:4px 10px;border-radius:var(--r-sm);font-size:11px;color:var(--gray-400);cursor:pointer;font-family:var(--font);transition:all 0.15s;" onmouseover="this.style.borderColor=\'#ef4444\';this.style.color=\'#ef4444\'" onmouseout="this.style.borderColor=\'var(--gray-200)\';this.style.color=\'var(--gray-400)\'"><i class="fas fa-trash"></i> Delete</button>';
-    html += '</div>';
-    html += '</div>';
-
-    if (entries.length > 1) {
-      html += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);">';
-      html += '<div style="font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Position History</div>';
-      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
-      entries.slice().reverse().slice(0,8).forEach(function(e,i){
-        const c = i === 0 ? posColor : 'var(--gray-400)';
-        html += '<div style="text-align:center;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 10px;">';
-        html += '<div style="font-size:13px;font-weight:700;color:'+c+'">#'+e.pos+'</div>';
-        html += '<div style="font-size:10px;color:var(--gray-400);">'+e.date+'</div>';
-        html += '</div>';
-      });
-      if (entries.length > 8) html += '<div style="font-size:11px;color:var(--gray-400);align-self:center;">+'+(entries.length-8)+' more</div>';
-      html += '</div></div>';
-    }
-
-    html += '</div>';
+    html += "<div class=\"kw-row " + rowCls + "\">" +
+      "<div class=\"kw-top\">" +
+      "<div class=\"pos-badge\"><div class=\"pos-num\" style=\"color:" + posColor + ";\">#" + latest.pos + "</div><div class=\"pos-lbl\" style=\"background:" + posLblBg + ";color:" + posLblC + ";\">" + posLbl + "</div></div>" +
+      "<div class=\"kw-info\"><div class=\"kw-name\">" + escH(kw) + "</div>" +
+      (kwData.url ? "<div class=\"kw-url\">" + escH(kwData.url) + "</div>" : "") +
+      changeHtml + "</div>" +
+      spark +
+      "<div style=\"text-align:right;flex-shrink:0;\">" +
+      "<div style=\"font-size:11px;color:var(--gray-400);margin-bottom:4px;\">" + entries.length + " data point" + (entries.length===1?"":"s") + "</div>" +
+      "<div style=\"font-size:11px;color:var(--gray-400);margin-bottom:8px;\">Updated: " + latest.date + "</div>" +
+      "<button onclick=\"deleteKw(&quot;" + safeKw + "&quot;)\" style=\"background:none;border:1px solid var(--gray-200);padding:4px 10px;border-radius:7px;font-size:11px;color:var(--gray-400);cursor:pointer;font-family:var(--font);transition:all .15s;\" onmouseover=\"this.style.borderColor='#ef4444';this.style.color='#ef4444'\" onmouseout=\"this.style.borderColor='var(--gray-200)';this.style.color='var(--gray-400)'\"><i class=\"fas fa-trash\"></i> Delete</button>" +
+      "</div></div>" +
+      histChips +
+      "</div>";
   });
 
-  html += '</div>';
   el.innerHTML = html;
 }
 
-async function exportTrackingCSV() {
+function statBox(n,label,color){ return "<div class=\"stat-box\"><div class=\"stat-num\" style=\"color:" + color + ";\">" + n + "</div><div class=\"stat-label\">" + label + "</div></div>"; }
+
+async function exportCSV() {
   try {
-    const res  = await fetch(API + '/api/keyword-tracking');
+    const res  = await fetch(API + "/api/keyword-tracking");
     const json = await res.json();
     if (!json.success) throw new Error(json.error);
     const data = json.data;
-    const rows = ['Keyword,URL,Date,Position,Change'];
-    Object.entries(data).forEach(function(entry) {
-      const kw      = entry[0];
-      const kwData  = entry[1];
-      const entries = kwData.entries || [];
-      entries.forEach(function(e, i) {
-        const prev   = i > 0 ? entries[i-1].pos : '';
-        const change = prev !== '' ? prev - e.pos : '';
-        rows.push('"'+kw.replace(/"/g,'""')+'","'+(kwData.url||'')+'","'+e.date+'",'+e.pos+','+(change!==''?change:''));
+    const rows = ["Keyword,URL,Date,Position,Change"];
+    Object.entries(data).forEach(([kw,kwData]) => {
+      (kwData.entries||[]).forEach((e,i,arr) => {
+        const prev   = i>0 ? arr[i-1].pos : "";
+        const change = prev!=="" ? prev-e.pos : "";
+        rows.push("\"" + kw.replace(/"/g,"\"\"") + "\",\"" + (kwData.url||"") + "\",\"" + e.date + "\"," + e.pos + "," + change);
       });
     });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
-    a.download = 'keyword-tracking-'+new Date().toISOString().split('T')[0]+'.csv';
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([rows.join("\n")],{type:"text/csv"}));
+    a.download="keyword-tracking-" + today() + ".csv";
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  } catch(err) {
-    alert('Export failed: ' + err.message);
-  }
+  } catch(err) { alert("Export failed: " + err.message); }
 }
 </script>
 </body>

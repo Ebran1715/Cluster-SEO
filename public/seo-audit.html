@@ -4,103 +4,168 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SEO Audit Tool — ClusterSEO Pro</title>
-  <meta name="description" content="Paste page HTML for an instant on-page SEO health check.">
+  <meta name="description" content="Full SEO audit with PageSpeed Insights, Core Web Vitals and 22 on-page checks.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="shared.css">
   <style>
-    .tool-hero {background:linear-gradient(135deg, #059669, #047857);padding:52px 28px 40px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
-    .tool-hero h1 {font-size:2rem;font-weight:800;color:var(--white);letter-spacing:-0.03em;margin-bottom:8px;}
-    .tool-hero p {font-size:14px;color:rgba(255,255,255,0.5);}
-    .tool-back {display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.2s;}
-    .tool-back:hover {background:rgba(255,255,255,0.18);}
-    .tool-section {padding:40px 28px 72px;}
-    .tool-inner {max-width:1100px;margin:0 auto;}
-    .browser-chrome {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xl);}
-    .browser-bar {background:var(--gray-100);border-bottom:1px solid var(--gray-200);padding:12px 18px;display:flex;align-items:center;gap:12px;}
-    .browser-dots {display:flex;gap:6px;}
-    .browser-dots span {width:12px;height:12px;border-radius:50%;}
-    .dot-r{background:#ff5f57;}.dot-y{background:#ffbd2e;}.dot-g{background:#28c840;}
-    .browser-url {flex:1;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 12px;font-size:12px;color:var(--gray-400);font-family:var(--mono);}
-    .app-inside {padding:28px;}
-    .input-lbl {font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-    textarea.kw-box {width:100%;border:1px solid var(--gray-200);border-radius:var(--r);padding:13px;font-size:13px;font-family:var(--mono);color:var(--gray-700);background:var(--white);resize:vertical;line-height:1.6;transition:border-color 0.2s;outline:none;}
-    textarea.kw-box:focus {border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
-    .btn-run {padding:12px 28px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;color:white;transition:all 0.2s;}
-    .btn-run:hover {opacity:0.88;transform:translateY(-1px);}
-    .btn-secondary {padding:10px 20px;border:1px solid var(--gray-200);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--gray-600);background:var(--white);transition:all 0.2s;}
-    .btn-secondary:hover {border-color:var(--teal);color:var(--teal);}
-    .result-section {margin-top:24px;}
-    .result-card {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);overflow:hidden;}
-    .result-card-head {padding:14px 18px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
-    .result-card-head h3 {font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
-    .result-card-body {padding:18px;}
-    .empty-state {text-align:center;padding:48px 24px;color:var(--gray-400);}
-    .empty-state i {font-size:2.5rem;color:var(--gray-200);display:block;margin-bottom:12px;}
-    .empty-state h3 {font-size:15px;font-weight:700;color:var(--gray-600);margin-bottom:6px;}
-    .stat-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
-    .stat-box {background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;}
-    .stat-box-num {font-size:1.5rem;font-weight:800;color:var(--gray-900);line-height:1;}
-    .stat-box-label {font-size:11px;color:var(--gray-400);font-weight:500;margin-top:4px;}
-    .tag-cloud {display:flex;flex-wrap:wrap;gap:8px;}
-    .entity-tag {display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid transparent;}
-    .et-person {background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,0.2);}
-    .et-org {background:var(--teal-light);color:var(--teal-dark);border-color:rgba(14,165,233,0.2);}
-    .et-place {background:var(--green-light);color:#065f46;border-color:rgba(16,185,129,0.2);}
-    .et-brand {background:#ede9fe;color:#6d28d9;border-color:rgba(124,58,237,0.2);}
-    .et-concept {background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-200);}
-    .score-bar {height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-top:6px;}
-    .score-fill {height:100%;border-radius:4px;transition:width 0.6s ease;}
-    .score-good {background:linear-gradient(90deg,var(--green),#34d399);}
-    .score-med  {background:linear-gradient(90deg,var(--gold),#fbbf24);}
-    .score-bad  {background:linear-gradient(90deg,var(--red),#f87171);}
-    .audit-item {display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);}
-    .audit-item:last-child {border-bottom:none;}
-    .audit-icon {width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;}
-    .ai-pass {background:#d1fae5;color:#065f46;}
-    .ai-warn {background:#fef3c7;color:#92400e;}
-    .ai-fail {background:#fee2e2;color:#991b1b;}
-    .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
-    .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
+    .tool-hero{background:linear-gradient(135deg,#059669,#047857);padding:52px 28px 40px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
+    .tool-hero h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-0.03em;margin-bottom:8px;}
+    .tool-hero p{font-size:14px;color:rgba(255,255,255,0.55);margin-bottom:14px;}
+    .tool-back{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.75);font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;}
+    .tool-back:hover{background:rgba(255,255,255,0.18);}
+    .tool-section{padding:40px 24px 80px;}
+    .tool-inner{max-width:960px;margin:0 auto;}
+    .card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.1);}
+    .card-body{padding:28px;}
+    .lbl{font-size:13px;font-weight:600;color:#334155;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .url-input-wrap{display:flex;align-items:center;border:2px solid #e2e8f0;border-radius:10px;background:#fafbfc;transition:border-color .2s;overflow:hidden;}
+    .url-input-wrap:focus-within{border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,0.12);}
+    .url-prefix{padding:0 12px;font-size:13px;color:#94a3b8;font-family:'JetBrains Mono',monospace;background:#f1f5f9;border-right:1px solid #e2e8f0;height:44px;display:flex;align-items:center;flex-shrink:0;}
+    #urlInput{flex:1;border:none;background:transparent;padding:0 14px;font-size:13px;font-family:'Sora',sans-serif;color:#334155;outline:none;height:44px;}
+    .kw-input{width:100%;border:2px solid #e2e8f0;border-radius:10px;background:#fafbfc;padding:0 14px;font-size:13px;font-family:'Sora',sans-serif;color:#334155;outline:none;height:44px;transition:border-color .2s;}
+    .kw-input:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,0.12);}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+    @media(max-width:600px){.two-col{grid-template-columns:1fr;}}
+    .btn-run{padding:12px 28px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;display:inline-flex;align-items:center;gap:8px;color:#fff;background:linear-gradient(135deg,#059669,#047857);transition:all .2s;white-space:nowrap;}
+    .btn-run:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-run:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .btn-sec{padding:10px 18px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:inline-flex;align-items:center;gap:6px;color:#475569;background:#fff;transition:all .2s;}
+    .btn-sec:hover{border-color:#059669;color:#059669;}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px;}
+    .strategy-wrap{display:flex;gap:8px;margin-bottom:20px;}
+    .strat-btn{flex:1;padding:9px 12px;border:2px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;background:#fff;color:#64748b;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .strat-btn.active{border-color:#059669;background:#f0fdf4;color:#059669;}
+    .result-wrap{margin-top:28px;}
+    .empty-state{text-align:center;padding:56px 24px;color:#94a3b8;}
+    .empty-state i{font-size:2.8rem;color:#e2e8f0;display:block;margin-bottom:14px;}
+    .empty-state h3{font-size:15px;font-weight:700;color:#64748b;margin-bottom:6px;}
+    .empty-state p{font-size:13px;line-height:1.6;}
+    .spin{display:inline-block;width:36px;height:36px;border:3px solid #e2e8f0;border-top-color:#059669;border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .score-hero{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;margin-bottom:20px;padding:24px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;border-radius:14px;}
+    @media(max-width:500px){.score-hero{grid-template-columns:1fr;text-align:center;}}
+    .score-circle{width:110px;height:110px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:5px solid transparent;flex-shrink:0;}
+    .score-num{font-size:2.2rem;font-weight:800;line-height:1;}
+    .score-sub{font-size:11px;font-weight:600;opacity:.7;margin-top:2px;}
+    .score-grade{font-size:1.4rem;font-weight:800;margin-bottom:4px;}
+    .score-bar-wrap{height:10px;background:#e2e8f0;border-radius:100px;overflow:hidden;margin:10px 0;}
+    .score-bar-fill{height:100%;border-radius:100px;transition:width 1s ease;}
+    .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+    .pill{padding:5px 14px;border-radius:100px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+    .pill-pass{background:#dcfce7;color:#14532d;}
+    .pill-warn{background:#fef9c3;color:#713f12;}
+    .pill-fail{background:#fee2e2;color:#7f1d1d;}
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:20px;}
+    .stat-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;}
+    .stat-num{font-size:1.3rem;font-weight:800;color:#0f172a;}
+    .stat-lbl{font-size:10px;color:#94a3b8;font-weight:500;margin-top:3px;text-transform:uppercase;letter-spacing:.03em;}
+    .psi-panel{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+    .psi-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+    .psi-title{font-size:14px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;}
+    .psi-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;}
+    .psi-strategy{font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .psi-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+    @media(max-width:600px){.psi-scores{grid-template-columns:repeat(2,1fr);}}
+    .psi-score-box{text-align:center;padding:14px 8px;border:1px solid #e2e8f0;border-radius:12px;background:#fafafa;}
+    .psi-score-ring{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:5px solid;margin:0 auto 8px;}
+    .psi-score-num{font-size:1.3rem;font-weight:800;line-height:1;}
+    .psi-score-lbl{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.03em;}
+    .psi-score-tag{font-size:10px;font-weight:700;margin-top:3px;}
+    .cwv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+    @media(max-width:600px){.cwv-grid{grid-template-columns:1fr 1fr;}}
+    .cwv-box{border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;background:#fafafa;}
+    .cwv-good{border-left:3px solid #059669;background:#f0fdf4;}
+    .cwv-warn{border-left:3px solid #f59e0b;background:#fffbeb;}
+    .cwv-poor{border-left:3px solid #ef4444;background:#fef2f2;}
+    .cwv-val{font-size:1.2rem;font-weight:800;color:#0f172a;}
+    .cwv-name{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.03em;margin-top:2px;}
+    .cwv-good-val{font-size:10px;color:#94a3b8;margin-top:1px;}
+    .opp-list{display:flex;flex-direction:column;gap:8px;}
+    .opp-item{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;border:1px solid #e2e8f0;border-radius:10px;background:#fafafa;}
+    .opp-poor{border-left:3px solid #ef4444;}
+    .opp-warn{border-left:3px solid #f59e0b;}
+    .opp-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;}
+    .opp-title{font-size:12px;font-weight:700;color:#0f172a;}
+    .opp-saving{font-size:11px;color:#059669;font-weight:600;margin-top:2px;}
+    .opp-desc{font-size:11px;color:#64748b;margin-top:3px;line-height:1.5;}
+    .field-bar{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;}
+    .field-bar:last-child{border-bottom:none;}
+    .field-label{font-size:12px;font-weight:600;color:#334155;min-width:140px;}
+    .field-val{font-size:12px;font-weight:700;}
+    .field-cat{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;}
+    .cat-good{background:#dcfce7;color:#14532d;}
+    .cat-ni{background:#fef9c3;color:#713f12;}
+    .cat-poor{background:#fee2e2;color:#7f1d1d;}
+    .section-divider{height:1px;background:#e2e8f0;margin:20px 0;}
+    .section-title{font-size:14px;font-weight:700;color:#0f172a;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+    .check-item{border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:8px;}
+    .check-item-fail{border-left:3px solid #ef4444;}
+    .check-item-warn{border-left:3px solid #f59e0b;}
+    .check-head{display:flex;align-items:flex-start;gap:12px;}
+    .ci-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;}
+    .ci-pass{background:#dcfce7;color:#14532d;}
+    .ci-warn{background:#fef9c3;color:#713f12;}
+    .ci-fail{background:#fee2e2;color:#7f1d1d;}
+    .ci-title{font-size:13px;font-weight:700;color:#0f172a;flex:1;}
+    .ci-pts{font-size:11px;font-weight:600;color:#94a3b8;white-space:nowrap;}
+    .ci-detail{font-size:12px;color:#64748b;font-family:'JetBrains Mono',monospace;margin:6px 0 0 40px;word-break:break-all;}
+    .ci-tip{font-size:12px;color:#334155;background:#f8fafc;border-left:3px solid #059669;padding:9px 13px;border-radius:0 8px 8px 0;margin:8px 0 0 40px;line-height:1.6;}
+    .ci-tip-fail{border-left-color:#ef4444;}
+    .ci-tip-warn{border-left-color:#f59e0b;}
+    .fetched-url{font-size:11px;color:#059669;font-family:'JetBrains Mono',monospace;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:6px 12px;margin-bottom:16px;word-break:break-all;}
+    .error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px 20px;color:#991b1b;font-size:13px;display:flex;align-items:flex-start;gap:10px;}
+    .psi-error{background:#fef9c3;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:12px;color:#713f12;margin-bottom:16px;}
   </style>
 </head>
 <body>
 <div class="page-wrap">
   <section class="tool-hero">
     <h1><i class="fas fa-stethoscope" style="margin-right:10px;"></i> SEO Audit Tool</h1>
-    <p>Paste your page HTML for an instant on-page SEO health check and scoring</p>
+    <p>PageSpeed Insights · Core Web Vitals · 22 on-page SEO checks</p>
     <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
   </section>
+
   <section class="tool-section">
     <div class="tool-inner">
-      <div class="browser-chrome">
-        <div class="browser-bar">
-          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-          <div class="browser-url">clusterseo.pro — SEO Audit Tool</div>
-        </div>
-        <div class="app-inside">
+      <div class="card">
+        <div class="card-body">
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+          <div class="two-col">
             <div>
-              <div class="input-lbl"><i class="fas fa-link"></i> Page URL (optional)</div>
-              <input type="text" id="auditUrl" placeholder="https://yoursite.com/page" style="width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'">
+              <div class="lbl"><i class="fas fa-link" style="color:#059669;"></i> Page URL to Audit</div>
+              <div class="url-input-wrap">
+                <span class="url-prefix">https://</span>
+                <input type="text" id="urlInput" placeholder="example.com/your-page" onkeydown="if(event.key==='Enter')runAudit()" />
+              </div>
             </div>
             <div>
-              <div class="input-lbl"><i class="fas fa-key"></i> Target Keyword (optional)</div>
-              <input type="text" id="auditKeyword" placeholder="e.g. running shoes" style="width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:var(--r);font-size:13px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'">
+              <div class="lbl"><i class="fas fa-key" style="color:#059669;"></i> Focus Keyword <span style="font-weight:400;color:#94a3b8;">(optional)</span></div>
+              <input type="text" class="kw-input" id="kwInput" placeholder="e.g. running shoes" onkeydown="if(event.key==='Enter')runAudit()" />
             </div>
           </div>
-          <div class="input-lbl"><i class="fas fa-code"></i> Paste Page HTML Source</div>
-          <textarea class="kw-box" id="auditHtml" rows="10" placeholder="Paste the full HTML source of your page here (Ctrl+U in browser, then Ctrl+A, Ctrl+C)..."></textarea>
-          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-            <button class="btn-run" style="background:linear-gradient(135deg,#059669,#047857);" onclick="runSeoAudit()"><i class="fas fa-stethoscope"></i> Run SEO Audit</button>
-            <button class="btn-secondary" onclick="clearAudit()"><i class="fas fa-trash"></i> Clear</button>
-            <button class="btn-secondary" id="btnExportAudit" style="display:none;" onclick="exportAuditCSV()"><i class="fas fa-download"></i> Export CSV</button>
+
+          <div class="lbl"><i class="fas fa-mobile-alt" style="color:#059669;"></i> PageSpeed Strategy</div>
+          <div class="strategy-wrap">
+            <button class="strat-btn active" id="btnMobile" onclick="setStrategy('mobile')"><i class="fas fa-mobile-alt"></i> Mobile</button>
+            <button class="strat-btn" id="btnDesktop" onclick="setStrategy('desktop')"><i class="fas fa-desktop"></i> Desktop</button>
+            <button class="strat-btn" id="btnBoth" onclick="setStrategy('both')"><i class="fas fa-layer-group"></i> Both</button>
           </div>
-          <div id="auditResults" class="result-section">
-            <div class="empty-state"><i class="fas fa-stethoscope"></i><h3>Ready to audit</h3><p>Paste your page HTML and click Run SEO Audit</p></div>
+
+          <div class="btn-row">
+            <button class="btn-run" id="btnRun" onclick="runAudit()"><i class="fas fa-stethoscope"></i> Run Full Audit</button>
+            <button class="btn-sec" onclick="clearAll()"><i class="fas fa-redo"></i> Clear</button>
+            <button class="btn-sec" id="btnExport" style="display:none;" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+          </div>
+
+          <div id="results" class="result-wrap">
+            <div class="empty-state">
+              <i class="fas fa-stethoscope"></i>
+              <h3>Enter a URL to get started</h3>
+              <p>Runs PageSpeed Insights + 22 SEO checks automatically.<br>No HTML copying needed.</p>
+            </div>
           </div>
 
         </div>
@@ -108,107 +173,238 @@
     </div>
   </section>
 </div>
+
 <script src="shared-layout.js"></script>
-
 <script>
-const API = '';
-let auditChecks = [];
+const API = 'http://localhost:8003';
+let lastChecks = [];
+let currentStrategy = 'mobile';
 
-async function runSeoAudit() {
-  const html    = document.getElementById('auditHtml').value.trim();
-  const keyword = document.getElementById('auditKeyword').value.trim();
-  if (!html) { alert('Please paste your page HTML first.'); return; }
+function setStrategy(s) {
+  currentStrategy = s;
+  ['mobile','desktop','both'].forEach(x => document.getElementById('btn'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active', x===s));
+}
 
-  document.getElementById('auditResults').innerHTML = '<div class="empty-state"><div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--gray-400);">Running 16 SEO checks...</p></div>';
+async function runAudit() {
+  const rawUrl = document.getElementById('urlInput').value.trim();
+  const keyword = document.getElementById('kwInput').value.trim();
+  if (!rawUrl) { alert('Please enter a URL'); return; }
+  const url = rawUrl.startsWith('http') ? rawUrl : 'https://' + rawUrl;
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="width:16px;height:16px;border-width:2px;margin-right:4px;"></span> Running...';
+  document.getElementById('btnExport').style.display = 'none';
+  document.getElementById('results').innerHTML = `
+    <div style="text-align:center;padding:48px 24px;">
+      <div class="spin" style="width:44px;height:44px;margin:0 auto 16px;"></div>
+      <div style="font-size:14px;font-weight:600;color:#334155;">Fetching page &amp; running audit...</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:6px;">PageSpeed Insights + 22 checks · Usually 5–15 seconds</div>
+    </div>`;
 
   try {
-    const res  = await fetch(API + '/api/seo-audit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ html, keyword })
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'API error');
+    const strategies = currentStrategy === 'both' ? ['mobile','desktop'] : [currentStrategy];
+    const requests = [
+      fetch(API + '/api/fetch-html?url=' + encodeURIComponent(url)).then(r=>r.json()),
+      ...strategies.map(s => fetch(API + '/api/pagespeed?url=' + encodeURIComponent(url) + '&strategy=' + s).then(r=>r.json()))
+    ];
+    const [fetchRes, ...psiRaws] = await Promise.allSettled(requests);
+    const fetchData = fetchRes.status==='fulfilled' ? fetchRes.value : null;
+    if (!fetchData || !fetchData.success) throw new Error(fetchData?.error || 'Could not fetch page HTML.');
 
-    auditChecks = data.checks;
-    document.getElementById('btnExportAudit').style.display = 'flex';
-    renderAudit(data);
+    const auditResp = await fetch(API + '/api/seo-audit', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ html: fetchData.html, keyword, url: fetchData.finalUrl || url })
+    });
+    const auditData = await auditResp.json();
+    if (!auditData.success) throw new Error(auditData.error || 'Audit failed.');
+
+    const psiData = {};
+    psiRaws.forEach((r, i) => { if (r.status==='fulfilled' && r.value?.success) psiData[strategies[i]] = r.value; });
+
+    lastChecks = auditData.checks;
+    renderResults(auditData, psiData, fetchData.finalUrl || url);
+    document.getElementById('btnExport').style.display = 'flex';
   } catch(err) {
-    document.getElementById('auditResults').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error</h3><p>'+err.message+'<br>Make sure your server is running.</p></div>';
+    document.getElementById('results').innerHTML = `
+      <div class="error-box">
+        <i class="fas fa-exclamation-circle" style="margin-top:2px;flex-shrink:0;"></i>
+        <div><strong>Could not complete audit</strong><br>
+        <span style="opacity:.8;">${escH(err.message)}</span><br>
+        <span style="font-size:11px;opacity:.6;margin-top:4px;display:block;">Some sites block automated requests. Try another URL.</span></div>
+      </div>`;
   }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-stethoscope"></i> Run Full Audit';
 }
 
-function renderAudit(data) {
-  const scoreColor = data.score >= 80 ? '#059669' : data.score >= 60 ? '#f59e0b' : '#ef4444';
-  const scoreBg    = data.score >= 80 ? '#d1fae5' : data.score >= 60 ? '#fef3c7' : '#fee2e2';
+function scoreColor(s){ return s>=90?'#059669':s>=50?'#f59e0b':'#ef4444'; }
+function scoreLabel(s){ return s>=90?'Good':s>=50?'Needs Improvement':'Poor'; }
+function vitalCls(score){ return score===null?'':score>=90?'cwv-good':score>=50?'cwv-warn':'cwv-poor'; }
 
-  let html = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:18px;">';
-  html += '<div class="stat-box" style="background:'+scoreBg+';border-color:'+scoreColor+';grid-column:span 1;">';
-  html += '<div class="stat-box-num" style="color:'+scoreColor+';font-size:2rem;">'+data.score+'</div>';
-  html += '<div class="stat-box-label">SEO Score</div>';
-  html += '<div style="font-size:11px;font-weight:700;color:'+scoreColor+';margin-top:2px;">'+data.grade+'</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">'+data.summary.pass+'</div><div class="stat-box-label">Passed</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#f59e0b">'+data.summary.warn+'</div><div class="stat-box-label">Warnings</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">'+data.summary.fail+'</div><div class="stat-box-label">Failed</div></div>';
+function renderResults(auditData, psiData, url) {
+  let html = '';
+  if (url) html += `<div class="fetched-url"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Audited: ${escH(url)}</div>`;
+
+  const psiKeys = Object.keys(psiData);
+  if (psiKeys.length > 0) {
+    psiKeys.forEach(strat => { html += renderPSI(psiData[strat], strat); });
+    html += '<div class="section-divider"></div>';
+  } else {
+    html += `<div class="psi-error"><i class="fas fa-info-circle" style="margin-right:6px;"></i><strong>PageSpeed unavailable</strong> — Google API may be rate-limited or the page is not publicly accessible. SEO checks below are still complete.</div>`;
+  }
+
+  const {score,grade,gradeLabel,gradeColor,totalPoints,maxPoints,checks,summary,meta} = auditData;
+  const col = gradeColor||(score>=85?'#059669':score>=70?'#10b981':score>=55?'#f59e0b':score>=40?'#f97316':'#ef4444');
+  const lbl = gradeLabel||(score>=85?'Excellent':score>=70?'Good':score>=55?'Needs Work':score>=40?'Poor':'Critical');
+
+  html += `<div class="section-title"><i class="fas fa-search"></i> On-Page SEO Score</div>
+  <div class="score-hero">
+    <div class="score-circle" style="border-color:${col};background:${col}18;">
+      <div class="score-num" style="color:${col}">${score}</div>
+      <div class="score-sub" style="color:${col}">/ 100</div>
+    </div>
+    <div>
+      <div class="score-grade" style="color:${col}">Grade ${grade} — ${lbl}</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:6px;">${totalPoints} of ${maxPoints} points · ${checks.length} checks</div>
+      <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${score}%;background:${col};"></div></div>
+      <div class="pills">
+        <span class="pill pill-pass"><i class="fas fa-check"></i> ${summary.pass} passed</span>
+        <span class="pill pill-warn"><i class="fas fa-exclamation"></i> ${summary.warn} warnings</span>
+        <span class="pill pill-fail"><i class="fas fa-times"></i> ${summary.fail} failed</span>
+      </div>
+    </div>
+  </div>`;
+
+  if (meta) {
+    html += '<div class="stats-row">';
+    [{num:meta.wordCount.toLocaleString(),lbl:'Words'},{num:meta.sentences,lbl:'Sentences'},{num:meta.avgWordsPerSentence,lbl:'Words/Sent'},{num:meta.readabilityScore+'/100',lbl:'Flesch'},{num:meta.readability,lbl:'Readability'}]
+    .forEach(s=>{ html+=`<div class="stat-box"><div class="stat-num">${s.num}</div><div class="stat-lbl">${s.lbl}</div></div>`; });
+    html += '</div>';
+  }
+
+  const failCount = checks.filter(c=>c.status==='fail').length;
+  if (failCount>0) html += `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#991b1b;"><i class="fas fa-exclamation-triangle" style="margin-right:7px;"></i><strong>${failCount} critical issue${failCount>1?'s':''} found</strong> — fix these first.</div>`;
+
+  html += `<div class="section-title"><i class="fas fa-list-check"></i> All Checks (${checks.length})</div>`;
+  checks.forEach(c=>{
+    const cls=c.status==='fail'?'check-item check-item-fail':c.status==='warn'?'check-item check-item-warn':'check-item';
+    const icon=c.status==='pass'?'fa-check':c.status==='warn'?'fa-exclamation':'fa-times';
+    const tipcls='ci-tip'+(c.status!=='pass'?' ci-tip-'+c.status:'');
+    html+=`<div class="${cls}"><div class="check-head">
+      <div class="ci-icon ci-${c.status}"><i class="fas ${icon}"></i></div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div class="ci-title">${escH(c.title)}</div>
+          <div class="ci-pts">${c.points}/${c.maxPoints} pts</div>
+        </div>
+        <div class="ci-detail">${escH(c.detail)}</div>
+        ${c.tip?`<div class="${tipcls}"><i class="fas fa-lightbulb" style="margin-right:5px;opacity:.6;"></i>${escH(c.tip)}</div>`:''}
+      </div>
+    </div></div>`;
+  });
+
+  document.getElementById('results').innerHTML = html;
+}
+
+function renderPSI(d, strat) {
+  const icon = strat==='mobile'?'fa-mobile-alt':'fa-desktop';
+  const stratLabel = strat.charAt(0).toUpperCase()+strat.slice(1);
+  const s = d.scores||{};
+  const v = d.vitals||{};
+
+  let html = `<div class="psi-panel">
+    <div class="psi-header">
+      <div class="psi-title"><i class="fas fa-tachometer-alt" style="color:#059669;"></i> PageSpeed Insights <span class="psi-badge">Google FREE API</span></div>
+      <div class="psi-strategy"><i class="fas ${icon}" style="margin-right:4px;"></i>${stratLabel}</div>
+    </div>
+    <div class="psi-scores">`;
+
+  [['performance','Performance','fa-tachometer-alt'],['seo','SEO','fa-search'],['accessibility','Accessibility','fa-universal-access'],['bestPractices','Best Practices','fa-shield-alt']]
+  .forEach(([key,label])=>{
+    const sc = s[key]||{score:0,color:'#94a3b8',label:'N/A'};
+    html+=`<div class="psi-score-box">
+      <div class="psi-score-ring" style="border-color:${sc.color};background:${sc.color}18;">
+        <div class="psi-score-num" style="color:${sc.color}">${sc.score}</div>
+      </div>
+      <div class="psi-score-lbl">${label}</div>
+      <div class="psi-score-tag" style="color:${sc.color}">${sc.label}</div>
+    </div>`;
+  });
   html += '</div>';
 
-  html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-tasks"></i> Score Breakdown</h3></div>';
-  html += '<div class="result-card-body">';
-  html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--gray-600);">';
-  html += '<span>'+data.totalPoints+' / '+data.maxPoints+' points</span><span style="color:'+scoreColor+'">'+data.score+'%</span></div>';
-  html += '<div style="height:12px;background:var(--gray-100);border-radius:6px;overflow:hidden;">';
-  html += '<div style="height:100%;width:'+data.score+'%;background:linear-gradient(90deg,'+scoreColor+','+scoreColor+'aa);border-radius:6px;transition:width .6s;"></div></div>';
-  html += '</div></div>';
+  html += `<div class="section-title" style="font-size:13px;margin-bottom:10px;"><i class="fas fa-heartbeat" style="color:#ef4444;"></i> Core Web Vitals</div><div class="cwv-grid">`;
+  [['lcp','LCP','Largest Contentful Paint'],['tbt','TBT','Total Blocking Time'],['cls','CLS','Cumulative Layout Shift'],['fcp','FCP','First Contentful Paint'],['si','SI','Speed Index'],['tti','TTI','Time to Interactive']]
+  .forEach(([key,name,full])=>{
+    const vt=v[key]||{}; const cls=vitalCls(vt.score);
+    html+=`<div class="cwv-box ${cls}">
+      <div class="cwv-val">${vt.value||'—'}</div>
+      <div class="cwv-name">${name} <span style="font-weight:400;opacity:.6;">${full}</span></div>
+      <div class="cwv-good-val">Good: ${vt.good||'—'}</div>
+    </div>`;
+  });
+  html += '</div>';
 
-  html += '<div class="result-card">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-list-check"></i> All Checks ('+data.checks.length+')</h3></div>';
-  html += '<div class="result-card-body">';
-
-  const icons = { pass:'fa-check-circle', warn:'fa-exclamation-circle', fail:'fa-times-circle' };
-  const colors = { pass:'#059669', warn:'#f59e0b', fail:'#ef4444' };
-  const bgs    = { pass:'#d1fae5', warn:'#fef3c7', fail:'#fee2e2' };
-
-  data.checks.forEach(function(c) {
-    const col = colors[c.status], bg = bgs[c.status];
-    html += '<div class="audit-item">';
-    html += '<div class="audit-icon" style="background:'+bg+';color:'+col+'"><i class="fas '+icons[c.status]+'"></i></div>';
-    html += '<div style="flex:1;">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
-    html += '<span class="audit-title">'+c.title+'</span>';
-    html += '<span style="font-size:11px;font-weight:700;color:'+col+'">'+c.points+'/'+c.maxPoints+' pts</span></div>';
-    html += '<div class="audit-detail">'+c.detail+'</div>';
-    if (c.tip && c.status !== 'pass') {
-      html += '<div style="font-size:11px;color:#0ea5e9;margin-top:4px;display:flex;align-items:flex-start;gap:5px;">';
-      html += '<i class="fas fa-lightbulb" style="margin-top:2px;flex-shrink:0;"></i><span>'+c.tip+'</span></div>';
+  if (d.fieldData?.hasCrux) {
+    const fd=d.fieldData;
+    const catC=c=>c==='FAST'?'cat-good':c==='AVERAGE'?'cat-ni':'cat-poor';
+    const catL=c=>c==='FAST'?'Good':c==='AVERAGE'?'Needs Improvement':'Poor';
+    const fi=[];
+    if(fd.lcp?.percentiles?.p75)fi.push({l:'LCP (p75)',v:fd.lcp.percentiles.p75+'ms',c:fd.lcp.category});
+    if(fd.fid?.percentiles?.p75)fi.push({l:'FID (p75)',v:fd.fid.percentiles.p75+'ms',c:fd.fid.category});
+    if(fd.cls?.percentiles?.p75)fi.push({l:'CLS (p75)',v:fd.cls.percentiles.p75,c:fd.cls.category});
+    if(fd.fcp?.percentiles?.p75)fi.push({l:'FCP (p75)',v:fd.fcp.percentiles.p75+'ms',c:fd.fcp.category});
+    if(fd.inp?.percentiles?.p75)fi.push({l:'INP (p75)',v:fd.inp.percentiles.p75+'ms',c:fd.inp.category});
+    if(fi.length>0){
+      html+=`<div class="section-title" style="font-size:13px;margin:12px 0 8px;"><i class="fas fa-users" style="color:#7c3aed;"></i> Real-User Field Data (CrUX)</div>
+      <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;">`;
+      fi.forEach(x=>{ html+=`<div class="field-bar"><div class="field-label">${x.l}</div><div class="field-val">${x.v}</div><div style="margin-left:auto;"><span class="field-cat ${catC(x.c)}">${catL(x.c)}</span></div></div>`; });
+      html+='</div>';
     }
-    html += '</div></div>';
-  });
-  html += '</div></div>';
+  }
 
-  document.getElementById('auditResults').innerHTML = html;
+  if (d.opportunities?.length>0) {
+    html+=`<div class="section-divider" style="margin:16px 0 12px;"></div>
+    <div class="section-title" style="font-size:13px;margin-bottom:10px;"><i class="fas fa-bolt" style="color:#f59e0b;"></i> Speed Opportunities</div>
+    <div class="opp-list">`;
+    d.opportunities.forEach(o=>{
+      const cls=o.score<50?'opp-poor':'opp-warn';
+      const ic=o.score<50?'#fee2e2':'#fef9c3';
+      const it=o.score<50?'#7f1d1d':'#713f12';
+      html+=`<div class="opp-item ${cls}">
+        <div class="opp-icon" style="background:${ic};color:${it}"><i class="fas fa-bolt"></i></div>
+        <div style="flex:1;">
+          <div class="opp-title">${escH(o.title)}</div>
+          ${o.savings?`<div class="opp-saving"><i class="fas fa-clock" style="margin-right:4px;"></i>Save: ${o.savings}</div>`:''}
+          ${o.displayValue?`<div class="opp-desc">${escH(o.displayValue)}</div>`:''}
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  html+='</div>';
+  return html;
 }
 
-function clearAudit() {
-  document.getElementById('auditHtml').value = '';
-  document.getElementById('auditKeyword').value = '';
-  document.getElementById('auditUrl').value = '';
-  document.getElementById('auditResults').innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><h3>Ready to audit</h3><p>Paste your page HTML and optionally your focus keyword, then click Run Audit</p></div>';
-  document.getElementById('btnExportAudit').style.display = 'none';
-  auditChecks = [];
+function clearAll() {
+  document.getElementById('urlInput').value='';
+  document.getElementById('kwInput').value='';
+  document.getElementById('results').innerHTML=`<div class="empty-state"><i class="fas fa-stethoscope"></i><h3>Enter a URL to get started</h3><p>Runs PageSpeed Insights + 22 SEO checks automatically.</p></div>`;
+  document.getElementById('btnExport').style.display='none';
+  lastChecks=[];
 }
 
-function exportAuditCSV() {
-  const rows = ['Check,Status,Points,MaxPoints,Detail,Tip'];
-  auditChecks.forEach(function(c){
-    rows.push('"'+c.title+'","'+c.status+'",'+c.points+','+c.maxPoints+',"'+c.detail.replace(/"/g,'""')+'","'+(c.tip||'').replace(/"/g,'""')+'"');
-  });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
-  a.download = 'seo-audit-'+new Date().toISOString().split('T')[0]+'.csv';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+function exportCSV() {
+  if (!lastChecks.length) return;
+  const rows=['Check,Status,Points,MaxPoints,Detail,Tip'];
+  lastChecks.forEach(c=>rows.push(`"${c.title}","${c.status}",${c.points},${c.maxPoints},"${(c.detail||'').replace(/"/g,'""')}","${(c.tip||'').replace(/"/g,'""')}"`));
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+  a.download='seo-audit-'+new Date().toISOString().split('T')[0]+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
+
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>

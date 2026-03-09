@@ -1,222 +1,473 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Keyword Gap Finder — ClusterSEO Pro</title>
-  <meta name="description" content="Paste two keyword lists to discover gaps and content opportunities.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="shared.css">
-  <style>
-    .tool-hero {background:linear-gradient(135deg, #0ea5e9, #0284c7);padding:52px 28px 40px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
-    .tool-hero h1 {font-size:2rem;font-weight:800;color:var(--white);letter-spacing:-0.03em;margin-bottom:8px;}
-    .tool-hero p {font-size:14px;color:rgba(255,255,255,0.5);}
-    .tool-back {display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.2s;}
-    .tool-back:hover {background:rgba(255,255,255,0.18);}
-    .tool-section {padding:40px 28px 72px;}
-    .tool-inner {max-width:1100px;margin:0 auto;}
-    .browser-chrome {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xl);}
-    .browser-bar {background:var(--gray-100);border-bottom:1px solid var(--gray-200);padding:12px 18px;display:flex;align-items:center;gap:12px;}
-    .browser-dots {display:flex;gap:6px;}
-    .browser-dots span {width:12px;height:12px;border-radius:50%;}
-    .dot-r{background:#ff5f57;}.dot-y{background:#ffbd2e;}.dot-g{background:#28c840;}
-    .browser-url {flex:1;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 12px;font-size:12px;color:var(--gray-400);font-family:var(--mono);}
-    .app-inside {padding:28px;}
-    .input-lbl {font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-    textarea.kw-box {width:100%;border:1px solid var(--gray-200);border-radius:var(--r);padding:13px;font-size:13px;font-family:var(--mono);color:var(--gray-700);background:var(--white);resize:vertical;line-height:1.6;transition:border-color 0.2s;outline:none;}
-    textarea.kw-box:focus {border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
-    .btn-run {padding:12px 28px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;color:white;transition:all 0.2s;}
-    .btn-run:hover {opacity:0.88;transform:translateY(-1px);}
-    .btn-secondary {padding:10px 20px;border:1px solid var(--gray-200);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--gray-600);background:var(--white);transition:all 0.2s;}
-    .btn-secondary:hover {border-color:var(--teal);color:var(--teal);}
-    .result-section {margin-top:24px;}
-    .result-card {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);overflow:hidden;}
-    .result-card-head {padding:14px 18px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
-    .result-card-head h3 {font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
-    .result-card-body {padding:18px;}
-    .empty-state {text-align:center;padding:48px 24px;color:var(--gray-400);}
-    .empty-state i {font-size:2.5rem;color:var(--gray-200);display:block;margin-bottom:12px;}
-    .empty-state h3 {font-size:15px;font-weight:700;color:var(--gray-600);margin-bottom:6px;}
-    .stat-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
-    .stat-box {background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;}
-    .stat-box-num {font-size:1.5rem;font-weight:800;color:var(--gray-900);line-height:1;}
-    .stat-box-label {font-size:11px;color:var(--gray-400);font-weight:500;margin-top:4px;}
-    .tag-cloud {display:flex;flex-wrap:wrap;gap:8px;}
-    .entity-tag {display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid transparent;}
-    .et-person {background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,0.2);}
-    .et-org {background:var(--teal-light);color:var(--teal-dark);border-color:rgba(14,165,233,0.2);}
-    .et-place {background:var(--green-light);color:#065f46;border-color:rgba(16,185,129,0.2);}
-    .et-brand {background:#ede9fe;color:#6d28d9;border-color:rgba(124,58,237,0.2);}
-    .et-concept {background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-200);}
-    .score-bar {height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-top:6px;}
-    .score-fill {height:100%;border-radius:4px;transition:width 0.6s ease;}
-    .score-good {background:linear-gradient(90deg,var(--green),#34d399);}
-    .score-med  {background:linear-gradient(90deg,var(--gold),#fbbf24);}
-    .score-bad  {background:linear-gradient(90deg,var(--red),#f87171);}
-    .audit-item {display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);}
-    .audit-item:last-child {border-bottom:none;}
-    .audit-icon {width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;}
-    .ai-pass {background:#d1fae5;color:#065f46;}
-    .ai-warn {background:#fef3c7;color:#92400e;}
-    .ai-fail {background:#fee2e2;color:#991b1b;}
-    .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
-    .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keyword Gap Analysis — ClusterSEO Pro</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+:root{--indigo:#6366f1;--teal:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#7c3aed;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-700:#334155;--gray-900:#0f172a;--white:#fff;--font:'Sora',sans-serif;--shadow:0 20px 60px rgba(0,0,0,0.1);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:#f0f4f8;color:var(--gray-900);min-height:100vh;}
+.tool-hero{background:linear-gradient(135deg,#6366f1,#4f46e5);padding:52px 28px 40px;text-align:center;}
+.tool-hero h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:8px;}
+.tool-hero p{font-size:14px;color:rgba(255,255,255,0.65);margin-bottom:14px;}
+.tool-back{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;text-decoration:none;}
+.tool-section{padding:36px 20px 80px;}
+.tool-inner{max-width:1160px;margin:0 auto;}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:20px;}
+.card-body{padding:28px;}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:16px;}
+@media(max-width:700px){.input-grid{grid-template-columns:1fr;}}
+.lbl{font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:10px;padding:13px;font-size:12.5px;font-family:'JetBrains Mono',monospace;color:var(--gray-700);background:#fafbfc;resize:vertical;line-height:1.65;outline:none;transition:border-color .2s;}
+textarea:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(99,102,241,.1);}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.btn{padding:11px 24px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-sec{background:#fff;border:1.5px solid var(--gray-200);color:var(--gray-600);padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;border-radius:10px;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
+.btn-sec:hover{border-color:var(--indigo);color:var(--indigo);}
+/* Stats */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
+.stat-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:14px;padding:18px;text-align:center;}
+.stat-num{font-size:2rem;font-weight:800;line-height:1;}
+.stat-label{font-size:11px;color:var(--gray-400);font-weight:600;margin-top:5px;text-transform:uppercase;letter-spacing:.04em;}
+/* Overlap visual */
+.overlap-wrap{display:flex;align-items:center;justify-content:center;gap:0;margin:20px 0;position:relative;height:90px;}
+.overlap-circle{width:160px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:12px;font-weight:700;}
+.oc-yours{background:rgba(14,165,233,0.15);border:2px solid #0ea5e9;margin-right:-40px;z-index:1;}
+.oc-shared{background:rgba(99,102,241,0.18);border:2px solid #6366f1;z-index:2;width:90px;}
+.oc-comp{background:rgba(239,68,68,0.12);border:2px solid #ef4444;margin-left:-40px;z-index:1;}
+.oc-num{font-size:1.2rem;font-weight:800;}
+.oc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.04em;opacity:.8;}
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--gray-100);padding:4px;border-radius:12px;margin-bottom:20px;flex-wrap:wrap;}
+.tab{padding:8px 16px;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--gray-600);font-family:var(--font);transition:all .15s;display:flex;align-items:center;gap:6px;}
+.tab.active{background:#fff;color:var(--indigo);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.tab-badge{background:var(--indigo);color:#fff;border-radius:100px;padding:1px 6px;font-size:10px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+/* Filters */
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.filter-select{padding:7px 12px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:12.5px;font-family:var(--font);color:var(--gray-700);background:#fff;outline:none;cursor:pointer;}
+.filter-select:focus{border-color:var(--indigo);}
+.filter-label{font-size:12px;font-weight:600;color:var(--gray-400);}
+/* Gap items */
+.gap-item{border:1.5px solid var(--gray-200);border-radius:12px;padding:16px;margin-bottom:10px;transition:all .2s;cursor:pointer;}
+.gap-item:hover{border-color:var(--indigo);box-shadow:0 2px 12px rgba(99,102,241,.1);}
+.gap-item.expanded .brief-body{display:block;}
+.gap-kw{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.gap-kw-text{flex:1;}
+.expand-icon{font-size:11px;color:var(--gray-400);transition:transform .2s;}
+.gap-item.expanded .expand-icon{transform:rotate(180deg);}
+.gap-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;align-items:center;}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:600;}
+.b-easy{background:#dcfce7;color:#14532d;}
+.b-low{background:#d1fae5;color:#065f46;}
+.b-medium{background:#fef9c3;color:#713f12;}
+.b-hard{background:#fee2e2;color:#7f1d1d;}
+.b-transactional{background:#fee2e2;color:#7f1d1d;}
+.b-commercial{background:#fef9c3;color:#713f12;}
+.b-informational{background:#dcfce7;color:#14532d;}
+.b-navigational{background:#e0f2fe;color:#075985;}
+.b-vol{background:var(--gray-100);color:var(--gray-600);}
+/* Priority bar */
+.priority-bar-wrap{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.priority-bar-bg{flex:1;height:5px;background:var(--gray-100);border-radius:100px;overflow:hidden;}
+.priority-bar-fill{height:100%;border-radius:100px;transition:width .6s;}
+.priority-lbl{font-size:10px;font-weight:700;white-space:nowrap;}
+/* Brief box */
+.brief-body{display:none;margin-top:12px;border-top:1px solid var(--gray-100);padding-top:12px;}
+.brief-box{background:#f8f7ff;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:12px 14px;font-size:12.5px;color:var(--gray-700);line-height:1.65;}
+.brief-box strong{color:var(--indigo);}
+.brief-action{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 14px;background:var(--indigo);color:#fff;border-radius:8px;font-size:12px;font-weight:700;}
+/* Funnel */
+.funnel-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:700px){.funnel-cols{grid-template-columns:1fr;}}
+.funnel-col{border:1.5px solid var(--gray-200);border-radius:12px;overflow:hidden;}
+.funnel-head{padding:12px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.fc-aware{background:#fef3c7;color:#78350f;}
+.fc-consider{background:#e0f2fe;color:#075985;}
+.fc-decide{background:#dcfce7;color:#14532d;}
+.funnel-body{padding:12px;}
+.funnel-kw{font-size:12.5px;padding:7px 10px;border-radius:8px;background:var(--gray-50);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:6px;}
+/* Cluster grid */
+.cluster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.cluster-card{border:1.5px solid var(--gray-200);border-radius:12px;padding:16px;transition:border-color .2s;background:#fff;}
+.cluster-card:hover{border-color:var(--indigo);}
+.cluster-name{font-size:14px;font-weight:700;margin-bottom:6px;color:var(--gray-900);}
+.cluster-kws{font-size:11.5px;color:var(--gray-400);line-height:1.7;}
+/* Section */
+.section-card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.section-head{padding:16px 20px;border-bottom:1px solid var(--gray-100);background:var(--gray-50);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.section-title{font-size:15px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:8px;}
+.section-body{padding:20px;}
+.opp-score{font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;white-space:nowrap;}
+.opp-high{background:#dcfce7;color:#14532d;}
+.opp-med{background:#fef9c3;color:#713f12;}
+.opp-low{background:var(--gray-100);color:var(--gray-500);}
+.empty-state{text-align:center;padding:60px 24px;color:var(--gray-400);}
+.empty-state i{font-size:3rem;color:var(--gray-200);display:block;margin-bottom:14px;}
+.empty-state h3{font-size:16px;font-weight:700;color:var(--gray-500);margin-bottom:6px;}
+.spin{display:inline-block;width:32px;height:32px;border:3px solid var(--gray-200);border-top-color:var(--indigo);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.no-results{text-align:center;padding:32px;color:var(--gray-400);font-size:13px;}
+</style>
 </head>
 <body>
 <div class="page-wrap">
-  <section class="tool-hero">
-    <h1><i class="fas fa-not-equal" style="margin-right:10px;"></i> Keyword Gap Finder</h1>
-    <p>Discover keywords your competitor ranks for that you are missing</p>
-    <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
-  </section>
-  <section class="tool-section">
-    <div class="tool-inner">
-      <div class="browser-chrome">
-        <div class="browser-bar">
-          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-          <div class="browser-url">clusterseo.pro — Keyword Gap Finder</div>
+<section class="tool-hero">
+  <h1><i class="fas fa-search-dollar" style="margin-right:10px;"></i> Keyword Gap Analysis</h1>
+  <p>Discover keywords your competitor ranks for that you don't — with priority scores, funnel mapping and content briefs</p>
+  <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
+</section>
+<section class="tool-section">
+  <div class="tool-inner">
+    <div class="card">
+      <div class="card-body">
+        <div class="input-grid">
+          <div>
+            <div class="lbl"><i class="fas fa-user" style="color:var(--teal);"></i> Your Keywords <span style="font-size:11px;color:var(--gray-400);font-weight:400;margin-left:4px;">one per line · optional: keyword, volume</span></div>
+            <textarea id="yourKws" rows="10" placeholder="best running shoes&#10;running shoes for beginners, 880&#10;trail running shoes, 2400&#10;running shoe reviews"></textarea>
+          </div>
+          <div>
+            <div class="lbl"><i class="fas fa-user-secret" style="color:var(--indigo);"></i> Competitor Keywords <span style="font-size:11px;color:var(--gray-400);font-weight:400;margin-left:4px;">one per line</span></div>
+            <textarea id="compKws" rows="10" placeholder="best running shoes&#10;buy running shoes online, 3200&#10;cheap running shoes, 1900&#10;marathon running shoes, 5400&#10;road running shoes, 2800&#10;running shoes for flat feet, 1400&#10;best trail running shoes&#10;womens running shoes, 6600"></textarea>
+          </div>
         </div>
-        <div class="app-inside">
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-            <div>
-              <div class="input-lbl"><i class="fas fa-user" style="color:var(--teal)"></i> Your Keywords</div>
-              <textarea class="kw-box" id="gapYours" rows="14" placeholder="Paste your keywords&#10;one per line&#10;&#10;best running shoes&#10;running shoes review&#10;buy nike shoes"></textarea>
-            </div>
-            <div>
-              <div class="input-lbl"><i class="fas fa-chess" style="color:var(--red)"></i> Competitor Keywords</div>
-              <textarea class="kw-box" id="gapComp" rows="14" placeholder="Paste competitor keywords&#10;one per line&#10;&#10;best running shoes&#10;running shoes for men&#10;trail running shoes 2025"></textarea>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-            <button class="btn-run" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);" onclick="runKeywordGap()"><i class="fas fa-not-equal"></i> Find Keyword Gaps</button>
-            <button class="btn-secondary" onclick="clearGap()"><i class="fas fa-trash"></i> Clear</button>
-            <button class="btn-secondary" id="btnExportGap" style="display:none;" onclick="exportGapCSV()"><i class="fas fa-download"></i> Export CSV</button>
-          </div>
-          <div id="gapResults" class="result-section">
-            <div class="empty-state"><i class="fas fa-not-equal"></i><h3>Ready to find gaps</h3><p>Paste both keyword lists to discover opportunities</p></div>
-          </div>
-
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnRun" onclick="runGap()"><i class="fas fa-search-dollar"></i> Find Keyword Gaps</button>
+          <button class="btn-sec" onclick="clearTool()"><i class="fas fa-redo"></i> Clear</button>
+          <button class="btn-sec" id="btnExport" style="display:none;" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
         </div>
       </div>
     </div>
-  </section>
-</div>
-<script src="shared-layout.js"></script>
 
+    <div id="results">
+      <div class="empty-state">
+        <i class="fas fa-search-dollar"></i>
+        <h3>No gap analysis yet</h3>
+        <p>Enter both keyword lists above and click Find Keyword Gaps</p>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<script src="shared-layout.js"></script>
 <script>
 const API = '';
-let gapResults = {};
+let lastData = null;
+let activeTab = 'quick-wins';
+let filterDiff = 'all';
+let filterIntent = 'all';
+let filterMinVol = 0;
 
-function parseKwLines(text) {
-  return text.split('\n')
-    .map(function(l){ const p=l.split(',').map(function(s){return s.trim();}); return p[0]+(p[1]?','+p[1]:''); })
-    .filter(function(k){return k.length>1;});
+function parseKws(id) {
+  return document.getElementById(id).value.trim().split('\n')
+    .map(l=>l.trim()).filter(l=>l.length>1)
+    .map(l=>{ const p=l.split(','); return {keyword:p[0].trim(), volume:parseInt(p[1])||0}; });
 }
 
-async function runKeywordGap() {
-  const yours = parseKwLines(document.getElementById('gapYours').value);
-  const comps  = parseKwLines(document.getElementById('gapComp').value);
-  if (!yours.length || !comps.length) { alert('Paste keywords in both columns.'); return; }
+async function runGap() {
+  const yours = parseKws('yourKws');
+  const comps  = parseKws('compKws');
+  if (!yours.length || !comps.length) { alert('Please enter keywords in both lists.'); return; }
 
-  document.getElementById('gapResults').innerHTML = '<div class="empty-state"><div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:#0ea5e9;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--gray-400);">Detecting keyword gaps...</p></div>';
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="width:16px;height:16px;border-width:2px;margin-right:4px;"></span> Analysing...';
+  document.getElementById('results').innerHTML = '<div class="empty-state"><div class="spin"></div><p style="margin-top:14px;color:var(--gray-400);">Finding keyword gaps...</p></div>';
+  document.getElementById('btnExport').style.display = 'none';
 
   try {
     const res  = await fetch(API + '/api/keyword-gap', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ yourKeywords: yours, competitorKeywords: comps })
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({yourKeywords:yours, competitorKeywords:comps})
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.error || 'API error');
-
-    gapResults = data;
-    document.getElementById('btnExportGap').style.display = 'flex';
+    lastData = data;
     renderGap(data);
+    document.getElementById('btnExport').style.display = 'flex';
   } catch(err) {
-    document.getElementById('gapResults').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error</h3><p>'+err.message+'<br>Make sure your server is running.</p></div>';
+    document.getElementById('results').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red);"></i><h3>Error</h3><p>${escH(err.message)}</p></div>`;
   }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-search-dollar"></i> Find Keyword Gaps';
+}
+
+function oppScore(k) { return k.opportunityScore || 0; }
+function oppClass(s) { return s>=12?'opp-high':s>=6?'opp-med':'opp-low'; }
+function oppLabel(s) { return s>=12?'🔥 High':s>=6?'⚡ Medium':'● Low'; }
+function diffBadge(d) { return `<span class="badge b-${(d||'').toLowerCase()}">${d}</span>`; }
+function intentBadge(i) { return `<span class="badge b-${(i||'').toLowerCase()}">${i}</span>`; }
+function priorityColor(s) { return s>=12?'#10b981':s>=6?'#f59e0b':'#94a3b8'; }
+
+function switchTab(id) {
+  activeTab = id;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
+}
+
+function applyFilters() {
+  filterDiff   = document.getElementById('fDiff').value;
+  filterIntent = document.getElementById('fIntent').value;
+  filterMinVol = parseInt(document.getElementById('fVol').value) || 0;
+  renderAllGaps(lastData.gaps);
+}
+
+function filterGaps(gaps) {
+  return gaps.filter(k => {
+    if (filterDiff !== 'all' && k.difficulty !== filterDiff) return false;
+    if (filterIntent !== 'all' && k.intent !== filterIntent) return false;
+    if (filterMinVol > 0 && (k.volume||0) < filterMinVol) return false;
+    return true;
+  });
 }
 
 function renderGap(data) {
-  const s = data.stats;
-  let html = '<div class="stat-grid">';
-  html += '<div class="stat-box"><div class="stat-box-num">'+s.yourKeywords+'</div><div class="stat-box-label">Your Keywords</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num">'+s.compKeywords+'</div><div class="stat-box-label">Competitor Keywords</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">'+s.gaps+'</div><div class="stat-box-label">Gaps Found</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--teal)">'+s.shared+'</div><div class="stat-box-label">Shared</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#f59e0b">'+s.gapRate+'%</div><div class="stat-box-label">Gap Rate</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">'+s.coverageRate+'%</div><div class="stat-box-label">Coverage</div></div>';
+  const {stats, gaps, quickWins, gapsByIntent, gapsByFunnel, topClusters} = data;
+  let html = '';
+
+  // ── Summary Stats ──
+  html += `<div class="section-card">
+    <div class="section-head"><div class="section-title"><i class="fas fa-chart-pie" style="color:var(--indigo);"></i> Gap Summary</div></div>
+    <div class="section-body">
+      <div class="stat-grid">
+        ${statBox(stats.yourKeywords,'Your Keywords','#0ea5e9')}
+        ${statBox(stats.compKeywords,'Competitor KWs','#6366f1')}
+        ${statBox(stats.gaps,'Keyword Gaps','#ef4444')}
+        ${statBox(stats.shared,'Shared','#10b981')}
+        ${statBox(stats.gapRate+'%','Gap Rate','#f59e0b')}
+        ${statBox(stats.coverageRate+'%','Coverage','#64748b')}
+      </div>`;
+
+  // Overlap visual
+  const yours = stats.yourKeywords - stats.shared;
+  const comp  = stats.compKeywords - stats.shared;
+  const total = yours + stats.shared + comp;
+  const ypct  = total>0?Math.round(yours/total*100):0;
+  const spct  = total>0?Math.round(stats.shared/total*100):0;
+  const cpct  = total>0?Math.round(comp/total*100):0;
+
+  html += `<div style="margin-top:8px;">
+    <div style="font-size:12px;font-weight:600;color:var(--gray-400);text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em;">Keyword Overlap</div>
+    <div style="display:flex;align-items:center;height:60px;border-radius:10px;overflow:hidden;border:1px solid var(--gray-200);">
+      <div style="width:${ypct}%;background:#0ea5e920;border-right:2px solid #0ea5e9;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;min-width:60px;">
+        <div style="font-size:13px;font-weight:800;color:#0ea5e9;">${yours}</div>
+        <div style="font-size:9px;color:#0ea5e9;font-weight:600;">YOURS ONLY</div>
+      </div>
+      <div style="width:${spct}%;background:#6366f130;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;min-width:50px;">
+        <div style="font-size:13px;font-weight:800;color:#6366f1;">${stats.shared}</div>
+        <div style="font-size:9px;color:#6366f1;font-weight:600;">SHARED</div>
+      </div>
+      <div style="width:${cpct}%;background:#ef444420;border-left:2px solid #ef4444;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;min-width:60px;">
+        <div style="font-size:13px;font-weight:800;color:#ef4444;">${comp}</div>
+        <div style="font-size:9px;color:#ef4444;font-weight:600;">GAPS</div>
+      </div>
+    </div>
+  </div>`;
+  html += '</div></div>';
+
+  // ── Tabs ──
+  html += `<div class="section-card"><div class="section-body" style="padding-bottom:0;">
+    <div class="tabs">
+      <button class="tab active" data-tab="quick-wins" onclick="switchTab('quick-wins')">
+        <i class="fas fa-bolt" style="color:var(--amber);"></i> Quick Wins <span class="tab-badge">${quickWins.length}</span>
+      </button>
+      <button class="tab" data-tab="all-gaps" onclick="switchTab('all-gaps')">
+        <i class="fas fa-list" style="color:var(--indigo);"></i> All Gaps <span class="tab-badge">${gaps.length}</span>
+      </button>
+      <button class="tab" data-tab="funnel" onclick="switchTab('funnel')">
+        <i class="fas fa-filter" style="color:var(--teal);"></i> Funnel View
+      </button>
+      <button class="tab" data-tab="clusters" onclick="switchTab('clusters')">
+        <i class="fas fa-layer-group" style="color:var(--purple);"></i> Clusters <span class="tab-badge">${(topClusters||[]).length}</span>
+      </button>
+      <button class="tab" data-tab="by-intent" onclick="switchTab('by-intent')">
+        <i class="fas fa-tag" style="color:var(--green);"></i> By Intent
+      </button>
+    </div>`;
+
+  // Quick Wins tab
+  html += `<div id="panel-quick-wins" class="tab-panel active" style="padding-bottom:20px;">`;
+  if (quickWins.length === 0) {
+    html += `<div class="no-results"><i class="fas fa-info-circle" style="margin-right:6px;"></i>No easy/low difficulty gaps found.</div>`;
+  } else {
+    html += `<div style="font-size:12px;color:var(--gray-400);margin-bottom:14px;"><i class="fas fa-info-circle" style="margin-right:5px;"></i>Keywords your competitor ranks for with Easy or Low difficulty — highest ROI opportunities.</div>`;
+    quickWins.forEach(k => { html += gapCard(k); });
+  }
   html += '</div>';
 
-  // Quick wins
-  if (data.quickWins && data.quickWins.length) {
-    const diffColor = {Easy:'#059669',Medium:'#f59e0b',Hard:'#ef4444'};
-    const intColor  = {Informational:'#0ea5e9',Transactional:'#f59e0b',Commercial:'#10b981',Navigational:'#7c3aed'};
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-bolt" style="color:var(--gold)"></i> Quick Wins — Easy Long-Tail Gaps ('+data.quickWins.length+')</h3></div>';
-    html += '<div class="result-card-body"><p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">3+ word keywords your competitor has — easier to rank, faster results.</p>';
-    html += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
-    html += '<thead><tr style="background:var(--gray-50);"><th style="text-align:left;padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Keyword</th><th style="padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Intent</th><th style="padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Volume</th><th style="padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Action</th></tr></thead>';
-    html += '<tbody>';
-    data.quickWins.forEach(function(k,i){
-      html += '<tr style="border-bottom:1px solid var(--gray-100);'+(i%2?'background:var(--gray-50)':'')+'">';
-      html += '<td style="padding:8px 12px;font-weight:600;color:var(--gray-900);">'+k.keyword+'</td>';
-      html += '<td style="padding:8px 12px;"><span style="font-size:11px;font-weight:700;color:'+(intColor[k.intent]||'#666')+'">'+k.intent+'</span></td>';
-      html += '<td style="padding:8px 12px;color:var(--gray-600);">'+(k.volume?k.volume.toLocaleString():'—')+'</td>';
-      html += '<td style="padding:8px 12px;font-size:11px;color:var(--gray-500);">'+(k.recommendedAction||'')+'</td>';
-      html += '</tr>';
+  // All Gaps tab
+  html += `<div id="panel-all-gaps" class="tab-panel" style="padding-bottom:20px;">
+    <div class="filters">
+      <span class="filter-label"><i class="fas fa-filter"></i> Filter:</span>
+      <select class="filter-select" id="fDiff" onchange="applyFilters()">
+        <option value="all">All Difficulty</option>
+        <option value="Easy">Easy</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="Hard">Hard</option>
+      </select>
+      <select class="filter-select" id="fIntent" onchange="applyFilters()">
+        <option value="all">All Intent</option>
+        <option value="Transactional">Transactional</option>
+        <option value="Commercial">Commercial</option>
+        <option value="Informational">Informational</option>
+        <option value="Navigational">Navigational</option>
+      </select>
+      <select class="filter-select" id="fVol" onchange="applyFilters()">
+        <option value="0">Any Volume</option>
+        <option value="100">100+ volume</option>
+        <option value="500">500+ volume</option>
+        <option value="1000">1,000+ volume</option>
+        <option value="5000">5,000+ volume</option>
+      </select>
+    </div>
+    <div id="all-gaps-list">`;
+  gaps.slice(0,30).forEach(k => { html += gapCard(k); });
+  if (gaps.length > 30) html += `<p style="font-size:12px;color:var(--gray-400);text-align:center;padding:12px;">Showing 30 of ${gaps.length}. Export CSV for all.</p>`;
+  html += '</div></div>';
+
+  // Funnel tab
+  html += `<div id="panel-funnel" class="tab-panel" style="padding-bottom:20px;">
+    <div class="funnel-cols">`;
+  [{key:'Awareness',cls:'fc-aware',icon:'fa-eye'},{key:'Consideration',cls:'fc-consider',icon:'fa-balance-scale'},{key:'Decision',cls:'fc-decide',icon:'fa-check-circle'}]
+  .forEach(s => {
+    const items = gapsByFunnel[s.key]||[];
+    html += `<div class="funnel-col">
+      <div class="funnel-head ${s.cls}"><i class="fas ${s.icon}"></i> ${s.key} (${items.length})</div>
+      <div class="funnel-body">`;
+    items.slice(0,10).forEach(k => {
+      html += `<div class="funnel-kw">
+        <span style="font-size:12px;">${escH(k.keyword)}</span>
+        <span class="opp-score ${oppClass(oppScore(k))}">${oppLabel(oppScore(k))}</span>
+      </div>`;
     });
-    html += '</tbody></table></div></div></div>';
-  }
+    if (!items.length) html += `<div style="font-size:12px;color:var(--gray-400);padding:8px 0;">No gaps in this stage</div>`;
+    if (items.length>10) html += `<div style="font-size:11px;color:var(--gray-400);margin-top:4px;">+${items.length-10} more</div>`;
+    html += '</div></div>';
+  });
+  html += '</div></div>';
 
-  // Gaps by intent
-  const intentOrder = data.intentOrder || ['Transactional','Commercial','Informational','Navigational'];
-  const intentColors = {Transactional:'#f59e0b',Commercial:'#10b981',Informational:'#0ea5e9',Navigational:'#7c3aed'};
-  const tagCls = {Informational:'et-org',Transactional:'et-person',Commercial:'et-place',Navigational:'et-brand'};
-
-  intentOrder.forEach(function(intent) {
-    const group = (data.gapsByIntent && data.gapsByIntent[intent]) || [];
-    if (!group.length) return;
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3 style="color:'+(intentColors[intent]||'#666')+'"><i class="fas fa-tag"></i> '+intent+' Gaps ('+group.length+')</h3>';
-    if (group[0] && group[0].recommendedAction) html += '<span style="font-size:11px;color:var(--gray-400);margin-left:8px;">💡 '+group[0].recommendedAction+'</span>';
+  // Clusters tab
+  html += `<div id="panel-clusters" class="tab-panel" style="padding-bottom:20px;">`;
+  if (!topClusters || !topClusters.length) {
+    html += `<div class="no-results">No clusters found.</div>`;
+  } else {
+    html += '<div class="cluster-grid">';
+    topClusters.forEach(c => {
+      html += `<div class="cluster-card">
+        <div class="cluster-name">${escH(c.clusterName)}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+          ${intentBadge(c.keywords[0]?.intent||'')}
+          ${c.totalVolume?`<span class="badge b-vol">${c.totalVolume.toLocaleString()} vol</span>`:''}
+          <span class="badge" style="background:#f1f5f9;color:#64748b;">${c.keywords.length} kw</span>
+        </div>
+        <div class="cluster-kws">${c.keywords.slice(0,4).map(k=>escH(k.keyword)).join(' · ')}${c.keywords.length>4?' +more':''}</div>
+      </div>`;
+    });
     html += '</div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    group.slice(0,40).forEach(function(k){ html += '<span class="entity-tag '+(tagCls[intent]||'et-concept')+'">'+k.keyword+'</span>'; });
-    if (group.length>40) html += '<span class="entity-tag et-concept">+'+(group.length-40)+' more in CSV</span>';
-    html += '</div></div></div>';
-  });
+  }
+  html += '</div>';
 
-  document.getElementById('gapResults').innerHTML = html;
+  // By Intent tab
+  html += `<div id="panel-by-intent" class="tab-panel" style="padding-bottom:20px;">`;
+  const iColors = {Transactional:'var(--red)',Commercial:'var(--amber)',Informational:'var(--green)',Navigational:'var(--teal)'};
+  ['Transactional','Commercial','Informational','Navigational'].forEach(intent => {
+    const items = gapsByIntent[intent];
+    if (!items || !items.length) return;
+    html += `<div style="margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:700;color:${iColors[intent]};margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-tag"></i> ${intent} (${items.length}) — ${items[0].recommendedAction||''}
+      </div>`;
+    items.slice(0,15).forEach(k => { html += gapCard(k); });
+    if (items.length>15) html += `<p style="font-size:12px;color:var(--gray-400);margin-top:6px;">...and ${items.length-15} more.</p>`;
+    html += '</div>';
+  });
+  html += '</div>';
+
+  html += '</div></div>'; // close section-body + section-card
+  document.getElementById('results').innerHTML = html;
 }
 
-function clearGap() {
-  document.getElementById('gapYours').value = '';
-  document.getElementById('gapComp').value  = '';
-  document.getElementById('gapResults').innerHTML = '<div class="empty-state"><i class="fas fa-search-minus"></i><h3>Ready to detect gaps</h3><p>Paste your keywords and competitor keywords then click Find Gaps</p></div>';
-  document.getElementById('btnExportGap').style.display = 'none';
-  gapResults = {};
+function gapCard(k) {
+  const score = oppScore(k);
+  const pct   = Math.min(100, Math.round(score / 20 * 100));
+  const col   = priorityColor(score);
+  return `<div class="gap-item" onclick="this.classList.toggle('expanded')">
+    <div class="gap-kw">
+      <span class="gap-kw-text">${escH(k.keyword)}</span>
+      <i class="fas fa-chevron-down expand-icon"></i>
+    </div>
+    <div class="gap-meta">
+      ${diffBadge(k.difficulty)}
+      ${intentBadge(k.intent)}
+      <span class="opp-score ${oppClass(score)}">${oppLabel(score)}</span>
+      ${k.volume?`<span class="badge b-vol"><i class="fas fa-chart-line"></i> ${k.volume.toLocaleString()}</span>`:''}
+      <span class="badge" style="background:#f1f5f9;color:#64748b;">${escH(k.pageType||'')}</span>
+      <span class="badge" style="background:#f1f5f9;color:#64748b;">${escH(k.funnelStage||'')}</span>
+    </div>
+    <div class="priority-bar-wrap">
+      <span class="priority-lbl" style="color:${col};font-size:10px;min-width:60px;">Priority ${score}</span>
+      <div class="priority-bar-bg"><div class="priority-bar-fill" style="width:${pct}%;background:${col};"></div></div>
+    </div>
+    <div class="brief-body">
+      <div class="brief-box">
+        <strong>📋 Content Brief:</strong> ${escH(k.contentBrief||'')}
+        <div style="margin-top:8px;"><strong>🎯 Page Type:</strong> ${escH(k.pageType||'')} &nbsp;|&nbsp; <strong>📊 Funnel:</strong> ${escH(k.funnelStage||'')} &nbsp;|&nbsp; <strong>🔍 Intent:</strong> ${escH(k.intent||'')}</div>
+        <div class="brief-action"><i class="fas fa-pencil-alt"></i> ${escH(k.recommendedAction||'')}</div>
+      </div>
+    </div>
+  </div>`;
 }
 
-function exportGapCSV() {
-  const rows = ['Keyword,Type,Intent,Difficulty,Volume,RecommendedAction'];
-  (gapResults.gaps||[]).forEach(function(k){
-    rows.push('"'+k.keyword+'","Gap","'+(k.intent||'')+'","'+(k.difficulty||'')+'","'+(k.volume||0)+'","'+(k.recommendedAction||'')+'"');
+function renderAllGaps(gaps) {
+  const filtered = filterGaps(gaps);
+  const list = document.getElementById('all-gaps-list');
+  if (!list) return;
+  if (!filtered.length) { list.innerHTML = `<div class="no-results">No gaps match the selected filters.</div>`; return; }
+  list.innerHTML = filtered.slice(0,50).map(k=>gapCard(k)).join('') +
+    (filtered.length>50?`<p style="font-size:12px;color:var(--gray-400);text-align:center;padding:12px;">Showing 50 of ${filtered.length}. Export CSV for all.</p>`:'');
+}
+
+function statBox(num,label,color){ return `<div class="stat-box"><div class="stat-num" style="color:${color}">${num}</div><div class="stat-label">${label}</div></div>`; }
+
+function clearTool() {
+  document.getElementById('yourKws').value = '';
+  document.getElementById('compKws').value = '';
+  document.getElementById('results').innerHTML = '<div class="empty-state"><i class="fas fa-search-dollar"></i><h3>No gap analysis yet</h3><p>Enter both keyword lists above and click Find Keyword Gaps</p></div>';
+  document.getElementById('btnExport').style.display = 'none';
+  lastData = null;
+}
+
+function exportCSV() {
+  if (!lastData) return;
+  const rows = ['Keyword,Intent,Difficulty,Volume,Opportunity Score,Funnel Stage,Page Type,Content Brief,Action'];
+  (lastData.gaps||[]).forEach(k => {
+    rows.push([
+      '"'+k.keyword.replace(/"/g,'""')+'"', k.intent, k.difficulty,
+      k.volume||0, k.opportunityScore||0, k.funnelStage,
+      '"'+(k.pageType||'')+'"',
+      '"'+(k.contentBrief||'').replace(/"/g,'""')+'"',
+      '"'+(k.recommendedAction||'')+'"'
+    ].join(','));
   });
-  (gapResults.shared||[]).forEach(function(k){
-    rows.push('"'+k.keyword+'","Shared","'+(k.intent||'')+'","'+(k.difficulty||'')+'","'+(k.volume||0)+'"');
-  });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
-  a.download = 'keyword-gap-'+new Date().toISOString().split('T')[0]+'.csv';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+  a.download='keyword-gap-'+new Date().toISOString().split('T')[0]+'.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
+
+function escH(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>

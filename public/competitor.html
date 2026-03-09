@@ -1,266 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Competitor Analysis — ClusterSEO Pro</title>
-  <meta name="description" content="Compare your keywords vs competitor keywords with overlap scoring and gap detection.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="shared.css">
-  <style>
-    .tool-hero {background:linear-gradient(135deg, #ef4444, #dc2626);padding:52px 28px 40px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
-    .tool-hero h1 {font-size:2rem;font-weight:800;color:var(--white);letter-spacing:-0.03em;margin-bottom:8px;}
-    .tool-hero p {font-size:14px;color:rgba(255,255,255,0.5);}
-    .tool-back {display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.2s;}
-    .tool-back:hover {background:rgba(255,255,255,0.18);}
-    .tool-section {padding:40px 28px 72px;}
-    .tool-inner {max-width:1100px;margin:0 auto;}
-    .browser-chrome {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xl);}
-    .browser-bar {background:var(--gray-100);border-bottom:1px solid var(--gray-200);padding:12px 18px;display:flex;align-items:center;gap:12px;}
-    .browser-dots {display:flex;gap:6px;}
-    .browser-dots span {width:12px;height:12px;border-radius:50%;}
-    .dot-r{background:#ff5f57;}.dot-y{background:#ffbd2e;}.dot-g{background:#28c840;}
-    .browser-url {flex:1;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 12px;font-size:12px;color:var(--gray-400);font-family:var(--mono);}
-    .app-inside {padding:28px;}
-    .input-lbl {font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-    textarea.kw-box {width:100%;border:1px solid var(--gray-200);border-radius:var(--r);padding:13px;font-size:13px;font-family:var(--mono);color:var(--gray-700);background:var(--white);resize:vertical;line-height:1.6;transition:border-color 0.2s;outline:none;}
-    textarea.kw-box:focus {border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
-    .btn-run {padding:12px 28px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;color:white;transition:all 0.2s;}
-    .btn-run:hover {opacity:0.88;transform:translateY(-1px);}
-    .btn-secondary {padding:10px 20px;border:1px solid var(--gray-200);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--gray-600);background:var(--white);transition:all 0.2s;}
-    .btn-secondary:hover {border-color:var(--teal);color:var(--teal);}
-    .result-section {margin-top:24px;}
-    .result-card {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);overflow:hidden;}
-    .result-card-head {padding:14px 18px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
-    .result-card-head h3 {font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
-    .result-card-body {padding:18px;}
-    .empty-state {text-align:center;padding:48px 24px;color:var(--gray-400);}
-    .empty-state i {font-size:2.5rem;color:var(--gray-200);display:block;margin-bottom:12px;}
-    .empty-state h3 {font-size:15px;font-weight:700;color:var(--gray-600);margin-bottom:6px;}
-    .stat-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
-    .stat-box {background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;}
-    .stat-box-num {font-size:1.5rem;font-weight:800;color:var(--gray-900);line-height:1;}
-    .stat-box-label {font-size:11px;color:var(--gray-400);font-weight:500;margin-top:4px;}
-    .tag-cloud {display:flex;flex-wrap:wrap;gap:8px;}
-    .entity-tag {display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid transparent;}
-    .et-person {background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,0.2);}
-    .et-org {background:var(--teal-light);color:var(--teal-dark);border-color:rgba(14,165,233,0.2);}
-    .et-place {background:var(--green-light);color:#065f46;border-color:rgba(16,185,129,0.2);}
-    .et-brand {background:#ede9fe;color:#6d28d9;border-color:rgba(124,58,237,0.2);}
-    .et-concept {background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-200);}
-    .score-bar {height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-top:6px;}
-    .score-fill {height:100%;border-radius:4px;transition:width 0.6s ease;}
-    .score-good {background:linear-gradient(90deg,var(--green),#34d399);}
-    .score-med  {background:linear-gradient(90deg,var(--gold),#fbbf24);}
-    .score-bad  {background:linear-gradient(90deg,var(--red),#f87171);}
-    .audit-item {display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);}
-    .audit-item:last-child {border-bottom:none;}
-    .audit-icon {width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;}
-    .ai-pass {background:#d1fae5;color:#065f46;}
-    .ai-warn {background:#fef3c7;color:#92400e;}
-    .ai-fail {background:#fee2e2;color:#991b1b;}
-    .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
-    .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competitor Analysis — ClusterSEO Pro</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+:root{--orange:#f97316;--orange-dark:#ea580c;--blue:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#7c3aed;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-500:#64748b;--gray-600:#475569;--gray-700:#334155;--gray-900:#0f172a;--white:#fff;--font:"Sora",sans-serif;--mono:"JetBrains Mono",monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:#f0f4f8;color:var(--gray-900);min-height:100vh;}
+.tool-hero{background:linear-gradient(135deg,#f97316,#ea580c);padding:52px 28px 40px;text-align:center;}
+.tool-hero h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:8px;}
+.tool-hero p{font-size:14px;color:rgba(255,255,255,0.65);margin-bottom:14px;}
+.tool-back{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;text-decoration:none;}
+.tool-section{padding:36px 20px 80px;}
+.tool-inner{max-width:1160px;margin:0 auto;}
+
+/* Input card */
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.08);margin-bottom:20px;}
+.card-body{padding:26px;}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:700px){.input-grid{grid-template-columns:1fr;}}
+.col-label{font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+.col-you{border-left:3px solid var(--blue);padding-left:10px;}
+.col-comp{border-left:3px solid var(--orange);padding-left:10px;}
+textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:10px;padding:13px;font-size:12.5px;font-family:var(--mono);color:var(--gray-700);background:#fafbfc;resize:vertical;line-height:1.65;outline:none;transition:border-color .2s;}
+textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(249,115,22,.1);}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;}
+.btn{padding:12px 24px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+.btn-orange{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;}
+.btn-orange:hover{opacity:.88;transform:translateY(-1px);}
+.btn-orange:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-sec{padding:10px 18px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--gray-600);background:#fff;transition:all .2s;}
+.btn-sec:hover{border-color:var(--orange);color:var(--orange);}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:22px;}
+@media(max-width:800px){.stats-row{grid-template-columns:repeat(3,1fr);}}
+.stat-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;padding:16px;text-align:center;}
+.stat-num{font-size:1.7rem;font-weight:800;line-height:1;}
+.stat-lbl{font-size:10px;color:var(--gray-400);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.05em;}
+
+/* Overlap bar */
+.overlap-wrap{margin-bottom:20px;}
+.overlap-title{font-size:12px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.overlap-bar{height:20px;border-radius:100px;display:flex;overflow:hidden;gap:2px;}
+.seg-you{background:var(--blue);}
+.seg-shared{background:#cbd5e1;}
+.seg-comp{background:var(--orange);}
+.overlap-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--gray-500);margin-top:8px;}
+.leg-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--gray-100);padding:4px;border-radius:10px;margin-bottom:20px;flex-wrap:wrap;}
+.tab{padding:8px 16px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--gray-500);font-family:var(--font);transition:all .15s;display:flex;align-items:center;gap:5px;}
+.tab.active{background:#fff;color:var(--orange-dark);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.tab-count{background:var(--orange);color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:100px;min-width:18px;text-align:center;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* Section cards */
+.sec{background:#fff;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.sec-head{padding:13px 20px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
+.sec-title{font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:8px;}
+.sec-body{padding:20px;}
+
+/* Keyword cards */
+.kw-card{border:1.5px solid var(--gray-200);border-radius:10px;padding:12px 14px;margin-bottom:8px;transition:all .2s;cursor:pointer;}
+.kw-card:hover{border-color:var(--orange);box-shadow:0 2px 8px rgba(249,115,22,.1);}
+.kw-card.expanded{border-color:var(--orange);}
+.kw-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.kw-name{font-size:13.5px;font-weight:700;color:var(--gray-900);flex:1;}
+.kw-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);}
+.kw-card.expanded .kw-detail{display:block;}
+.brief-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
+@media(max-width:600px){.brief-grid{grid-template-columns:1fr;}}
+.brief-item{background:var(--gray-50);border-radius:8px;padding:10px 12px;}
+.brief-item-label{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.brief-item-val{font-size:12.5px;color:var(--gray-700);line-height:1.5;}
+
+/* Priority bar */
+.prio-bar{height:4px;border-radius:100px;background:var(--gray-100);overflow:hidden;margin-top:6px;width:80px;}
+.prio-fill{height:100%;border-radius:100px;}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:700;}
+.b-easy,.b-low{background:#dcfce7;color:#14532d;}
+.b-medium{background:#fef9c3;color:#713f12;}
+.b-hard,.b-high{background:#fee2e2;color:#7f1d1d;}
+.b-transactional{background:#fee2e2;color:#7f1d1d;}
+.b-commercial{background:#fef9c3;color:#713f12;}
+.b-informational{background:#dcfce7;color:#14532d;}
+.b-navigational{background:#e0f2fe;color:#075985;}
+.b-gray{background:var(--gray-100);color:var(--gray-500);}
+
+/* Intent table */
+.intent-table{width:100%;border-collapse:collapse;}
+.intent-table th{text-align:left;padding:10px 14px;border-bottom:2px solid var(--gray-200);font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;}
+.intent-table td{padding:11px 14px;border-bottom:1px solid var(--gray-100);font-size:13px;}
+.intent-table tr:last-child td{border-bottom:none;}
+.intent-table tr:hover td{background:var(--gray-50);}
+.mini-bar-wrap{display:flex;gap:4px;align-items:center;}
+.mini-bar{height:8px;border-radius:100px;background:var(--gray-100);overflow:hidden;width:70px;}
+.mini-fill{height:100%;border-radius:100px;}
+
+/* Cluster grid */
+.cluster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
+.cluster-card{border:1.5px solid var(--gray-200);border-radius:12px;padding:16px;transition:all .2s;}
+.cluster-card:hover{border-color:var(--orange);box-shadow:0 3px 10px rgba(249,115,22,.08);}
+.cluster-name{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:8px;}
+.cluster-kws{font-size:11.5px;color:var(--gray-500);line-height:1.7;}
+
+/* Empty / loading */
+.empty-state{text-align:center;padding:60px 24px;color:var(--gray-400);}
+.empty-state i{font-size:3rem;color:var(--gray-200);display:block;margin-bottom:14px;}
+.empty-state h3{font-size:16px;font-weight:700;color:var(--gray-500);margin-bottom:6px;}
+.spin{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(249,115,22,.3);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-wrap{text-align:center;padding:60px 24px;}
+.loading-big{width:40px;height:40px;border:3px solid var(--gray-200);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;}
+</style>
 </head>
 <body>
 <div class="page-wrap">
-  <section class="tool-hero">
-    <h1><i class="fas fa-chess" style="margin-right:10px;"></i> Competitor Analysis</h1>
-    <p>Compare your keyword set against a competitor — find gaps, overlaps and intent differences</p>
-    <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
-  </section>
-  <section class="tool-section">
-    <div class="tool-inner">
-      <div class="browser-chrome">
-        <div class="browser-bar">
-          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-          <div class="browser-url">clusterseo.pro — Competitor Analysis</div>
+<section class="tool-hero">
+  <h1><i class="fas fa-chess" style="margin-right:10px;"></i> Competitor Keyword Analysis</h1>
+  <p>Compare keyword lists — find quick wins, content gaps, intent differences and topic clusters</p>
+  <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
+</section>
+<section class="tool-section">
+<div class="tool-inner">
+  <div class="card">
+    <div class="card-body">
+      <div class="input-grid">
+        <div>
+          <div class="col-label col-you"><i class="fas fa-user" style="color:var(--blue);"></i> Your Keywords <span style="font-size:11px;color:var(--gray-400);font-weight:400;margin-left:4px;">one per line · keyword, volume</span></div>
+          <textarea id="yourKws" rows="10" placeholder="best running shoes&#10;running shoes for beginners&#10;trail running shoes, 2400&#10;running shoe reviews&#10;waterproof running shoes, 880"></textarea>
         </div>
-        <div class="app-inside">
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-            <div>
-              <div class="input-lbl"><i class="fas fa-user" style="color:var(--teal)"></i> Your Keywords</div>
-              <textarea class="kw-box" id="yourKws" rows="12" placeholder="Paste your keywords&#10;one per line or keyword, volume&#10;&#10;best running shoes&#10;running shoes review&#10;buy nike shoes, 2400"></textarea>
-            </div>
-            <div>
-              <div class="input-lbl"><i class="fas fa-chess" style="color:var(--red)"></i> Competitor Keywords</div>
-              <textarea class="kw-box" id="compKws" rows="12" placeholder="Paste competitor keywords&#10;one per line or keyword, volume&#10;&#10;best running shoes&#10;running shoes for men&#10;nike running shoes 2025"></textarea>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-            <button class="btn-run" style="background:linear-gradient(135deg,#ef4444,#dc2626);" onclick="runCompetitorAnalysis()"><i class="fas fa-chess"></i> Analyse Competitor</button>
-            <button class="btn-secondary" onclick="clearCompetitor()"><i class="fas fa-trash"></i> Clear</button>
-            <button class="btn-secondary" id="btnExportComp" style="display:none;" onclick="exportCompCSV()"><i class="fas fa-download"></i> Export CSV</button>
-          </div>
-          <div id="competitorResults" class="result-section">
-            <div class="empty-state"><i class="fas fa-chess"></i><h3>Ready to analyse</h3><p>Paste your keywords and competitor keywords then click Analyse</p></div>
-          </div>
-
+        <div>
+          <div class="col-label col-comp"><i class="fas fa-user-secret" style="color:var(--orange);"></i> Competitor Keywords <span style="font-size:11px;color:var(--gray-400);font-weight:400;margin-left:4px;">one per line · keyword, volume</span></div>
+          <textarea id="compKws" rows="10" placeholder="best running shoes&#10;buy running shoes online&#10;cheap running shoes, 3200&#10;running shoes sale, 1900&#10;marathon running shoes&#10;road running shoes, 5400&#10;best trail running shoes, 2800&#10;running shoes for flat feet, 1400"></textarea>
         </div>
       </div>
+      <div class="btn-row">
+        <button class="btn btn-orange" id="btnRun" onclick="runAnalysis()"><i class="fas fa-chess"></i> Analyse</button>
+        <button class="btn-sec" onclick="clearTool()"><i class="fas fa-redo"></i> Clear</button>
+        <button class="btn-sec" id="btnExport" style="display:none;" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+      </div>
     </div>
-  </section>
+  </div>
+
+  <div id="results">
+    <div class="empty-state"><i class="fas fa-chess"></i><h3>No analysis yet</h3><p>Enter both keyword lists above and click Analyse</p></div>
+  </div>
+</div>
+</section>
 </div>
 <script src="shared-layout.js"></script>
-
 <script>
-const API = '';
-let compData = {};
+const API = "";
+let lastData = null;
 
-function parseKwList(text) {
-  return text.split('\n')
-    .map(function(l){ const p=l.split(',').map(function(s){return s.trim();}); return {keyword:p[0],volume:p[1]?parseInt(p[1])||0:0}; })
-    .filter(function(k){return k.keyword&&k.keyword.length>1;});
+function parseKws(id) {
+  return document.getElementById(id).value.trim().split("\n")
+    .map(l=>l.trim()).filter(l=>l.length>1)
+    .map(l=>{ const p=l.split(","); return {keyword:p[0].trim(), volume:parseInt(p[1])||0}; });
 }
 
-async function runCompetitorAnalysis() {
-  const yours = parseKwList(document.getElementById('yourKws').value);
-  const comps  = parseKwList(document.getElementById('compKws').value);
-  if (!yours.length || !comps.length) { alert('Paste keywords in both columns.'); return; }
-
-  const resultsEl = document.getElementById('competitorResults');
-  resultsEl.innerHTML = '<div class="empty-state"><div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:#ef4444;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--gray-400);">Analysing keywords...</p></div>';
-
+async function runAnalysis() {
+  const yours = parseKws("yourKws");
+  const comps  = parseKws("compKws");
+  if (!yours.length || !comps.length) { alert("Please enter keywords in both lists."); return; }
+  const btn = document.getElementById("btnRun");
+  btn.disabled = true; btn.innerHTML = "<span class='spin'></span> Analysing...";
+  document.getElementById("results").innerHTML = "<div class='loading-wrap'><div class='loading-big'></div><p style='color:var(--gray-400);font-size:14px;'>Analysing keyword overlap...</p></div>";
+  document.getElementById("btnExport").style.display = "none";
   try {
-    const res = await fetch(API + '/api/competitor-analysis', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        yourKeywords:       yours.map(function(k){ return k.keyword + (k.volume ? ','+k.volume : ''); }),
-        competitorKeywords: comps.map(function(k){ return k.keyword + (k.volume ? ','+k.volume : ''); })
-      })
+    const res  = await fetch(API + "/api/competitor-analysis", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({yourKeywords:yours, competitorKeywords:comps})
     });
     const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'API error');
-
-    compData = data;
-    renderCompetitor(data);
-    document.getElementById('btnExportComp').style.display = 'flex';
+    if (!data.success) throw new Error(data.error || "API error");
+    lastData = data;
+    renderResults(data);
+    document.getElementById("btnExport").style.display = "flex";
   } catch(err) {
-    resultsEl.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error</h3><p>' + err.message + '<br>Make sure your server is running.</p></div>';
+    document.getElementById("results").innerHTML = "<div class='empty-state'><i class='fas fa-exclamation-circle' style='color:var(--red)'></i><h3>Error</h3><p>" + escH(err.message) + "</p></div>";
   }
+  btn.disabled = false; btn.innerHTML = "<i class='fas fa-chess'></i> Analyse";
 }
 
-function renderCompetitor(d) {
-  const s = d.stats;
-  let html = '<div class="stat-grid">';
-  html += '<div class="stat-box"><div class="stat-box-num">'+s.yourKeywords+'</div><div class="stat-box-label">Your Keywords</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num">'+s.compKeywords+'</div><div class="stat-box-label">Competitor Keywords</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:var(--teal)">'+s.shared+'</div><div class="stat-box-label">Shared</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#059669">'+s.yourAdvantage+'</div><div class="stat-box-label">Your Advantage</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num" style="color:#ef4444">'+s.missing+'</div><div class="stat-box-label">You\'re Missing</div></div>';
-  html += '<div class="stat-box"><div class="stat-box-num">'+s.overlapPct+'%</div><div class="stat-box-label">Keyword Overlap</div></div>';
-  html += '</div>';
+function renderResults(data) {
+  const {stats, overlap, intentComparison, onlyComp, quickWins, topicGaps, shared, onlyYours} = data;
+  let html = "";
+
+  // Stats row
+  html += "<div class='sec'><div class='sec-head'><div class='sec-title'><i class='fas fa-chart-bar' style='color:var(--orange);'></i> Overview</div></div><div class='sec-body'>";
+  html += "<div class='stats-row'>";
+  html += statBox(stats.yourKeywords, "Your KWs", "var(--blue)");
+  html += statBox(stats.compKeywords, "Comp KWs", "var(--orange)");
+  html += statBox(stats.shared, "Shared", "var(--gray-500)");
+  html += statBox(stats.yourAdvantage, "Only Yours", "var(--green)");
+  html += statBox(stats.missing, "Gaps", "var(--red)");
+  html += statBox(stats.overlapPct + "%", "Overlap", "var(--purple)");
+  html += "</div>";
 
   // Overlap bar
-  const o = d.overlap;
-  html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-chart-bar"></i> Keyword Overlap Visualisation</h3></div>';
-  html += '<div class="result-card-body">';
-  html += '<div style="display:flex;height:32px;border-radius:var(--r);overflow:hidden;margin-bottom:12px;">';
-  html += '<div style="width:'+o.yourPct+'%;background:#059669;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">'+(o.yourPct>8?d.onlyYours.length:'')+'</div>';
-  html += '<div style="width:'+o.sharedPct+'%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">'+(o.sharedPct>8?d.shared.length:'')+'</div>';
-  html += '<div style="width:'+o.compPct+'%;background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">'+(o.compPct>8?d.onlyComp.length:'')+'</div>';
-  html += '</div>';
-  html += '<div style="display:flex;gap:16px;font-size:12px;">';
-  html += '<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:#059669;border-radius:2px;display:inline-block;"></span>You only ('+d.onlyYours.length+')</span>';
-  html += '<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:var(--teal);border-radius:2px;display:inline-block;"></span>Shared ('+d.shared.length+')</span>';
-  html += '<span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;background:#ef4444;border-radius:2px;display:inline-block;"></span>Competitor only ('+d.onlyComp.length+')</span>';
-  html += '</div></div></div>';
+  html += "<div class='overlap-wrap'>";
+  html += "<div class='overlap-title'>Keyword Distribution</div>";
+  html += "<div class='overlap-bar'>";
+  html += "<div class='seg-you' style='flex:" + overlap.yourPct + "'></div>";
+  html += "<div class='seg-shared' style='flex:" + overlap.sharedPct + "'></div>";
+  html += "<div class='seg-comp' style='flex:" + overlap.compPct + "'></div>";
+  html += "</div>";
+  html += "<div class='overlap-legend'>";
+  html += "<span><span class='leg-dot' style='background:var(--blue);'></span>Only yours (" + overlap.yourPct + "%)</span>";
+  html += "<span><span class='leg-dot' style='background:#cbd5e1;'></span>Shared (" + overlap.sharedPct + "%)</span>";
+  html += "<span><span class='leg-dot' style='background:var(--orange);'></span>Only competitor (" + overlap.compPct + "%)</span>";
+  html += "</div></div></div></div>";
 
-  // Intent comparison
-  const intentColors = { Informational:'#0ea5e9', Transactional:'#f59e0b', Commercial:'#10b981', Navigational:'#7c3aed' };
-  html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-chart-pie"></i> Intent Strategy Comparison</h3></div>';
-  html += '<div class="result-card-body">';
-  (d.intentComparison || []).forEach(function(ic) {
-    const col  = intentColors[ic.intent];
-    const diff = ic.diff;
-    const tag  = diff>0 ? '<span style="color:#059669;font-size:11px;font-weight:700;">You +'+diff+'%</span>'
-               : diff<0 ? '<span style="color:#ef4444;font-size:11px;font-weight:700;">Gap '+Math.abs(diff)+'%</span>'
-               : '<span style="color:var(--gray-400);font-size:11px;">Equal</span>';
-    html += '<div style="margin-bottom:14px;">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">';
-    html += '<span style="font-size:13px;font-weight:700;color:'+col+'">'+ic.intent+'</span>';
-    html += '<span style="font-size:12px;color:var(--gray-500);">You: '+ic.yourCount+' ('+ic.yourPct+'%) &nbsp;|&nbsp; Competitor: '+ic.compCount+' ('+ic.compPct+'%)</span>';
-    html += tag+'</div>';
-    html += '<div style="display:grid;gap:3px;">';
-    html += '<div style="height:8px;background:var(--gray-100);border-radius:4px;position:relative;"><div style="position:absolute;inset:0;width:'+ic.yourPct+'%;background:'+col+';border-radius:4px;"></div></div>';
-    html += '<div style="height:8px;background:var(--gray-100);border-radius:4px;position:relative;"><div style="position:absolute;inset:0;width:'+ic.compPct+'%;background:'+col+';border-radius:4px;opacity:0.35;"></div></div>';
-    html += '</div></div>';
+  // Tabs
+  html += "<div class='sec'><div class='sec-body'>";
+  html += "<div class='tabs'>";
+  html += tabBtn("quickwins", "fa-bolt", "Quick Wins", (quickWins||[]).length, true);
+  html += tabBtn("gaps", "fa-map", "All Gaps", (onlyComp||[]).length, false);
+  html += tabBtn("intent", "fa-bullseye", "Intent", "", false);
+  html += tabBtn("clusters", "fa-layer-group", "Topic Clusters", (topicGaps||[]).length, false);
+  html += tabBtn("shared", "fa-handshake", "Shared", (shared||[]).length, false);
+  html += tabBtn("yours", "fa-star", "Only Yours", (onlyYours||[]).length, false);
+  html += "</div>";
+
+  // Quick Wins tab
+  html += "<div id='panel-quickwins' class='tab-panel active'>";
+  if (quickWins && quickWins.length) {
+    html += "<div style='font-size:13px;color:var(--gray-600);margin-bottom:14px;line-height:1.6;'>These keywords have <strong>Easy/Low difficulty</strong> — your competitor ranks for them but you don't. Target these first for fastest wins.</div>";
+    quickWins.slice(0,25).forEach(k => { html += kwCard(k); });
+  } else {
+    html += "<div class='empty-state' style='padding:30px;'><i class='fas fa-bolt'></i><h3>No quick wins found</h3><p>All gap keywords have medium or high difficulty</p></div>";
+  }
+  html += "</div>";
+
+  // All Gaps tab
+  html += "<div id='panel-gaps' class='tab-panel'>";
+  if (onlyComp && onlyComp.length) {
+    html += "<div style='font-size:13px;color:var(--gray-600);margin-bottom:14px;'>All " + onlyComp.length + " keywords your competitor ranks for that you don't. Click any keyword to see the content brief.</div>";
+    onlyComp.slice(0,60).forEach(k => { html += kwCard(k); });
+    if (onlyComp.length > 60) html += "<p style='font-size:12px;color:var(--gray-400);padding:8px 0;'>...and " + (onlyComp.length-60) + " more — export CSV for full list.</p>";
+  } else {
+    html += "<div class='empty-state' style='padding:30px;'><i class='fas fa-check-circle' style='color:var(--green)'></i><h3>No gaps found</h3><p>You cover all competitor keywords!</p></div>";
+  }
+  html += "</div>";
+
+  // Intent Comparison tab
+  html += "<div id='panel-intent' class='tab-panel'>";
+  html += "<div style='font-size:13px;color:var(--gray-600);margin-bottom:16px;'>How your keyword intent mix compares to your competitor. Gaps in specific intents reveal strategic weaknesses.</div>";
+  html += "<table class='intent-table'><thead><tr><th>Intent</th><th>Your Count</th><th>Comp Count</th><th>Difference</th><th>You</th><th>Competitor</th></tr></thead><tbody>";
+  (intentComparison||[]).forEach(ic => {
+    const diff = ic.yourPct - ic.compPct;
+    const dc = diff > 0 ? "var(--green)" : diff < 0 ? "var(--red)" : "var(--gray-400)";
+    const intentClass = ic.intent.toLowerCase();
+    html += "<tr><td><span class='badge b-" + intentClass + "'>" + ic.intent + "</span></td>";
+    html += "<td><strong>" + ic.yourCount + "</strong> <span style='color:var(--gray-400);font-size:11px;'>(" + ic.yourPct + "%)</span></td>";
+    html += "<td><strong>" + ic.compCount + "</strong> <span style='color:var(--gray-400);font-size:11px;'>(" + ic.compPct + "%)</span></td>";
+    html += "<td style='color:" + dc + ";font-weight:800;'>" + (diff > 0 ? "+" : "") + diff + "%</td>";
+    html += "<td><div class='mini-bar-wrap'><div class='mini-bar'><div class='mini-fill' style='width:" + ic.yourPct + "%;background:var(--blue);'></div></div><span style='font-size:11px;color:var(--gray-400);'>" + ic.yourPct + "%</span></div></td>";
+    html += "<td><div class='mini-bar-wrap'><div class='mini-bar'><div class='mini-fill' style='width:" + ic.compPct + "%;background:var(--orange);'></div></div><span style='font-size:11px;color:var(--gray-400);'>" + ic.compPct + "%</span></div></td>";
+    html += "</tr>";
   });
-  html += '<div style="font-size:11px;color:var(--gray-400);">Solid = You &nbsp; Faded = Competitor</div>';
-  html += '</div></div>';
+  html += "</tbody></table></div>";
 
-  // Quick wins
-  if (d.quickWins && d.quickWins.length) {
-    const diffColor = {Easy:'#059669',Medium:'#f59e0b',Hard:'#ef4444'};
-    const intColor  = {Informational:'#0ea5e9',Transactional:'#f59e0b',Commercial:'#10b981',Navigational:'#7c3aed'};
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-bolt" style="color:var(--gold)"></i> Quick Wins — Easy Keywords You\'re Missing ('+d.quickWins.length+')</h3></div>';
-    html += '<div class="result-card-body"><p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">Long-tail keywords the competitor ranks for — lower competition, faster to rank.</p>';
-    html += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
-    html += '<thead><tr style="background:var(--gray-50);"><th style="text-align:left;padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Keyword</th><th style="padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Intent</th><th style="padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Volume</th><th style="padding:8px 12px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">Difficulty</th></tr></thead>';
-    html += '<tbody>';
-    d.quickWins.forEach(function(k,i) {
-      html += '<tr style="border-bottom:1px solid var(--gray-100);'+(i%2?'background:var(--gray-50)':'')+'">';
-      html += '<td style="padding:8px 12px;font-weight:600;color:var(--gray-900);">'+k.keyword+'</td>';
-      html += '<td style="padding:8px 12px;"><span style="font-size:11px;font-weight:700;color:'+(intColor[k.intent]||'#666')+'">'+k.intent+'</span></td>';
-      html += '<td style="padding:8px 12px;color:var(--gray-600);">'+(k.volume?k.volume.toLocaleString():'—')+'</td>';
-      html += '<td style="padding:8px 12px;"><span style="font-size:11px;font-weight:700;color:'+(diffColor[k.difficulty]||'#666')+'">'+k.difficulty+'</span></td>';
-      html += '</tr>';
+  // Topic Clusters tab
+  html += "<div id='panel-clusters' class='tab-panel'>";
+  if (topicGaps && topicGaps.length) {
+    html += "<div style='font-size:13px;color:var(--gray-600);margin-bottom:16px;'>Topic clusters your competitor covers that you're missing entirely. Each represents a content opportunity.</div>";
+    html += "<div class='cluster-grid'>";
+    topicGaps.slice(0,16).forEach(cl => {
+      html += "<div class='cluster-card'>";
+      html += "<div class='cluster-name'>" + escH(cl.clusterName) + "</div>";
+      html += "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;'><span class='badge b-" + (cl.intent||"").toLowerCase() + "'>" + (cl.intent||"") + "</span><span class='badge b-gray'>" + escH(cl.pageType||"") + "</span>";
+      if (cl.totalVolume > 0) html += "<span class='badge b-gray'><i class='fas fa-chart-line'></i> " + cl.totalVolume.toLocaleString() + "</span>";
+      html += "</div>";
+      html += "<div class='cluster-kws'>" + cl.keywords.slice(0,5).map(k=>escH(k.keyword)).join(" · ") + (cl.keywords.length>5?" <span style='color:var(--gray-400);'>+"+( cl.keywords.length-5)+" more</span>":"") + "</div>";
+      html += "</div>";
     });
-    html += '</tbody></table></div></div></div>';
+    html += "</div>";
+  } else {
+    html += "<div class='empty-state' style='padding:30px;'><i class='fas fa-layer-group'></i><h3>No cluster gaps</h3><p>No distinct topic gaps found</p></div>";
   }
+  html += "</div>";
 
-  // All missing
-  const tagCls = {Informational:'et-org',Transactional:'et-person',Commercial:'et-place',Navigational:'et-brand'};
-  if (d.onlyComp && d.onlyComp.length) {
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> All Keywords You\'re Missing ('+d.onlyComp.length+')</h3></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    d.onlyComp.slice(0,60).forEach(function(k){ html += '<span class="entity-tag '+(tagCls[k.intent]||'et-concept')+'">'+k.keyword+'</span>'; });
-    if (d.onlyComp.length>60) html += '<span class="entity-tag et-concept">+'+(d.onlyComp.length-60)+' more in CSV</span>';
-    html += '</div></div></div>';
+  // Shared tab
+  html += "<div id='panel-shared' class='tab-panel'>";
+  if (shared && shared.length) {
+    html += "<div style='font-size:13px;color:var(--gray-600);margin-bottom:14px;'>Keywords both you and your competitor target. These are your contested battlegrounds.</div>";
+    shared.slice(0,50).forEach(k => { html += kwCard(k, "var(--gray-400)"); });
+  } else {
+    html += "<div class='empty-state' style='padding:30px;'><i class='fas fa-handshake'></i><h3>No shared keywords</h3></div>";
   }
+  html += "</div>";
 
-  // Your advantage
-  if (d.onlyYours && d.onlyYours.length) {
-    html += '<div class="result-card">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-shield-alt" style="color:#059669"></i> Your Keyword Advantage ('+d.onlyYours.length+' unique)</h3></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    d.onlyYours.slice(0,40).forEach(function(k){ html += '<span class="entity-tag et-org">'+k.keyword+'</span>'; });
-    if (d.onlyYours.length>40) html += '<span class="entity-tag et-concept">+'+(d.onlyYours.length-40)+' more</span>';
-    html += '</div></div></div>';
+  // Only Yours tab
+  html += "<div id='panel-yours' class='tab-panel'>";
+  if (onlyYours && onlyYours.length) {
+    html += "<div style='font-size:13px;color:var(--gray-600);margin-bottom:14px;'>Your unique keywords — your competitor is missing these. Protect your advantage here.</div>";
+    onlyYours.slice(0,50).forEach(k => { html += kwCard(k, "var(--green)"); });
+  } else {
+    html += "<div class='empty-state' style='padding:30px;'><i class='fas fa-star'></i><h3>No unique keywords</h3></div>";
   }
+  html += "</div>";
 
-  document.getElementById('competitorResults').innerHTML = html;
+  html += "</div></div>"; // close sec-body + sec
+
+  document.getElementById("results").innerHTML = html;
 }
 
-function clearCompetitor() {
-  document.getElementById('yourKws').value = '';
-  document.getElementById('compKws').value = '';
-  document.getElementById('competitorResults').innerHTML = '<div class="empty-state"><i class="fas fa-chess"></i><h3>Ready to analyse</h3><p>Paste your keywords and competitor keywords then click Analyse</p></div>';
-  document.getElementById('btnExportComp').style.display = 'none';
-  compData = {};
+function tabBtn(id, icon, label, count, active) {
+  const cnt = count !== "" ? "<span class='tab-count'>" + count + "</span>" : "";
+  return "<button class='tab" + (active?" active":"") + "' data-tab='" + id + "' onclick=\"switchTab('" + id + "')\"><i class='fas " + icon + "'></i> " + label + cnt + "</button>";
 }
 
-function exportCompCSV() {
-  const rows = ['Keyword,Category,Intent,Difficulty,Volume'];
-  (compData.onlyComp||[]).forEach(function(k){ rows.push('"'+k.keyword+'","Missing — Competitor Only","'+(k.intent||'')+'","'+(k.difficulty||'')+'","'+(k.volume||0)+'"'); });
-  (compData.shared||[]).forEach(function(k){ rows.push('"'+k.keyword+'","Shared","'+(k.intent||'')+'","","'+(k.volume||0)+'"'); });
-  (compData.onlyYours||[]).forEach(function(k){ rows.push('"'+k.keyword+'","Your Advantage","'+(k.intent||'')+'","'+(k.difficulty||'')+'","'+(k.volume||0)+'"'); });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([rows.join('\n')], {type:'text/csv'}));
-  a.download = 'competitor-analysis-'+new Date().toISOString().split('T')[0]+'.csv';
+function switchTab(id) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === id));
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + id));
+}
+
+function kwCard(k, accentColor) {
+  const id = "kw-" + Math.random().toString(36).slice(2,8);
+  const diff = (k.difficulty||"").toLowerCase().replace(" ","-");
+  const intent = (k.intent||"").toLowerCase();
+  const vol = k.volume ? k.volume.toLocaleString() : null;
+  let html = "<div class='kw-card' id='" + id + "' onclick=\"toggleCard('" + id + "')\">";
+  html += "<div class='kw-top'>";
+  html += "<div class='kw-name'>" + escH(k.keyword) + "</div>";
+  if (k.difficulty) html += "<span class='badge b-" + diff + "'>" + k.difficulty + "</span>";
+  if (k.intent) html += "<span class='badge b-" + intent + "'>" + k.intent + "</span>";
+  if (k.pageType) html += "<span class='badge b-gray'>" + escH(k.pageType) + "</span>";
+  if (vol) html += "<span class='badge b-gray'><i class='fas fa-chart-line' style='font-size:9px;'></i> " + vol + "</span>";
+  html += "<i class='fas fa-chevron-down' style='color:var(--gray-300);font-size:10px;margin-left:auto;'></i>";
+  html += "</div>";
+
+  // Expandable brief
+  html += "<div class='kw-detail'>";
+  html += "<div style='font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;'>Content Brief</div>";
+  html += "<div class='brief-grid'>";
+  const angle = k.contentAngle || (
+    intent === "informational" ? "In-depth guide answering the search query comprehensively with examples, FAQs and expert tips." :
+    intent === "transactional" ? "Product/service landing page with clear CTA, benefits, pricing, and trust signals." :
+    intent === "commercial" ? "Comparison or review page with pros/cons, ratings, and a clear recommendation." :
+    "Resource or brand page targeting direct navigational searches."
+  );
+  html += briefItem("Content Angle", angle);
+  html += briefItem("Page Type", k.pageType || "Blog Post");
+  html += briefItem("Target Intent", k.intent || "Informational");
+  html += briefItem("Difficulty", k.difficulty || "Unknown");
+  if (k.volume) html += briefItem("Search Volume", vol + "/mo");
+  const headings = generateHeadings(k.keyword, k.intent);
+  html += "<div class='brief-item' style='grid-column:1/-1;'><div class='brief-item-label'>Suggested Headings</div><div class='brief-item-val'>" + headings.map(h=>"• "+escH(h)).join("<br>") + "</div></div>";
+  html += "</div></div>";
+  html += "</div>";
+  return html;
+}
+
+function briefItem(label, val) {
+  return "<div class='brief-item'><div class='brief-item-label'>" + label + "</div><div class='brief-item-val'>" + escH(String(val)) + "</div></div>";
+}
+
+function generateHeadings(kw, intent) {
+  const k = kw.toLowerCase();
+  if (intent === "Informational") return ["What is " + kw + "?", "How " + kw + " works", "Key benefits of " + kw, "Common mistakes to avoid", "FAQ: " + kw];
+  if (intent === "Transactional") return ["Best " + kw + " options", "Why choose us for " + kw, "How to get started", "Pricing & packages", "Customer reviews"];
+  if (intent === "Commercial") return ["Top " + kw + " compared", "Key features to look for", "Our top pick", "Pros and cons", "Final verdict"];
+  return [kw + " overview", "Key facts about " + kw, "Related resources"];
+}
+
+function toggleCard(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle("expanded");
+}
+
+function statBox(num, label, color) {
+  return "<div class='stat-box'><div class='stat-num' style='color:" + color + ";'>" + num + "</div><div class='stat-lbl'>" + label + "</div></div>";
+}
+
+function clearTool() {
+  document.getElementById("yourKws").value = "";
+  document.getElementById("compKws").value = "";
+  document.getElementById("results").innerHTML = "<div class='empty-state'><i class='fas fa-chess'></i><h3>No analysis yet</h3><p>Enter both keyword lists above and click Analyse</p></div>";
+  document.getElementById("btnExport").style.display = "none";
+  lastData = null;
+}
+
+function exportCSV() {
+  if (!lastData) return;
+  const rows = ["Keyword,Status,Intent,Difficulty,Volume,Page Type"];
+  const add = (k,s) => rows.push('"'+(k.keyword||"").replace(/"/g,'""')+'","'+s+'","'+(k.intent||"")+'","'+(k.difficulty||"")+'",'+( k.volume||0)+',"'+(k.pageType||"").replace(/"/g,'""')+'"');
+  (lastData.onlyComp||[]).forEach(k=>add(k,"Gap"));
+  (lastData.shared||[]).forEach(k=>add(k,"Shared"));
+  (lastData.onlyYours||[]).forEach(k=>add(k,"Only Yours"));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.join("\n")],{type:"text/csv"}));
+  a.download = "competitor-" + new Date().toISOString().split("T")[0] + ".csv";
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
+
+function escH(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 </script>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>

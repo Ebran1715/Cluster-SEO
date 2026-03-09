@@ -1,227 +1,376 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Backlinks Overview — ClusterSEO Pro</title>
-  <meta name="description" content="Get backlink strategy recommendations and link building guidance for your domain.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="shared.css">
-  <style>
-    .tool-hero {background:linear-gradient(135deg, #ec4899, #db2777);padding:52px 28px 40px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
-    .tool-hero h1 {font-size:2rem;font-weight:800;color:var(--white);letter-spacing:-0.03em;margin-bottom:8px;}
-    .tool-hero p {font-size:14px;color:rgba(255,255,255,0.5);}
-    .tool-back {display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.2s;}
-    .tool-back:hover {background:rgba(255,255,255,0.18);}
-    .tool-section {padding:40px 28px 72px;}
-    .tool-inner {max-width:1100px;margin:0 auto;}
-    .browser-chrome {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xl);}
-    .browser-bar {background:var(--gray-100);border-bottom:1px solid var(--gray-200);padding:12px 18px;display:flex;align-items:center;gap:12px;}
-    .browser-dots {display:flex;gap:6px;}
-    .browser-dots span {width:12px;height:12px;border-radius:50%;}
-    .dot-r{background:#ff5f57;}.dot-y{background:#ffbd2e;}.dot-g{background:#28c840;}
-    .browser-url {flex:1;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 12px;font-size:12px;color:var(--gray-400);font-family:var(--mono);}
-    .app-inside {padding:28px;}
-    .input-lbl {font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-    textarea.kw-box {width:100%;border:1px solid var(--gray-200);border-radius:var(--r);padding:13px;font-size:13px;font-family:var(--mono);color:var(--gray-700);background:var(--white);resize:vertical;line-height:1.6;transition:border-color 0.2s;outline:none;}
-    textarea.kw-box:focus {border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
-    .btn-run {padding:12px 28px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;color:white;transition:all 0.2s;}
-    .btn-run:hover {opacity:0.88;transform:translateY(-1px);}
-    .btn-secondary {padding:10px 20px;border:1px solid var(--gray-200);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--gray-600);background:var(--white);transition:all 0.2s;}
-    .btn-secondary:hover {border-color:var(--teal);color:var(--teal);}
-    .result-section {margin-top:24px;}
-    .result-card {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);overflow:hidden;}
-    .result-card-head {padding:14px 18px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
-    .result-card-head h3 {font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
-    .result-card-body {padding:18px;}
-    .empty-state {text-align:center;padding:48px 24px;color:var(--gray-400);}
-    .empty-state i {font-size:2.5rem;color:var(--gray-200);display:block;margin-bottom:12px;}
-    .empty-state h3 {font-size:15px;font-weight:700;color:var(--gray-600);margin-bottom:6px;}
-    .stat-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
-    .stat-box {background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;}
-    .stat-box-num {font-size:1.5rem;font-weight:800;color:var(--gray-900);line-height:1;}
-    .stat-box-label {font-size:11px;color:var(--gray-400);font-weight:500;margin-top:4px;}
-    .tag-cloud {display:flex;flex-wrap:wrap;gap:8px;}
-    .entity-tag {display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid transparent;}
-    .et-person {background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,0.2);}
-    .et-org {background:var(--teal-light);color:var(--teal-dark);border-color:rgba(14,165,233,0.2);}
-    .et-place {background:var(--green-light);color:#065f46;border-color:rgba(16,185,129,0.2);}
-    .et-brand {background:#ede9fe;color:#6d28d9;border-color:rgba(124,58,237,0.2);}
-    .et-concept {background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-200);}
-    .score-bar {height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-top:6px;}
-    .score-fill {height:100%;border-radius:4px;transition:width 0.6s ease;}
-    .score-good {background:linear-gradient(90deg,var(--green),#34d399);}
-    .score-med  {background:linear-gradient(90deg,var(--gold),#fbbf24);}
-    .score-bad  {background:linear-gradient(90deg,var(--red),#f87171);}
-    .audit-item {display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);}
-    .audit-item:last-child {border-bottom:none;}
-    .audit-icon {width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;}
-    .ai-pass {background:#d1fae5;color:#065f46;}
-    .ai-warn {background:#fef3c7;color:#92400e;}
-    .ai-fail {background:#fee2e2;color:#991b1b;}
-    .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
-    .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backlinks Overview — ClusterSEO Pro</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+:root{--pink:#ec4899;--pink-dark:#db2777;--teal:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#7c3aed;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-700:#334155;--gray-900:#0f172a;--white:#fff;--font:"Sora",sans-serif;--mono:"JetBrains Mono",monospace;--shadow:0 20px 60px rgba(0,0,0,0.1);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:#f0f4f8;color:var(--gray-900);min-height:100vh;}
+.tool-hero{background:linear-gradient(135deg,#ec4899,#db2777);padding:52px 28px 40px;text-align:center;}
+.tool-hero h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:8px;}
+.tool-hero p{font-size:14px;color:rgba(255,255,255,0.65);margin-bottom:14px;}
+.tool-back{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;text-decoration:none;}
+.tool-section{padding:36px 20px 80px;}
+.tool-inner{max-width:1160px;margin:0 auto;}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:20px;}
+.card-head{background:var(--gray-50);border-bottom:1px solid var(--gray-200);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.card-title{font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
+.card-body{padding:22px;}
+.input-row{display:flex;gap:10px;}
+.input-row input{flex:1;border:1.5px solid var(--gray-200);border-radius:10px;padding:13px 16px;font-size:15px;font-family:var(--font);color:var(--gray-700);background:#fafbfc;outline:none;transition:border-color .2s;}
+.input-row input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(236,72,153,.1);}
+.btn{padding:12px 24px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+.btn-pink{background:linear-gradient(135deg,#ec4899,#db2777);color:#fff;}
+.btn-pink:hover{opacity:.88;transform:translateY(-1px);}
+.btn-pink:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-sec{background:#fff;border:1.5px solid var(--gray-200);color:var(--gray-600);font-size:13px;padding:10px 18px;border-radius:10px;font-family:var(--font);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
+.btn-sec:hover{border-color:var(--pink);color:var(--pink);}
+/* Notice */
+.notice{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;display:flex;gap:10px;align-items:flex-start;margin-bottom:0;}
+/* Domain badge */
+.domain-profile{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 22px;background:var(--gray-50);border-radius:12px;margin-bottom:20px;}
+.domain-name{font-size:1.4rem;font-weight:800;color:var(--gray-900);font-family:var(--mono);}
+.type-badge{padding:5px 14px;border-radius:100px;font-size:12px;font-weight:700;}
+.tld-badge{padding:4px 10px;background:var(--gray-100);color:var(--gray-500);border-radius:100px;font-size:11px;font-weight:600;}
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--gray-100);padding:4px;border-radius:10px;margin-bottom:20px;flex-wrap:wrap;}
+.tab{padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--gray-600);font-family:var(--font);transition:all .15s;display:flex;align-items:center;gap:5px;}
+.tab.active{background:#fff;color:var(--pink-dark);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+/* Strategy items */
+.strat-item{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border:1.5px solid var(--gray-200);border-radius:12px;margin-bottom:10px;transition:all .2s;}
+.strat-item:hover{border-color:var(--pink);box-shadow:0 2px 8px rgba(236,72,153,.08);}
+.strat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.strat-body{flex:1;}
+.strat-title{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.strat-desc{font-size:12.5px;color:var(--gray-600);line-height:1.65;}
+.prio-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;}
+.prio-high{background:#dcfce7;color:#14532d;}
+.prio-med{background:#fef9c3;color:#713f12;}
+.prio-low{background:#e0f2fe;color:#075985;}
+/* Free tools grid */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.tool-card{padding:14px 16px;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:12px;text-decoration:none;display:block;transition:all .2s;}
+.tool-card:hover{border-color:var(--teal);box-shadow:0 2px 8px rgba(14,165,233,.1);transform:translateY(-1px);}
+.tool-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.tool-card-name{font-size:13px;font-weight:700;color:var(--gray-900);}
+.tool-badge{font-size:10px;font-weight:700;background:#e0f2fe;color:#075985;padding:2px 8px;border-radius:100px;}
+.tool-card-desc{font-size:11.5px;color:var(--gray-500);line-height:1.5;}
+/* Anchor bars */
+.anchor-item{margin-bottom:14px;}
+.anchor-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.anchor-type{font-size:13px;font-weight:600;color:var(--gray-900);}
+.anchor-pct{font-size:13px;font-weight:800;color:var(--pink);}
+.anchor-bar-bg{height:8px;background:var(--gray-100);border-radius:100px;overflow:hidden;}
+.anchor-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#ec4899,#db2777);transition:width .8s;}
+.anchor-note{font-size:11px;color:var(--gray-400);margin-top:3px;}
+/* Analysis areas */
+.analysis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+.analysis-card{padding:14px 16px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;border-left-width:4px;}
+.analysis-title{font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:5px;display:flex;align-items:center;gap:7px;}
+.analysis-what{font-size:11.5px;color:var(--gray-500);margin-bottom:5px;line-height:1.5;}
+.analysis-good{font-size:11.5px;color:var(--gray-700);font-weight:500;}
+.analysis-check{font-size:10.5px;color:var(--teal);margin-top:4px;}
+/* CDX links */
+.cdx-item{padding:9px 12px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.cdx-url{font-size:12px;font-family:var(--mono);color:var(--gray-700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.cdx-date{font-size:11px;color:var(--gray-400);flex-shrink:0;}
+/* Email templates */
+.template-card{border:1.5px solid var(--gray-200);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.template-head{background:var(--gray-50);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+.template-title{font-size:13px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
+.template-body{padding:14px 16px;}
+.template-text{font-size:12.5px;color:var(--gray-700);line-height:1.7;white-space:pre-wrap;font-family:var(--mono);background:var(--gray-50);border-radius:8px;padding:12px;border:1px solid var(--gray-200);}
+/* Empty */
+.empty-state{text-align:center;padding:52px 24px;color:var(--gray-400);}
+.empty-state i{font-size:2.8rem;color:var(--gray-200);display:block;margin-bottom:12px;}
+.empty-state h3{font-size:15px;font-weight:700;color:var(--gray-500);margin-bottom:6px;}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
 </head>
 <body>
 <div class="page-wrap">
-  <section class="tool-hero">
-    <h1><i class="fas fa-link" style="margin-right:10px;"></i> Backlinks Overview</h1>
-    <p>Get a link building strategy framework and anchor text guidance for your domain</p>
-    <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
-  </section>
-  <section class="tool-section">
-    <div class="tool-inner">
-      <div class="browser-chrome">
-        <div class="browser-bar">
-          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-          <div class="browser-url">clusterseo.pro — Backlinks Overview</div>
-        </div>
-        <div class="app-inside">
-
-          <div class="input-lbl"><i class="fas fa-link"></i> Enter your domain</div>
-          <div style="display:flex;gap:10px;margin-bottom:20px;">
-            <input type="text" id="backlinkDomain" placeholder="e.g. yoursite.com" style="flex:1;padding:13px 16px;border:1.5px solid var(--gray-200);border-radius:var(--r);font-size:15px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'" onkeydown="if(event.key==='Enter')runBacklinks()">
-            <button class="btn-run" style="background:linear-gradient(135deg,#ec4899,#db2777);" onclick="runBacklinks()"><i class="fas fa-link"></i> Analyse Profile</button>
-          </div>
-
-          <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid rgba(245,158,11,0.3);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">
-            <i class="fas fa-info-circle" style="color:#d97706;margin-top:2px;flex-shrink:0;"></i>
-            <div style="font-size:13px;color:#92400e;line-height:1.6;">
-              <strong>Note:</strong> Live backlink data requires a paid API. This tool provides a <strong>backlink strategy analysis framework</strong> and guidance based on your domain.
-            </div>
-          </div>
-
-          <div id="backlinkResults">
-            <div class="empty-state"><i class="fas fa-link"></i><h3>Enter your domain above</h3><p>Get a backlink strategy framework and link building recommendations</p></div>
-          </div>
-
+<section class="tool-hero">
+  <h1><i class="fas fa-link" style="margin-right:10px;"></i> Backlinks Overview</h1>
+  <p>Domain type detection, link building strategies, anchor text guidance and outreach email templates</p>
+  <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
+</section>
+<section class="tool-section">
+<div class="tool-inner">
+  <div class="card">
+    <div class="card-body">
+      <div class="input-row">
+        <input type="text" id="domainInput" placeholder="e.g. yoursite.com or https://yoursite.com" onkeydown="if(event.key==='Enter')runBacklinks()">
+        <button class="btn btn-pink" id="btnRun" onclick="runBacklinks()"><i class="fas fa-link"></i> Analyse</button>
+      </div>
+      <div style="margin-top:14px;">
+        <div class="notice">
+          <i class="fas fa-info-circle" style="color:#d97706;flex-shrink:0;margin-top:1px;"></i>
+          <div><strong>Note:</strong> Live backlink counts require a paid API (Ahrefs/Moz/SEMrush). This tool provides a <strong>strategy framework</strong> based on your domain type, plus free tools to check your actual backlink profile.</div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+  <div id="results">
+    <div class="empty-state"><i class="fas fa-link"></i><h3>Enter your domain above</h3><p>Get a link building strategy, anchor text guidance, outreach templates and more.</p></div>
+  </div>
+</div>
+</section>
 </div>
 <script src="shared-layout.js"></script>
-
 <script>
-const API = '';
+const API = "";
+let lastData = null;
 
 async function runBacklinks() {
-  const raw = document.getElementById('backlinkDomain').value.trim();
-  if (!raw) { alert('Enter a domain first.'); return; }
-
-  document.getElementById('backlinkResults').innerHTML = '<div class="empty-state"><div style="width:36px;height:36px;border:3px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div><p style="color:var(--gray-400);">Analysing domain profile...</p></div>';
-
+  const raw = document.getElementById("domainInput").value.trim();
+  if (!raw) { alert("Enter a domain first."); return; }
+  const btn = document.getElementById("btnRun");
+  btn.disabled = true; btn.innerHTML = "<span class=\"spin\"></span> Analysing...";
+  document.getElementById("results").innerHTML = "<div class=\"empty-state\"><div style=\"width:32px;height:32px;border:3px solid var(--gray-200);border-top-color:var(--pink);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;\"></div><p style=\"color:var(--gray-400)\">Analysing domain profile...</p></div>";
   try {
-    const res  = await fetch(API + '/api/backlinks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ domain: raw })
-    });
+    const res  = await fetch(API + "/api/backlinks", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({domain:raw}) });
     const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'API error');
-    renderBacklinks(data);
+    if (!data.success) throw new Error(data.error||"API error");
+    lastData = data;
+    renderResults(data);
   } catch(err) {
-    document.getElementById('backlinkResults').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error</h3><p>'+err.message+'<br>Make sure your server is running.</p></div>';
+    document.getElementById("results").innerHTML = "<div class=\"empty-state\"><i class=\"fas fa-exclamation-circle\" style=\"color:var(--red)\"></i><h3>Error</h3><p>" + escH(err.message) + "<br>Make sure your server is running.</p></div>";
   }
+  btn.disabled = false; btn.innerHTML = "<i class=\"fas fa-link\"></i> Analyse";
 }
 
-function renderBacklinks(d) {
-  const typeColors = {'Educational':'#0ea5e9','Non-profit / Organisation':'#059669','Local Business':'#f59e0b','E-commerce':'#7c3aed','Blog / Media':'#ef4444','SaaS / Tech':'#8b5cf6','Business Website':'#64748b'};
-  const col = typeColors[d.domainType] || '#64748b';
+function renderResults(d) {
+  const typeColors = {"Educational":"#0ea5e9","Non-profit / Organisation":"#059669","Local Business":"#f59e0b","E-commerce":"#7c3aed","Blog / Media":"#ef4444","SaaS / Tech":"#8b5cf6","Business Website":"#64748b"};
+  const col = typeColors[d.domainType]||"#64748b";
 
-  let html = '';
+  let html = "";
 
-  // Domain profile card
-  html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-globe"></i> Domain Profile</h3></div>';
-  html += '<div class="result-card-body">';
-  html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">';
-  html += '<div style="font-size:1.4rem;font-weight:800;color:var(--gray-900);font-family:var(--mono);">'+d.domain+'</div>';
-  html += '<span style="padding:4px 12px;background:'+col+'20;color:'+col+';border:1px solid '+col+'40;border-radius:100px;font-size:12px;font-weight:700;">'+d.domainType+'</span>';
-  html += '<span style="padding:4px 10px;background:var(--gray-100);color:var(--gray-500);border-radius:100px;font-size:11px;font-weight:600;">.'+d.tld+'</span>';
-  html += '</div></div></div>';
+  // Domain profile
+  html += "<div class=\"card\">";
+  html += "<div class=\"card-head\"><div class=\"card-title\"><i class=\"fas fa-globe\" style=\"color:var(--pink);\"></i> Domain Profile</div></div>";
+  html += "<div class=\"card-body\">";
+  html += "<div class=\"domain-profile\">";
+  html += "<div class=\"domain-name\">" + escH(d.domain) + "</div>";
+  html += "<span class=\"type-badge\" style=\"background:" + col + "20;color:" + col + ";border:1px solid " + col + "40;\">" + escH(d.domainType) + "</span>";
+  html += "<span class=\"tld-badge\">." + escH(d.tld) + "</span>";
+  html += "</div>";
 
-  // Free tools
-  html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-tools"></i> Free Backlink Tools — Check Your Profile</h3></div>';
-  html += '<div class="result-card-body">';
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;">';
-  (d.freeTools||[]).forEach(function(tool) {
-    html += '<a href="'+tool.url+'" target="_blank" rel="noopener" style="display:block;padding:12px 14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);text-decoration:none;transition:all 0.2s;" onmouseover="this.style.borderColor=\'var(--teal)\'" onmouseout="this.style.borderColor=\'var(--gray-200)\'">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
-    html += '<span style="font-size:13px;font-weight:700;color:var(--gray-900);">'+tool.name+'</span>';
-    html += '<span style="font-size:10px;font-weight:700;background:var(--teal-light);color:var(--teal-dark);padding:2px 7px;border-radius:100px;">'+tool.badge+'</span>';
-    html += '</div>';
-    html += '<span style="font-size:11px;color:var(--gray-500);">'+tool.desc+'</span>';
-    html += '</a>';
+  // Open PageRank score
+  if (d.pageRankData && d.pageRankData.noKey) {
+    html += "<div style=\"margin-top:14px;padding:12px 16px;background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;font-size:12.5px;color:#92400e;\">";
+    html += "<i class=\"fas fa-key\" style=\"margin-right:6px;\"></i><strong>Get your free Open PageRank score:</strong> ";
+    html += "Sign up free at <a href=\"https://www.openpagerank.com/\" target=\"_blank\" style=\"color:#b45309;font-weight:700;\">openpagerank.com</a>, copy your API key, ";
+    html += "then add <code style=\"background:#fde68a;padding:1px 5px;border-radius:3px;\">OPR_API_KEY=your_key_here</code> to your <code style=\"background:#fde68a;padding:1px 5px;border-radius:3px;\">.env</code> file and restart the server.";
+    html += "</div>";
+  } else if (d.pageRankData && d.pageRankData.pageRank !== undefined) {
+    const pr = d.pageRankData.pageRank || 0;
+    const prColor = pr >= 7 ? "#059669" : pr >= 4 ? "#f59e0b" : "#ef4444";
+    const prLabel = pr >= 7 ? "Strong" : pr >= 4 ? "Moderate" : "Low";
+    html += "<div style=\"margin-top:14px;padding:14px 16px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;\">";
+    html += "<div style=\"text-align:center;\">";
+    html += "<div style=\"font-size:2rem;font-weight:900;color:"+prColor+";line-height:1;\">" + pr + "<span style=\"font-size:1rem;color:var(--gray-400);font-weight:500;\"> /10</span></div>";
+    html += "<div style=\"font-size:11px;font-weight:700;color:"+prColor+";\">Open PageRank</div></div>";
+    html += "<div style=\"flex:1;\">";
+    html += "<div style=\"height:10px;background:var(--gray-200);border-radius:100px;overflow:hidden;margin-bottom:6px;\">";
+    html += "<div style=\"height:100%;width:"+(pr*10)+"%;background:"+prColor+";border-radius:100px;transition:width .8s;\"></div></div>";
+    html += "<div style=\"font-size:12px;color:var(--gray-600);\"><strong>" + prLabel + " authority</strong> — based on Open PageRank (free metric). For full backlink data use Ahrefs or Moz.</div></div></div>";
+  }
+  // CDX crawl coverage
+  if (d.cdxLinks && d.cdxLinks.length) {
+    html += "<div style=\"margin-top:12px;\"><div style=\"font-size:12px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;\"><i class=\"fas fa-spider\" style=\"margin-right:5px;\"></i>Pages crawled by Common Crawl (" + d.cdxLinks.length + " unique paths)</div>";
+    d.cdxLinks.slice(0,6).forEach(lnk => {
+      const dt = lnk.timestamp ? lnk.timestamp.slice(0,8).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3") : "";
+      const cleanUrl = decodeURIComponent(lnk.url||"");
+      html += "<div class=\"cdx-item\"><span class=\"cdx-url\">" + escH(cleanUrl) + "</span>" + (dt ? "<span class=\"cdx-date\">" + dt + "</span>" : "") + "</div>";
+    });
+    if (d.cdxLinks.length > 6) html += "<div style=\"font-size:11px;color:var(--gray-400);margin-top:4px;\">+" + (d.cdxLinks.length-6) + " more pages crawled</div>";
+    html += "</div>";
+  }
+  if (!d.pageRankData && (!d.cdxLinks || !d.cdxLinks.length)) {
+    html += "<div style=\"font-size:12px;color:var(--gray-400);margin-top:12px;\"><i class=\"fas fa-info-circle\" style=\"margin-right:5px;\"></i>Domain authority data unavailable. Add a free Open PageRank API key for scores.</div>";
+  }
+  html += "</div></div>";
+
+  // Tabs
+  html += "<div class=\"card\"><div class=\"card-body\">";
+  html += "<div class=\"tabs\">";
+  html += "<button class=\"tab active\" data-tab=\"strategy\" onclick=\"switchTab('strategy')\"><i class=\"fas fa-chess-knight\" style=\"color:var(--pink);\"></i> Strategy</button>";
+  html += "<button class=\"tab\" data-tab=\"tools\" onclick=\"switchTab('tools')\"><i class=\"fas fa-tools\" style=\"color:var(--teal);\"></i> Free Tools</button>";
+  html += "<button class=\"tab\" data-tab=\"anchor\" onclick=\"switchTab('anchor')\"><i class=\"fas fa-link\" style=\"color:var(--amber);\"></i> Anchor Text</button>";
+  html += "<button class=\"tab\" data-tab=\"analysis\" onclick=\"switchTab('analysis')\"><i class=\"fas fa-search\" style=\"color:var(--purple);\"></i> What to Analyse</button>";
+  html += "<button class=\"tab\" data-tab=\"outreach\" onclick=\"switchTab('outreach')\"><i class=\"fas fa-envelope\" style=\"color:var(--green);\"></i> Outreach Templates</button>";
+  html += "</div>";
+
+  // Strategy tab
+  html += "<div id=\"panel-strategy\" class=\"tab-panel active\">";
+  const prioColors = {High:"#059669", Medium:"#f59e0b", Low:"#0ea5e9"};
+  const prioBg     = {High:"#dcfce7", Medium:"#fef9c3", Low:"#e0f2fe"};
+  (d.strategies||[]).forEach(st => {
+    const pc = prioColors[st.priority]||"#64748b";
+    const pb = prioBg[st.priority]||"#f1f5f9";
+    html += "<div class=\"strat-item\">";
+    html += "<div class=\"strat-icon\" style=\"background:" + pb + ";color:" + pc + ";\"><i class=\"fas " + st.icon + "\"></i></div>";
+    html += "<div class=\"strat-body\">";
+    html += "<div class=\"strat-title\">" + escH(st.title) + "<span class=\"prio-badge\" style=\"background:" + pb + ";color:" + pc + ";\">"+st.priority+"</span></div>";
+    html += "<div class=\"strat-desc\">" + escH(st.desc) + "</div>";
+    html += "</div></div>";
   });
-  html += '</div></div></div>';
+  html += "</div>";
 
-  // Analysis areas
-  html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-search"></i> What to Analyse</h3></div>';
-  html += '<div class="result-card-body">';
-  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;">';
-  (d.analysisAreas||[]).forEach(function(area) {
-    html += '<div style="padding:14px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);border-left:3px solid '+area.color+';">';
-    html += '<div style="font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:5px;display:flex;align-items:center;gap:7px;"><i class="fas '+area.icon+'" style="color:'+area.color+'"></i>'+area.title+'</div>';
-    html += '<div style="font-size:11px;color:var(--gray-500);margin-bottom:5px;">'+area.what+'</div>';
-    html += '<div style="font-size:11px;color:var(--gray-600);font-weight:500;">✓ '+area.good+'</div>';
-    if (area.howToCheck) html += '<div style="font-size:10px;color:var(--teal-dark);margin-top:4px;">🔍 '+area.howToCheck+'</div>';
-    html += '</div>';
+  // Free tools tab
+  html += "<div id=\"panel-tools\" class=\"tab-panel\">";
+  html += "<div class=\"tools-grid\">";
+  (d.freeTools||[]).forEach(t => {
+    html += "<a href=\"" + escH(t.url) + "\" target=\"_blank\" rel=\"noopener\" class=\"tool-card\">";
+    html += "<div class=\"tool-card-top\"><span class=\"tool-card-name\">" + escH(t.name) + "</span><span class=\"tool-badge\">" + escH(t.badge) + "</span></div>";
+    html += "<div class=\"tool-card-desc\">" + escH(t.desc) + "</div></a>";
   });
-  html += '</div></div></div>';
+  html += "</div></div>";
 
-  // Strategies
-  html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-chess-knight"></i> Link Building Strategy for '+d.domainType+'</h3></div>';
-  html += '<div class="result-card-body">';
-  const prioColors = {High:'#059669',Medium:'#f59e0b',Low:'#0ea5e9'};
-  (d.strategies||[]).forEach(function(st) {
-    const pc = prioColors[st.priority]||'#64748b';
-    html += '<div class="audit-item">';
-    html += '<div class="audit-icon" style="background:'+pc+'20;color:'+pc+'"><i class="fas '+st.icon+'"></i></div>';
-    html += '<div style="flex:1;">';
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">';
-    html += '<span class="audit-title">'+st.title+'</span>';
-    html += '<span style="font-size:10px;font-weight:700;background:'+pc+'20;color:'+pc+';padding:2px 7px;border-radius:100px;">'+st.priority+'</span>';
-    html += '</div>';
-    html += '<div class="audit-detail">'+st.desc+'</div>';
-    html += '</div></div>';
+  // Anchor text tab
+  html += "<div id=\"panel-anchor\" class=\"tab-panel\">";
+  html += "<div style=\"font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6;\">A natural anchor text profile protects against Google penalties. Aim for this distribution across your backlink profile:</div>";
+  (d.anchorGuide||[]).forEach(a => {
+    html += "<div class=\"anchor-item\">";
+    html += "<div class=\"anchor-top\"><span class=\"anchor-type\">" + escH(a.type) + "</span><span class=\"anchor-pct\">" + a.pct + "%</span></div>";
+    html += "<div class=\"anchor-bar-bg\"><div class=\"anchor-bar-fill\" style=\"width:" + a.pct + "%;\"></div></div>";
+    if (a.note) html += "<div class=\"anchor-note\">" + escH(a.note) + "</div>";
+    html += "</div>";
   });
-  html += '</div></div>';
+  html += "</div>";
 
-  // Anchor text guide
-  html += '<div class="result-card">';
-  html += '<div class="result-card-head"><h3><i class="fas fa-link"></i> Ideal Anchor Text Distribution</h3></div>';
-  html += '<div class="result-card-body">';
-  let total = 0;
-  (d.anchorGuide||[]).forEach(function(a){ total += a.pct; });
-  (d.anchorGuide||[]).forEach(function(a) {
-    const fill = Math.round((a.pct/Math.max(total,1))*100);
-    html += '<div style="margin-bottom:12px;">';
-    html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">';
-    html += '<span style="font-size:12px;font-weight:600;color:var(--gray-900);">'+a.type+'</span>';
-    html += '<span style="font-size:12px;font-weight:700;color:var(--teal);">'+a.pct+'%</span></div>';
-    html += '<div style="height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;">';
-    html += '<div style="height:100%;width:'+fill+'%;background:linear-gradient(90deg,var(--teal),var(--teal-dark));border-radius:4px;"></div></div>';
-    if (a.note) html += '<div style="font-size:11px;color:var(--gray-400);margin-top:2px;">'+a.note+'</div>';
-    html += '</div>';
+  // Analysis tab
+  html += "<div id=\"panel-analysis\" class=\"tab-panel\">";
+  html += "<div class=\"analysis-grid\">";
+  (d.analysisAreas||[]).forEach(area => {
+    html += "<div class=\"analysis-card\" style=\"border-left-color:" + area.color + ";\";>";
+    html += "<div class=\"analysis-title\"><i class=\"fas " + area.icon + "\" style=\"color:" + area.color + ";\"></i>" + escH(area.title) + "</div>";
+    html += "<div class=\"analysis-what\">" + escH(area.what) + "</div>";
+    html += "<div class=\"analysis-good\">✓ " + escH(area.good) + "</div>";
+    if (area.howToCheck) html += "<div class=\"analysis-check\">🔍 " + escH(area.howToCheck) + "</div>";
+    html += "</div>";
   });
-  html += '</div></div>';
+  html += "</div></div>";
 
-  document.getElementById('backlinkResults').innerHTML = html;
+  // Outreach templates tab
+  const dn = escH(d.domainName);
+  const dm = escH(d.domain);
+  const templates = [
+    {
+      title: "Guest Post Outreach",
+      icon: "fa-pen",
+      color: "#7c3aed",
+      text: `Subject: Guest post idea for [Their Site Name]
+
+Hi [Name],
+
+I've been reading [Their Site Name] for a while — particularly enjoyed your recent piece on [topic].
+
+I'm [your name] from ${dm}. I'd love to contribute a guest post on [topic idea] — something along the lines of "[proposed article title]".
+
+I think it would resonate well with your audience because [reason].
+
+Happy to share a full outline first. Would this be a good fit?
+
+Best,
+[Your Name]
+${dm}`
+    },
+    {
+      title: "Broken Link Building",
+      icon: "fa-unlink",
+      color: "#ef4444",
+      text: `Subject: Broken link on your [page name] page
+
+Hi [Name],
+
+I was reading your article at [their URL] and noticed a broken link pointing to [broken URL].
+
+I have a similar resource on ${dm} that covers the same topic: [your URL]
+
+Would you consider updating the link? Happy to return the favour if useful.
+
+Best,
+[Your Name]`
+    },
+    {
+      title: "Unlinked Brand Mention",
+      icon: "fa-bell",
+      color: "#f59e0b",
+      text: `Subject: Quick request re: your mention of ${dn}
+
+Hi [Name],
+
+Thanks for mentioning ${dn} in your article at [their URL] — really appreciate it!
+
+Would you mind adding a link to ${dm}? It helps readers find us directly, and we'd be happy to share your article with our audience in return.
+
+Either way, thank you for the mention!
+
+Best,
+[Your Name]`
+    },
+    {
+      title: "Resource Page Link Request",
+      icon: "fa-list",
+      color: "#0ea5e9",
+      text: `Subject: Resource suggestion for your [page name] page
+
+Hi [Name],
+
+I came across your resource page at [their URL] — great collection!
+
+I think our [resource name] at [your URL] would be a valuable addition. It covers [brief description] and has been well received by [audience type].
+
+Would you consider adding it?
+
+Thank you,
+[Your Name]
+${dm}`
+    }
+  ];
+
+  html += "<div id=\"panel-outreach\" class=\"tab-panel\">";
+  html += "<div style=\"font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6;\">Copy these templates and personalise the [bracketed] fields before sending.</div>";
+  templates.forEach(t => {
+    html += "<div class=\"template-card\">";
+    html += "<div class=\"template-head\"><div class=\"template-title\"><i class=\"fas " + t.icon + "\" style=\"color:" + t.color + ";\"></i>" + t.title + "</div><button class=\"btn-sec\" style=\"font-size:11px;padding:5px 12px;\" onclick=\"copyTemplate(this)\"><i class=\"fas fa-copy\"></i> Copy</button></div>";
+    html += "<div class=\"template-body\"><div class=\"template-text\">" + escH(t.text) + "</div></div>";
+    html += "</div>";
+  });
+  html += "</div>";
+
+  html += "</div></div>"; // close card-body + card
+
+  document.getElementById("results").innerHTML = html;
 }
 
-function clearBacklinks() {
-  document.getElementById('backlinkDomain').value = '';
-  document.getElementById('backlinkResults').innerHTML = '<div class="empty-state"><i class="fas fa-link"></i><h3>Enter your domain above</h3><p>Type your domain and click Analyse Profile</p></div>';
+function switchTab(id) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === id));
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + id));
 }
+
+function copyTemplate(btn) {
+  const text = btn.closest(".template-card").querySelector(".template-text").textContent;
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement("textarea"); ta.value = text;
+    document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+  });
+  btn.innerHTML = "<i class=\"fas fa-check\"></i> Copied!";
+  setTimeout(() => { btn.innerHTML = "<i class=\"fas fa-copy\"></i> Copy"; }, 1500);
+}
+
+function escH(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 </script>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>

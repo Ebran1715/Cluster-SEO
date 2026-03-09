@@ -1,224 +1,371 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wikipedia Entity Finder — ClusterSEO Pro</title>
-  <meta name="description" content="Enter any topic to extract entities, categories and semantic relationships from Wikipedia.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="shared.css">
-  <style>
-    .tool-hero {background:linear-gradient(135deg, #64748b, #475569);padding:52px 28px 40px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
-    .tool-hero h1 {font-size:2rem;font-weight:800;color:var(--white);letter-spacing:-0.03em;margin-bottom:8px;}
-    .tool-hero p {font-size:14px;color:rgba(255,255,255,0.5);}
-    .tool-back {display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--r-sm);color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.2s;}
-    .tool-back:hover {background:rgba(255,255,255,0.18);}
-    .tool-section {padding:40px 28px 72px;}
-    .tool-inner {max-width:1100px;margin:0 auto;}
-    .browser-chrome {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xl);}
-    .browser-bar {background:var(--gray-100);border-bottom:1px solid var(--gray-200);padding:12px 18px;display:flex;align-items:center;gap:12px;}
-    .browser-dots {display:flex;gap:6px;}
-    .browser-dots span {width:12px;height:12px;border-radius:50%;}
-    .dot-r{background:#ff5f57;}.dot-y{background:#ffbd2e;}.dot-g{background:#28c840;}
-    .browser-url {flex:1;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-sm);padding:5px 12px;font-size:12px;color:var(--gray-400);font-family:var(--mono);}
-    .app-inside {padding:28px;}
-    .input-lbl {font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-    textarea.kw-box {width:100%;border:1px solid var(--gray-200);border-radius:var(--r);padding:13px;font-size:13px;font-family:var(--mono);color:var(--gray-700);background:var(--white);resize:vertical;line-height:1.6;transition:border-color 0.2s;outline:none;}
-    textarea.kw-box:focus {border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,0.1);}
-    .btn-run {padding:12px 28px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:8px;color:white;transition:all 0.2s;}
-    .btn-run:hover {opacity:0.88;transform:translateY(-1px);}
-    .btn-secondary {padding:10px 20px;border:1px solid var(--gray-200);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:6px;color:var(--gray-600);background:var(--white);transition:all 0.2s;}
-    .btn-secondary:hover {border-color:var(--teal);color:var(--teal);}
-    .result-section {margin-top:24px;}
-    .result-card {background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r-lg);overflow:hidden;}
-    .result-card-head {padding:14px 18px;background:var(--gray-50);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;}
-    .result-card-head h3 {font-size:14px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
-    .result-card-body {padding:18px;}
-    .empty-state {text-align:center;padding:48px 24px;color:var(--gray-400);}
-    .empty-state i {font-size:2.5rem;color:var(--gray-200);display:block;margin-bottom:12px;}
-    .empty-state h3 {font-size:15px;font-weight:700;color:var(--gray-600);margin-bottom:6px;}
-    .stat-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
-    .stat-box {background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px;text-align:center;}
-    .stat-box-num {font-size:1.5rem;font-weight:800;color:var(--gray-900);line-height:1;}
-    .stat-box-label {font-size:11px;color:var(--gray-400);font-weight:500;margin-top:4px;}
-    .tag-cloud {display:flex;flex-wrap:wrap;gap:8px;}
-    .entity-tag {display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid transparent;}
-    .et-person {background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,0.2);}
-    .et-org {background:var(--teal-light);color:var(--teal-dark);border-color:rgba(14,165,233,0.2);}
-    .et-place {background:var(--green-light);color:#065f46;border-color:rgba(16,185,129,0.2);}
-    .et-brand {background:#ede9fe;color:#6d28d9;border-color:rgba(124,58,237,0.2);}
-    .et-concept {background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-200);}
-    .score-bar {height:8px;background:var(--gray-100);border-radius:4px;overflow:hidden;margin-top:6px;}
-    .score-fill {height:100%;border-radius:4px;transition:width 0.6s ease;}
-    .score-good {background:linear-gradient(90deg,var(--green),#34d399);}
-    .score-med  {background:linear-gradient(90deg,var(--gold),#fbbf24);}
-    .score-bad  {background:linear-gradient(90deg,var(--red),#f87171);}
-    .audit-item {display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);}
-    .audit-item:last-child {border-bottom:none;}
-    .audit-icon {width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;}
-    .ai-pass {background:#d1fae5;color:#065f46;}
-    .ai-warn {background:#fef3c7;color:#92400e;}
-    .ai-fail {background:#fee2e2;color:#991b1b;}
-    .audit-title {font-size:13px;font-weight:700;color:var(--gray-900);}
-    .audit-detail {font-size:12px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wikipedia Entity Explorer — ClusterSEO Pro</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+:root{--dark:#1f2937;--dark2:#374151;--teal:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#7c3aed;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-700:#334155;--gray-900:#0f172a;--white:#fff;--font:'Sora',sans-serif;--shadow:0 20px 60px rgba(0,0,0,0.1);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:#f0f4f8;color:var(--gray-900);min-height:100vh;}
+.tool-hero{background:linear-gradient(135deg,#374151,#1f2937);padding:52px 28px 40px;text-align:center;}
+.tool-hero h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:8px;}
+.tool-hero p{font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:14px;}
+.tool-back{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;text-decoration:none;}
+.tool-section{padding:36px 20px 80px;}
+.tool-inner{max-width:1100px;margin:0 auto;}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:20px;}
+.card-body{padding:24px;}
+/* Search */
+.search-row{display:flex;gap:10px;}
+.search-row input{flex:1;border:1.5px solid var(--gray-200);border-radius:10px;padding:13px 16px;font-size:14px;font-family:var(--font);color:var(--gray-700);background:#fafbfc;outline:none;transition:border-color .2s;}
+.search-row input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,.1);}
+.btn{padding:12px 22px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:7px;transition:all .2s;}
+.btn-dark{background:linear-gradient(135deg,#374151,#1f2937);color:#fff;}
+.btn-dark:hover{opacity:.88;transform:translateY(-1px);}
+.btn-dark:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-sec{background:#fff;border:1.5px solid var(--gray-200);color:var(--gray-600);font-size:12.5px;padding:9px 16px;}
+.btn-sec:hover{border-color:var(--teal);color:var(--teal);}
+.btn-teal{background:var(--teal);color:#fff;font-size:12px;padding:7px 14px;}
+.btn-teal:hover{opacity:.88;}
+/* Quick tags */
+.quick-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;align-items:center;}
+.qtag{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;background:#e0f2fe;color:#075985;border:1px solid rgba(14,165,233,.2);transition:all .15s;}
+.qtag:hover{background:#bae6fd;transform:translateY(-1px);}
+.qtag.history{background:#f1f5f9;color:#475569;border-color:var(--gray-200);}
+.qtag.history:hover{background:#e2e8f0;}
+/* Topic card */
+.topic-card{display:grid;grid-template-columns:auto 1fr;gap:20px;}
+@media(max-width:600px){.topic-card{grid-template-columns:1fr;}}
+.topic-thumb{width:150px;height:120px;border-radius:12px;object-fit:cover;border:1px solid var(--gray-200);flex-shrink:0;}
+.topic-thumb-ph{width:150px;height:120px;border-radius:12px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;color:var(--gray-300);font-size:2.5rem;border:1px solid var(--gray-200);flex-shrink:0;}
+.topic-title{font-size:1.4rem;font-weight:800;color:var(--gray-900);margin-bottom:4px;}
+.topic-desc{font-size:13px;color:var(--teal);font-weight:600;margin-bottom:8px;}
+.topic-extract{font-size:13px;color:var(--gray-600);line-height:1.7;}
+.topic-link{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 14px;background:var(--gray-100);border-radius:8px;font-size:12px;font-weight:600;color:var(--gray-600);text-decoration:none;transition:all .2s;}
+.topic-link:hover{background:var(--gray-200);}
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--gray-100);padding:4px;border-radius:10px;margin-bottom:18px;flex-wrap:wrap;}
+.tab{padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--gray-600);font-family:var(--font);transition:all .15s;display:flex;align-items:center;gap:5px;}
+.tab.active{background:#fff;color:var(--dark);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.tab-badge{background:var(--dark);color:#fff;border-radius:100px;padding:1px 6px;font-size:10px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+/* Section card */
+.section-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.section-head{padding:13px 18px;border-bottom:1px solid var(--gray-100);background:var(--gray-50);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.section-title{font-size:13px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
+.section-body{padding:16px 18px;}
+/* Tags */
+.tag-cloud{display:flex;flex-wrap:wrap;gap:7px;}
+.tag{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;cursor:default;transition:all .15s;border:1px solid transparent;}
+.tag.clickable{cursor:pointer;}
+.tag.clickable:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.1);}
+.t-person{background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,.2);}
+.t-org{background:#e0f2fe;color:#075985;border-color:rgba(14,165,233,.2);}
+.t-place{background:#dcfce7;color:#14532d;border-color:rgba(34,197,94,.2);}
+.t-date{background:#ede9fe;color:#5b21b6;border-color:rgba(124,58,237,.2);}
+.t-number{background:#fce7f3;color:#831843;border-color:rgba(236,72,153,.2);}
+.t-cat{background:var(--gray-100);color:var(--gray-600);}
+.t-related{background:#f0fdf4;color:#14532d;cursor:pointer;}
+.t-related:hover{background:#dcfce7;}
+.t-semkw{background:#f0f9ff;color:#075985;cursor:pointer;}
+.t-semkw:hover{background:#e0f2fe;}
+/* Keyword list */
+.kw-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;font-size:13px;color:var(--gray-700);transition:background .15s;cursor:pointer;gap:8px;}
+.kw-item:hover{background:var(--gray-50);}
+.kw-copy-btn{font-size:10px;color:var(--gray-400);padding:2px 8px;border-radius:100px;border:1px solid var(--gray-200);white-space:nowrap;flex-shrink:0;transition:all .15s;}
+.kw-copy-btn:hover{background:var(--teal);color:#fff;border-color:var(--teal);}
+/* Fact items */
+.fact-item{font-size:13px;color:var(--gray-700);padding:8px 12px;border-left:3px solid var(--teal);background:var(--gray-50);border-radius:0 8px 8px 0;margin-bottom:8px;line-height:1.6;}
+/* Section headings list */
+.sec-item{padding:8px 12px;border-radius:8px;font-size:13px;color:var(--gray-700);background:var(--gray-50);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.sec-item i{color:var(--gray-400);font-size:11px;}
+/* Two cols */
+.two-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:700px){.two-cols{grid-template-columns:1fr;}}
+/* Empty */
+.empty-state{text-align:center;padding:60px 24px;color:var(--gray-400);}
+.empty-state i{font-size:3rem;color:var(--gray-200);display:block;margin-bottom:14px;}
+.empty-state h3{font-size:16px;font-weight:700;color:var(--gray-500);margin-bottom:6px;}
+.spin{display:inline-block;width:30px;height:30px;border:3px solid var(--gray-200);border-top-color:var(--dark);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.notice{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#075985;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+</style>
 </head>
 <body>
 <div class="page-wrap">
-  <section class="tool-hero">
-    <h1><i class="fab fa-wikipedia-w" style="margin-right:10px;"></i> Wikipedia Entity Finder</h1>
-    <p>Discover entities, related topics and semantic relationships using Wikipedia data</p>
-    <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
-  </section>
-  <section class="tool-section">
-    <div class="tool-inner">
-      <div class="browser-chrome">
-        <div class="browser-bar">
-          <div class="browser-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
-          <div class="browser-url">clusterseo.pro — Wikipedia Entity Finder</div>
-        </div>
-        <div class="app-inside">
-
-          <div class="input-lbl"><i class="fab fa-wikipedia-w"></i> Enter a topic to research</div>
-          <div style="display:flex;gap:10px;margin-bottom:14px;">
-            <input type="text" id="wikiInput" placeholder="e.g. Artificial Intelligence, Digital Marketing, Running Shoes..." style="flex:1;padding:13px 16px;border:1.5px solid var(--gray-200);border-radius:var(--r);font-size:15px;font-family:var(--font);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--gray-200)'" onkeydown="if(event.key==='Enter')runWikiEntity()">
-            <button class="btn-run" style="background:linear-gradient(135deg,#64748b,#475569);" onclick="runWikiEntity()"><i class="fab fa-wikipedia-w"></i> Find Entities</button>
-          </div>
-          <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-            <button class="btn-secondary" id="btnExportWiki" style="display:none;" onclick="exportWikiCSV()"><i class="fas fa-download"></i> Export CSV</button>
-          </div>
-          <div id="wikiResults">
-            <div class="empty-state"><i class="fab fa-wikipedia-w"></i><h3>Enter a topic above</h3><p>The tool fetches real Wikipedia data to extract entities, categories and semantic relationships</p></div>
-          </div>
-
-        </div>
+<section class="tool-hero">
+  <h1><i class="fab fa-wikipedia-w" style="margin-right:10px;"></i> Wikipedia Entity Explorer</h1>
+  <p>Look up any topic — extract entities, key facts, semantic keywords, article sections and related topics</p>
+  <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
+</section>
+<section class="tool-section">
+<div class="tool-inner">
+  <div class="card">
+    <div class="card-body">
+      <div class="search-row">
+        <input type="text" id="topicInput" placeholder="Enter any topic, person, company, place or concept..." value="Artificial intelligence" onkeydown="if(event.key==='Enter')lookupTopic()">
+        <button class="btn btn-dark" id="btnLookup" onclick="lookupTopic()"><i class="fab fa-wikipedia-w"></i> Lookup</button>
+      </div>
+      <div class="quick-tags" id="quickTags">
+        <span style="font-size:12px;color:var(--gray-400);">Try:</span>
+        <span class="qtag" onclick="quickSearch('Elon Musk')">Elon Musk</span>
+        <span class="qtag" onclick="quickSearch('OpenAI')">OpenAI</span>
+        <span class="qtag" onclick="quickSearch('Search engine optimization')">SEO</span>
+        <span class="qtag" onclick="quickSearch('Machine learning')">Machine learning</span>
+        <span class="qtag" onclick="quickSearch('Apple Inc.')">Apple Inc.</span>
+        <span class="qtag" onclick="quickSearch('Digital marketing')">Digital marketing</span>
+      </div>
+      <div id="historyRow" style="display:none;margin-top:8px;">
+        <div style="font-size:11px;color:var(--gray-400);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;"><i class="fas fa-history" style="margin-right:4px;"></i>Recent searches</div>
+        <div class="quick-tags" id="historyTags"></div>
       </div>
     </div>
-  </section>
+  </div>
+  <div id="results">
+    <div class="empty-state"><i class="fab fa-wikipedia-w"></i><h3>Enter a topic to explore</h3><p>Look up any topic to extract entities, key facts, semantic keywords and related Wikipedia links</p></div>
+  </div>
+</div>
+</section>
 </div>
 <script src="shared-layout.js"></script>
-
 <script>
 const API = '';
-let wikiData = {};
+let lastData = null;
+let searchHistory = JSON.parse(localStorage.getItem('wiki_history') || '[]');
 
-async function runWikiEntity() {
-  const topic = document.getElementById('wikiInput').value.trim();
-  if (!topic) { alert('Enter a topic first.'); return; }
+renderHistory();
 
-  const resultsEl = document.getElementById('wikiResults');
-  resultsEl.innerHTML = '<div class="empty-state"><div style="width:40px;height:40px;border:3px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div><p style="color:var(--gray-400);">Searching Wikipedia for "'+topic+'"...</p></div>';
+function renderHistory() {
+  const row = document.getElementById('historyRow');
+  const tags = document.getElementById('historyTags');
+  if (!searchHistory.length) { row.style.display = 'none'; return; }
+  row.style.display = 'block';
+  tags.innerHTML = searchHistory.slice(0,8).map(t =>
+    `<span class="qtag history" onclick="quickSearch('${escH(t).replace(/'/g,"&#39;")}')"><i class="fas fa-history" style="font-size:10px;"></i> ${escH(t)}</span>`
+  ).join('');
+}
+
+function addToHistory(topic) {
+  searchHistory = [topic, ...searchHistory.filter(t => t !== topic)].slice(0, 10);
+  localStorage.setItem('wiki_history', JSON.stringify(searchHistory));
+  renderHistory();
+}
+
+function quickSearch(topic) {
+  document.getElementById('topicInput').value = topic;
+  lookupTopic();
+}
+
+async function lookupTopic() {
+  const topic = document.getElementById('topicInput').value.trim();
+  if (!topic) { alert('Please enter a topic.'); return; }
+
+  const btn = document.getElementById('btnLookup');
+  btn.disabled = true; btn.innerHTML = '<span class="spin" style="width:16px;height:16px;border-width:2px;"></span> Looking up...';
+  document.getElementById('results').innerHTML = `<div class="empty-state"><div class="spin"></div><p style="margin-top:14px;color:var(--gray-400);">Looking up "${escH(topic)}" on Wikipedia...</p></div>`;
 
   try {
-    const res  = await fetch(API + '/api/wikipedia-entity?topic=' + encodeURIComponent(topic));
+    const res  = await fetch(API + '/api/wikipedia-entity?' + new URLSearchParams({topic}));
     const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Topic not found');
-
-    wikiData = data;
-    document.getElementById('btnExportWiki').style.display = 'flex';
-    renderWiki(data);
+    if (!data.success) throw new Error(data.error || 'Not found');
+    lastData = data;
+    addToHistory(data.topic);
+    renderResults(data);
   } catch(err) {
-    resultsEl.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i><h3>Error</h3><p>'+err.message+'<br>Make sure your server is running.</p></div>';
+    document.getElementById('results').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red);"></i><h3>Not found</h3><p>${escH(err.message)}<br><small>Try a different spelling or more specific term.</small></p></div>`;
   }
+  btn.disabled = false; btn.innerHTML = '<i class="fab fa-wikipedia-w"></i> Lookup';
 }
 
-function renderWiki(d) {
+function renderResults(data) {
   let html = '';
 
-  html += '<div class="result-card" style="margin-bottom:14px;">';
-  html += '<div class="result-card-head"><h3><i class="fab fa-wikipedia-w"></i> '+d.topic+'</h3>';
-  if (d.url) html += '<a href="'+d.url+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--teal);text-decoration:none;font-weight:600;">View on Wikipedia →</a>';
-  html += '</div>';
-  html += '<div class="result-card-body">';
-  if (d.thumbnail || d.description) {
-    html += '<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;">';
-    if (d.thumbnail) html += '<img src="'+d.thumbnail+'" alt="'+d.topic+'" style="width:80px;height:80px;object-fit:cover;border-radius:var(--r);flex-shrink:0;">';
-    html += '<div>';
-    if (d.description) html += '<div style="font-size:12px;font-weight:600;color:var(--teal-dark);margin-bottom:6px;">'+d.description+'</div>';
-    if (d.extract) html += '<div style="font-size:13px;color:var(--gray-600);line-height:1.6;">'+d.extract.substring(0,400)+(d.extract.length>400?'…':'')+'</div>';
-    html += '</div></div>';
-  } else if (d.extract) {
-    html += '<p style="font-size:13px;color:var(--gray-600);line-height:1.6;">'+d.extract.substring(0,400)+'…</p>';
+  // ── Topic card ──
+  html += '<div class="card"><div class="card-body"><div class="topic-card">';
+  if (data.thumbnail) {
+    html += `<img class="topic-thumb" src="${escH(data.thumbnail)}" alt="${escH(data.topic)}" onerror="this.outerHTML='<div class=topic-thumb-ph><i class=fab fa-wikipedia-w></i></div>'">`;
+  } else {
+    html += '<div class="topic-thumb-ph"><i class="fab fa-wikipedia-w"></i></div>';
   }
+  html += '<div>';
+  html += `<div class="topic-title">${escH(data.topic)}</div>`;
+  if (data.description) html += `<div class="topic-desc">${escH(data.description)}</div>`;
+  html += `<div class="topic-extract">${escH((data.extract||'').slice(0,450))}${(data.extract||'').length>450?'...':''}</div>`;
+  if (data.url) html += `<a class="topic-link" href="${escH(data.url)}" target="_blank" rel="noopener"><i class="fab fa-wikipedia-w"></i> Read full article <i class="fas fa-external-link-alt"></i></a>`;
   html += '</div></div>';
 
-  if (d.keyFacts && d.keyFacts.length) {
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-star"></i> Key Facts & Statistics</h3></div>';
-    html += '<div class="result-card-body">';
-    d.keyFacts.forEach(function(fact) {
-      html += '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray-100);">';
-      html += '<i class="fas fa-check-circle" style="color:var(--teal);margin-top:2px;flex-shrink:0;"></i>';
-      html += '<span style="font-size:13px;color:var(--gray-700);">'+fact+'</span></div>';
-    });
-    html += '</div></div>';
-  }
+  // Action buttons
+  html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-100);">
+    <button class="btn btn-sec" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+    <button class="btn btn-sec" onclick="copyAllKeywords()"><i class="fas fa-copy"></i> Copy All Keywords</button>
+    <button class="btn btn-sec" onclick="sendToResearch()"><i class="fas fa-search"></i> Send to Keyword Research</button>
+  </div>`;
+  html += '</div></div>';
 
-  const ents = d.entities || {};
-  const entConfig = [
-    { key:'people',       label:'People Mentioned',     icon:'fa-user',         cls:'et-person' },
-    { key:'organizations',label:'Organisations',         icon:'fa-building',     cls:'et-org' },
-    { key:'places',       label:'Places',               icon:'fa-map-marker-alt',cls:'et-place' },
-    { key:'dates',        label:'Key Dates',            icon:'fa-calendar',     cls:'et-brand' },
-    { key:'numbers',      label:'Numbers & Statistics', icon:'fa-chart-bar',    cls:'et-concept' }
+  // ── Stats row ──
+  const e = data.entities || {};
+  const totalEntities = (e.people||[]).length + (e.organizations||[]).length + (e.places||[]).length;
+  html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:18px;">
+    ${statBox(totalEntities,'Entities','#0ea5e9')}
+    ${statBox((data.semanticKeywords||[]).length,'Semantic KWs','#7c3aed')}
+    ${statBox((data.keyFacts||[]).length,'Key Facts','#10b981')}
+    ${statBox((data.relatedLinks||[]).length,'Related Topics','#f59e0b')}
+    ${statBox((data.categories||[]).length,'Categories','#374151')}
+  </div>`;
+
+  // ── Tabs ──
+  const kwCount = (data.semanticKeywords||[]).length;
+  const relCount = (data.relatedLinks||[]).length;
+  html += `<div class="card"><div class="card-body">
+    <div class="tabs">
+      <button class="tab active" data-tab="keywords" onclick="switchTab('keywords')"><i class="fas fa-search" style="color:var(--teal);"></i> Semantic Keywords <span class="tab-badge">${kwCount}</span></button>
+      <button class="tab" data-tab="entities" onclick="switchTab('entities')"><i class="fas fa-tags" style="color:var(--amber);"></i> Entities <span class="tab-badge">${totalEntities}</span></button>
+      <button class="tab" data-tab="facts" onclick="switchTab('facts')"><i class="fas fa-list-check" style="color:var(--green);"></i> Key Facts</button>
+      <button class="tab" data-tab="related" onclick="switchTab('related')"><i class="fas fa-link" style="color:var(--purple);"></i> Related Topics <span class="tab-badge">${relCount}</span></button>
+      <button class="tab" data-tab="categories" onclick="switchTab('categories')"><i class="fas fa-folder" style="color:var(--gray-600);"></i> Categories</button>
+    </div>`;
+
+  // Keywords tab
+  html += `<div id="panel-keywords" class="tab-panel active">`;
+  if (data.semanticKeywords && data.semanticKeywords.length) {
+    html += `<div class="notice"><i class="fas fa-lightbulb"></i> Click any keyword to copy it. Use "Copy All Keywords" to copy the full list at once.</div>`;
+    data.semanticKeywords.forEach(kw => {
+      html += `<div class="kw-item" onclick="copyKw(this,'${escH(kw).replace(/'/g,"&#39;")}')">
+        <span>${escH(kw)}</span>
+        <span class="kw-copy-btn">Copy</span>
+      </div>`;
+    });
+  } else {
+    html += '<div style="text-align:center;padding:24px;color:var(--gray-400);">No semantic keywords found.</div>';
+  }
+  html += '</div>';
+
+  // Entities tab
+  html += `<div id="panel-entities" class="tab-panel">`;
+  const entCats = [
+    {key:'people',label:'People',icon:'fa-user',cls:'t-person'},
+    {key:'organizations',label:'Organisations',icon:'fa-building',cls:'t-org'},
+    {key:'places',label:'Places',icon:'fa-map-marker-alt',cls:'t-place'},
+    {key:'dates',label:'Dates',icon:'fa-calendar',cls:'t-date'},
+    {key:'numbers',label:'Numbers & Stats',icon:'fa-hashtag',cls:'t-number'}
   ];
-  entConfig.forEach(function(cfg) {
-    const items = ents[cfg.key] || [];
+  entCats.forEach(cat => {
+    const items = (data.entities||{})[cat.key]||[];
     if (!items.length) return;
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas '+cfg.icon+'"></i> '+cfg.label+' ('+items.length+')</h3></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    items.forEach(function(item){ html += '<span class="entity-tag '+cfg.cls+'">'+item+'</span>'; });
-    html += '</div></div></div>';
+    html += `<div class="section-card">
+      <div class="section-head"><div class="section-title"><i class="fas ${cat.icon}" style="color:var(--teal);"></i>${cat.label} (${items.length})</div></div>
+      <div class="section-body"><div class="tag-cloud">
+        ${items.slice(0,25).map(i=>`<span class="tag ${cat.cls}">${escH(i)}</span>`).join('')}
+        ${items.length>25?`<span class="tag t-cat">+${items.length-25} more</span>`:''}
+      </div></div>
+    </div>`;
   });
+  html += '</div>';
 
-  if (d.relatedLinks && d.relatedLinks.length) {
-    html += '<div class="result-card" style="margin-bottom:14px;">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-project-diagram"></i> Related Topics ('+d.relatedLinks.length+')</h3></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    d.relatedLinks.slice(0,30).forEach(function(link) {
-      html += '<span class="entity-tag et-org" style="cursor:pointer;" onclick="document.getElementById(\'wikiInput\').value=\''+link.replace(/'/g,"\\'")+'\'">'+link+'</span>';
+  // Facts tab
+  html += `<div id="panel-facts" class="tab-panel">`;
+  if (data.keyFacts && data.keyFacts.length) {
+    data.keyFacts.forEach(f => { html += `<div class="fact-item">${escH(f)}</div>`; });
+  } else {
+    html += '<div style="text-align:center;padding:24px;color:var(--gray-400);">No key facts extracted.</div>';
+  }
+  html += '</div>';
+
+  // Related tab
+  html += `<div id="panel-related" class="tab-panel">`;
+  if (data.relatedLinks && data.relatedLinks.length) {
+    html += `<div class="notice"><i class="fas fa-mouse-pointer"></i> Click any topic to look it up instantly.</div>`;
+    html += '<div class="tag-cloud">';
+    data.relatedLinks.slice(0,50).forEach(link => {
+      html += `<span class="tag t-related" onclick="quickSearch('${escH(link).replace(/'/g,"&#39;")}')" title="Click to look up">${escH(link)}</span>`;
     });
-    if (d.relatedLinks.length>30) html += '<span class="entity-tag et-concept">+'+(d.relatedLinks.length-30)+' more</span>';
-    html += '</div></div></div>';
+    html += '</div>';
+  } else {
+    html += '<div style="text-align:center;padding:24px;color:var(--gray-400);">No related topics found.</div>';
   }
+  html += '</div>';
 
-  if (d.categories && d.categories.length) {
-    html += '<div class="result-card">';
-    html += '<div class="result-card-head"><h3><i class="fas fa-folder"></i> Wikipedia Categories ('+d.categories.length+')</h3></div>';
-    html += '<div class="result-card-body"><div class="tag-cloud">';
-    d.categories.forEach(function(cat){ html += '<span class="entity-tag et-concept">'+cat+'</span>'; });
-    html += '</div></div></div>';
+  // Categories tab
+  html += `<div id="panel-categories" class="tab-panel">`;
+  if (data.categories && data.categories.length) {
+    html += '<div class="tag-cloud">';
+    data.categories.forEach(c => { html += `<span class="tag t-cat">${escH(c)}</span>`; });
+    html += '</div>';
+  } else {
+    html += '<div style="text-align:center;padding:24px;color:var(--gray-400);">No categories found.</div>';
   }
+  html += '</div>';
 
-  document.getElementById('wikiResults').innerHTML = html;
+  html += '</div></div>'; // close card-body + card
+
+  document.getElementById('results').innerHTML = html;
 }
 
-function clearWiki() {
-  document.getElementById('wikiInput').value = '';
-  document.getElementById('wikiResults').innerHTML = '<div class="empty-state"><i class="fab fa-wikipedia-w"></i><h3>Enter a topic above</h3><p>The tool fetches real Wikipedia data to extract entities, categories and semantic relationships</p></div>';
-  document.getElementById('btnExportWiki').style.display = 'none';
-  wikiData = {};
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
 }
 
-function exportWikiCSV() {
-  const rows = ['Item,Category'];
-  const ents = wikiData.entities || {};
-  Object.entries(ents).forEach(function(entry) {
-    (entry[1]||[]).forEach(function(item){ rows.push('"'+item.replace(/"/g,'""')+'","'+entry[0]+'"'); });
+function copyKw(el, kw) {
+  navigator.clipboard.writeText(kw).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = kw;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
   });
-  (wikiData.relatedLinks||[]).forEach(function(l){ rows.push('"'+l.replace(/"/g,'""')+'","Related Link"'); });
-  (wikiData.categories||[]).forEach(function(c){ rows.push('"'+c.replace(/"/g,'""')+'","Category"'); });
+  const btn = el.querySelector('.kw-copy-btn');
+  if (btn) { btn.textContent = 'Copied!'; btn.style.background = 'var(--teal)'; btn.style.color = '#fff'; setTimeout(() => { btn.textContent = 'Copy'; btn.style.background = ''; btn.style.color = ''; }, 1200); }
+}
+
+function copyAllKeywords() {
+  if (!lastData || !lastData.semanticKeywords) return;
+  const text = lastData.semanticKeywords.join('\n');
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = text;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  });
+  alert(`Copied ${lastData.semanticKeywords.length} keywords to clipboard!`);
+}
+
+function sendToResearch() {
+  if (!lastData || !lastData.semanticKeywords) return;
+  const kws = lastData.semanticKeywords.join('\n');
+  sessionStorage.setItem('research_prefill', kws);
+  window.location.href = 'research.html';
+}
+
+function exportCSV() {
+  if (!lastData) return;
+  const rows = ['Item,Category'];
+  const {entities, relatedLinks, categories, semanticKeywords} = lastData;
+  (entities.people||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Person`));
+  (entities.organizations||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Organisation`));
+  (entities.places||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Place`));
+  (entities.dates||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Date`));
+  (entities.numbers||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Number/Stat`));
+  (relatedLinks||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Related Link`));
+  (categories||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Category`));
+  (semanticKeywords||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Semantic Keyword`));
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
-  a.download = 'wikipedia-entity-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.href = URL.createObjectURL(new Blob([rows.join('\n')], {type:'text/csv'}));
+  a.download = `wikipedia-${(lastData.topic||'export').replace(/\s+/g,'-').toLowerCase()}-${today()}.csv`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
+
+function statBox(n, label, color) {
+  return `<div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;padding:14px;text-align:center;">
+    <div style="font-size:1.6rem;font-weight:800;color:${color};line-height:1;">${n}</div>
+    <div style="font-size:10px;color:var(--gray-400);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.04em;">${label}</div>
+  </div>`;
+}
+
+function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function today() { return new Date().toISOString().split('T')[0]; }
 </script>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>
