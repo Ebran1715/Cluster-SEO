@@ -1020,6 +1020,17 @@
   border-color: #059669;
   color: #059669;
 }
+#refreshWithStrategy {
+  margin-left: auto;
+  background: #f0fdf4;
+  border-color: #059669;
+  color: #059669;
+}
+
+#refreshWithStrategy:hover {
+  background: #059669;
+  color: white;
+}
   </style>
 </head>
 <body>
@@ -1105,7 +1116,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function setStrategy(s) {
   currentStrategy = s;
-  ['mobile','desktop','both'].forEach(x => document.getElementById('btn'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active', x===s));
+  ['mobile','desktop','both'].forEach(x => {
+    const btn = document.getElementById('btn'+x.charAt(0).toUpperCase()+x.slice(1));
+    if (btn) btn.classList.toggle('active', x===s);
+  });
+  
+  // If results are already showing, refresh with new strategy
+  const resultsDiv = document.getElementById('results');
+  if (resultsDiv && !resultsDiv.innerHTML.includes('empty-state') && !resultsDiv.innerHTML.includes('loading')) {
+    // Ask user if they want to refresh with new strategy
+    if (confirm('Change strategy to ' + s + '? This will re-run the audit.')) {
+      runAudit();
+    }
+  }
+}
+
+// Show refresh button when results exist
+function checkAndShowRefreshButton() {
+  const resultsDiv = document.getElementById('results');
+  const refreshBtn = document.getElementById('refreshWithStrategy');
+  if (resultsDiv && !resultsDiv.innerHTML.includes('empty-state') && !resultsDiv.innerHTML.includes('loading')) {
+    refreshBtn.style.display = 'inline-flex';
+  } else {
+    refreshBtn.style.display = 'none';
+  }
+}
+
+// Call this after renderResults
+function afterRender() {
+  checkAndShowRefreshButton();
+}
+
+// Refresh with current strategy
+function refreshWithCurrentStrategy() {
+  runAudit();
 }
 
 async function runAudit() {
@@ -1233,11 +1277,14 @@ async function runAudit() {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-stethoscope"></i> Run Full Audit';
   }
+
 }
+// Call this after rendering
+afterRender();
 
 async function loadPageSpeedInBackground(url, finalUrl, auditData) {
   try {
-    const strategies = currentStrategy === 'both' ? ['mobile','desktop'] : [currentStrategy];
+    const strategies = currentStrategy === 'both' ? ['mobile', 'desktop'] : [currentStrategy];
     
     const psiLoadingDiv = document.createElement('div');
     psiLoadingDiv.id = 'psi-loading';
@@ -1256,14 +1303,19 @@ async function loadPageSpeedInBackground(url, finalUrl, auditData) {
     const psiRequests = strategies.map(s =>
       fetch(API + '/api/pagespeed?url=' + encodeURIComponent(url) + '&strategy=' + s)
         .then(r => r.json())
-        .catch(e => ({ success: false, error: e.message }))
+        .catch(e => ({ success: false, error: e.message, strategy: s }))
     );
 
     const psiRaws = await Promise.all(psiRequests);
     
     const psiData = {};
     psiRaws.forEach((r, i) => {
-      if (r?.success) psiData[strategies[i]] = r;
+      if (r?.success) {
+        psiData[strategies[i]] = r;
+        console.log(`${strategies[i]} PSI Data:`, r); // Debug: Check if data is different
+        console.log(`${strategies[i]} LCP:`, r.vitals?.lcp?.value);
+        console.log(`${strategies[i]} Performance:`, r.scores?.performance?.score);
+      }
     });
     
     const loadingEl = document.getElementById('psi-loading');
@@ -1289,7 +1341,6 @@ async function loadPageSpeedInBackground(url, finalUrl, auditData) {
     document.getElementById('results').appendChild(errorDiv);
   }
 }
-
 function scoreColor(s){ return s>=90?'#059669':s>=50?'#f59e0b':'#ef4444'; }
 function scoreLabel(s){ return s>=90?'Good':s>=50?'Needs Improvement':'Poor'; }
 function vitalCls(score){ return score===null?'':score>=90?'cwv-good':score>=50?'cwv-warn':'cwv-poor'; }
@@ -1492,12 +1543,13 @@ function renderResults(auditData, psiData, url, overview, pageStatus) {
       </div>
     </div>
   </div>
+  
 
 `;
 
 
 
- // Display PSI panels - Mobile and Desktop side by side
+// Display PSI panels - Mobile and Desktop side by side
 const psiKeys = Object.keys(psiData);
 if (psiKeys.length > 0) {
   if (psiKeys.length === 2) {
@@ -1513,6 +1565,24 @@ if (psiKeys.length > 0) {
       html += renderPSI(psiData[strat], strat); 
     });
   }
+      // 👇 ADD STRATEGY SWITCHER TABS HERE 👇
+      html += `
+      <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+        <button class="strat-btn ${currentStrategy === 'mobile' ? 'active' : ''}" 
+                onclick="switchStrategy('mobile')">
+          <i class="fas fa-mobile-alt"></i> Mobile View
+        </button>
+        <button class="strat-btn ${currentStrategy === 'desktop' ? 'active' : ''}" 
+                onclick="switchStrategy('desktop')">
+          <i class="fas fa-desktop"></i> Desktop View
+        </button>
+        <button class="strat-btn ${currentStrategy === 'both' ? 'active' : ''}" 
+                onclick="switchStrategy('both')">
+          <i class="fas fa-layer-group"></i> Both Views
+        </button>
+      </div>
+    `;
+    
   html += '<div class="section-divider"></div>';
 }
 
@@ -1569,6 +1639,26 @@ if (psiKeys.length > 0) {
   document.getElementById('results').innerHTML = html;
 }
 
+
+function switchStrategy(newStrategy) {
+  if (newStrategy === currentStrategy) return;
+  
+  // Update UI
+  setStrategy(newStrategy);
+  
+  // Show loading indicator
+  const resultsDiv = document.getElementById('results');
+  resultsDiv.innerHTML = `
+    <div style="text-align:center;padding:48px 24px;">
+      <div class="spin" style="width:44px;height:44px;margin:0 auto 16px;"></div>
+      <div style="font-size:14px;font-weight:600;color:#334155;">Switching to ${newStrategy} strategy...</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:6px;">Fetching new PageSpeed data</div>
+    </div>
+  `;
+  
+  // Re-run audit with new strategy
+  setTimeout(() => runAudit(), 100);
+}
 function renderPSI(d, strat) {
   if (!d || !d.scores) {
     return `<div class="psi-error">PageSpeed data incomplete</div>`;
@@ -1894,39 +1984,72 @@ function closeStatsModal() {
 }
 
 function generateTrafficModal(value, url) {
-  const monthlyData = [
-    { month: 'Jan', traffic: Math.round(value * 0.85) },
-    { month: 'Feb', traffic: Math.round(value * 0.92) },
-    { month: 'Mar', traffic: Math.round(value * 1.05) },
-    { month: 'Apr', traffic: Math.round(value * 0.98) },
-    { month: 'May', traffic: Math.round(value * 1.12) },
-    { month: 'Jun', traffic: Math.round(value * 1.08) },
-    { month: 'Jul', traffic: Math.round(value * 1.15) },
-    { month: 'Aug', traffic: Math.round(value * 1.22) },
-    { month: 'Sep', traffic: Math.round(value * 1.18) },
-    { month: 'Oct', traffic: Math.round(value * 1.25) },
-    { month: 'Nov', traffic: Math.round(value * 1.30) },
-    { month: 'Dec', traffic: Math.round(value * 1.28) }
-  ];
+  let currentRange = '12months';
   
+  // Generate data for different time ranges
+  const getDataForRange = (range) => {
+    switch(range) {
+      case '3months':
+        return [
+          { month: 'Jan', traffic: Math.round(value * 0.92) },
+          { month: 'Feb', traffic: Math.round(value * 0.98) },
+          { month: 'Mar', traffic: Math.round(value * 1.05) }
+        ];
+      case '6months':
+        return [
+          { month: 'Oct', traffic: Math.round(value * 0.88) },
+          { month: 'Nov', traffic: Math.round(value * 0.95) },
+          { month: 'Dec', traffic: Math.round(value * 1.02) },
+          { month: 'Jan', traffic: Math.round(value * 0.92) },
+          { month: 'Feb', traffic: Math.round(value * 0.98) },
+          { month: 'Mar', traffic: Math.round(value * 1.05) }
+        ];
+      case '30days':
+        return [
+          { day: 'Week 1', traffic: Math.round(value * 0.23) },
+          { day: 'Week 2', traffic: Math.round(value * 0.28) },
+          { day: 'Week 3', traffic: Math.round(value * 0.25) },
+          { day: 'Week 4', traffic: Math.round(value * 0.24) }
+        ];
+      default: // 12 months
+        return [
+          { month: 'Apr', traffic: Math.round(value * 0.85) },
+          { month: 'May', traffic: Math.round(value * 0.92) },
+          { month: 'Jun', traffic: Math.round(value * 1.05) },
+          { month: 'Jul', traffic: Math.round(value * 0.98) },
+          { month: 'Aug', traffic: Math.round(value * 1.12) },
+          { month: 'Sep', traffic: Math.round(value * 1.08) },
+          { month: 'Oct', traffic: Math.round(value * 1.15) },
+          { month: 'Nov', traffic: Math.round(value * 1.22) },
+          { month: 'Dec', traffic: Math.round(value * 1.18) },
+          { month: 'Jan', traffic: Math.round(value * 1.25) },
+          { month: 'Feb', traffic: Math.round(value * 1.30) },
+          { month: 'Mar', traffic: Math.round(value * 1.28) }
+        ];
+    }
+  };
+
+  let monthlyData = getDataForRange('12months');
   const maxTraffic = Math.max(...monthlyData.map(d => d.traffic));
   
-  let bars = '';
-  monthlyData.forEach(d => {
-    const percent = (d.traffic / maxTraffic) * 100;
-    bars += `
-      <div class="graph-bar-item">
-        <span class="graph-bar-label">${d.month}</span>
-        <div class="graph-bar-wrapper">
-          <div class="graph-bar-fill" style="width: ${percent}%;">
-            ${percent > 20 ? formatNumber(d.traffic) : ''}
+  const renderBars = (data) => {
+    return data.map(d => {
+      const label = d.month || d.day;
+      const percent = (d.traffic / maxTraffic) * 100;
+      return `
+        <div class="graph-bar-item" style="cursor:pointer;" onclick="showDailyTraffic('${label}', ${d.traffic})">
+          <span class="graph-bar-label">${label}</span>
+          <div class="graph-bar-wrapper">
+            <div class="graph-bar-fill" style="width: ${percent}%;">
+              ${percent > 20 ? formatNumber(d.traffic) : ''}
+            </div>
           </div>
+          <span class="graph-bar-value">${formatNumber(d.traffic)}</span>
         </div>
-        <span class="graph-bar-value">${formatNumber(d.traffic)}</span>
-      </div>
-    `;
-  });
-  
+      `;
+    }).join('');
+  };
+
   return `
     <div class="stats-grid-mini">
       <div class="stats-mini-card">
@@ -1944,18 +2067,19 @@ function generateTrafficModal(value, url) {
     </div>
     
     <div class="time-range-selector">
-      <button class="time-range-btn active">Last 12 months</button>
-      <button class="time-range-btn">Last 6 months</button>
-      <button class="time-range-btn">Last 30 days</button>
+      <button class="time-range-btn active" onclick="updateTrafficRange('12months', ${value}, this)">Last 12 months</button>
+      <button class="time-range-btn" onclick="updateTrafficRange('6months', ${value}, this)">Last 6 months</button>
+      <button class="time-range-btn" onclick="updateTrafficRange('3months', ${value}, this)">Last 3 months</button>
+      <button class="time-range-btn" onclick="updateTrafficRange('30days', ${value}, this)">Last 30 days</button>
     </div>
     
-    <div class="graph-container">
+    <div class="graph-container" id="traffic-graph">
       <div class="graph-title">
         <i class="fas fa-chart-line" style="color:#3b82f6;"></i>
         Monthly Traffic Trend
       </div>
-      <div class="graph-bar-container">
-        ${bars}
+      <div class="graph-bar-container" id="traffic-bars">
+        ${renderBars(monthlyData)}
       </div>
     </div>
     
@@ -1966,37 +2090,37 @@ function generateTrafficModal(value, url) {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div>
-          <div class="graph-bar-item">
+          <div class="graph-bar-item" onclick="showSourceDetails('organic')" style="cursor:pointer;">
             <span class="graph-bar-label">Organic</span>
             <div class="graph-bar-wrapper">
               <div class="graph-bar-fill" style="width: 45%;">45%</div>
             </div>
           </div>
-          <div class="graph-bar-item">
+          <div class="graph-bar-item" onclick="showSourceDetails('direct')" style="cursor:pointer;">
             <span class="graph-bar-label">Direct</span>
             <div class="graph-bar-wrapper">
               <div class="graph-bar-fill" style="width: 30%;">30%</div>
             </div>
           </div>
-          <div class="graph-bar-item">
+          <div class="graph-bar-item" onclick="showSourceDetails('referral')" style="cursor:pointer;">
             <span class="graph-bar-label">Referral</span>
             <div class="graph-bar-wrapper">
               <div class="graph-bar-fill" style="width: 15%;">15%</div>
             </div>
           </div>
-          <div class="graph-bar-item">
+          <div class="graph-bar-item" onclick="showSourceDetails('social')" style="cursor:pointer;">
             <span class="graph-bar-label">Social</span>
             <div class="graph-bar-wrapper">
               <div class="graph-bar-fill" style="width: 10%;">10%</div>
             </div>
           </div>
         </div>
-        <div style="background:#f8fafc;border-radius:12px;padding:16px;">
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;" onclick="showTopPages()" style="cursor:pointer;">
           <div style="font-size:13px;font-weight:600;margin-bottom:12px;">Top Landing Pages</div>
-          <div style="font-size:12px;margin-bottom:8px;">1. /blog/seo-guide <span style="float:right;color:#059669;">1.2K visits</span></div>
-          <div style="font-size:12px;margin-bottom:8px;">2. /tools/audit <span style="float:right;color:#059669;">890 visits</span></div>
-          <div style="font-size:12px;margin-bottom:8px;">3. /pricing <span style="float:right;color:#059669;">654 visits</span></div>
-          <div style="font-size:12px;">4. /about <span style="float:right;color:#059669;">432 visits</span></div>
+          <div style="font-size:12px;margin-bottom:8px;cursor:pointer;" onclick="event.stopPropagation(); showPageDetails('/blog/seo-guide')">1. /blog/seo-guide <span style="float:right;color:#059669;">1.2K visits</span></div>
+          <div style="font-size:12px;margin-bottom:8px;cursor:pointer;" onclick="event.stopPropagation(); showPageDetails('/tools/audit')">2. /tools/audit <span style="float:right;color:#059669;">890 visits</span></div>
+          <div style="font-size:12px;margin-bottom:8px;cursor:pointer;" onclick="event.stopPropagation(); showPageDetails('/pricing')">3. /pricing <span style="float:right;color:#059669;">654 visits</span></div>
+          <div style="font-size:12px;cursor:pointer;" onclick="event.stopPropagation(); showPageDetails('/about')">4. /about <span style="float:right;color:#059669;">432 visits</span></div>
         </div>
       </div>
     </div>
@@ -2671,6 +2795,214 @@ function closeMetricModal() {
     modal.classList.remove('active');
     setTimeout(() => modal.remove(), 300);
   }
+}
+
+// Traffic range update function
+function updateTrafficRange(range, value, btn) {
+  // Update active button
+  document.querySelectorAll('.time-range-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  // Generate data for selected range
+  let data = [];
+  switch(range) {
+    case '3months':
+      data = [
+        { label: 'Jan', value: Math.round(value * 0.92) },
+        { label: 'Feb', value: Math.round(value * 0.98) },
+        { label: 'Mar', value: Math.round(value * 1.05) }
+      ];
+      break;
+    case '6months':
+      data = [
+        { label: 'Oct', value: Math.round(value * 0.88) },
+        { label: 'Nov', value: Math.round(value * 0.95) },
+        { label: 'Dec', value: Math.round(value * 1.02) },
+        { label: 'Jan', value: Math.round(value * 0.92) },
+        { label: 'Feb', value: Math.round(value * 0.98) },
+        { label: 'Mar', value: Math.round(value * 1.05) }
+      ];
+      break;
+    case '30days':
+      data = [
+        { label: 'Week 1', value: Math.round(value * 0.23) },
+        { label: 'Week 2', value: Math.round(value * 0.28) },
+        { label: 'Week 3', value: Math.round(value * 0.25) },
+        { label: 'Week 4', value: Math.round(value * 0.24) }
+      ];
+      break;
+    default: // 12 months
+      data = [
+        { label: 'Apr', value: Math.round(value * 0.85) },
+        { label: 'May', value: Math.round(value * 0.92) },
+        { label: 'Jun', value: Math.round(value * 1.05) },
+        { label: 'Jul', value: Math.round(value * 0.98) },
+        { label: 'Aug', value: Math.round(value * 1.12) },
+        { label: 'Sep', value: Math.round(value * 1.08) },
+        { label: 'Oct', value: Math.round(value * 1.15) },
+        { label: 'Nov', value: Math.round(value * 1.22) },
+        { label: 'Dec', value: Math.round(value * 1.18) },
+        { label: 'Jan', value: Math.round(value * 1.25) },
+        { label: 'Feb', value: Math.round(value * 1.30) },
+        { label: 'Mar', value: Math.round(value * 1.28) }
+      ];
+  }
+  
+  const maxValue = Math.max(...data.map(d => d.value));
+  
+  let bars = '';
+  data.forEach(d => {
+    const percent = (d.value / maxValue) * 100;
+    bars += `
+      <div class="graph-bar-item" onclick="showDailyTraffic('${d.label}', ${d.value})">
+        <span class="graph-bar-label">${d.label}</span>
+        <div class="graph-bar-wrapper">
+          <div class="graph-bar-fill" style="width: ${percent}%;">
+            ${percent > 20 ? formatNumber(d.value) : ''}
+          </div>
+        </div>
+        <span class="graph-bar-value">${formatNumber(d.value)}</span>
+      </div>
+    `;
+  });
+  
+  document.getElementById('traffic-bars').innerHTML = bars;
+}
+
+// Show daily traffic details
+function showDailyTraffic(period, traffic) {
+  const content = `
+    <div style="text-align:center;">
+      <h3 style="margin-bottom:16px;">${period} Traffic Details</h3>
+      <div style="font-size:48px;font-weight:700;color:#059669;margin-bottom:16px;">${formatNumber(traffic)}</div>
+      <p style="color:#64748b;margin-bottom:24px;">visitors</p>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;">
+          <div style="font-size:12px;color:#64748b;">New vs Returning</div>
+          <div style="font-size:20px;font-weight:700;">65% / 35%</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;">
+          <div style="font-size:12px;color:#64748b;">Bounce Rate</div>
+          <div style="font-size:20px;font-weight:700;">42%</div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  showMetricModal(`Traffic for ${period}`, content);
+}
+
+// Show source details
+function showSourceDetails(source) {
+  const sourceNames = {
+    organic: 'Organic Search',
+    direct: 'Direct Traffic',
+    referral: 'Referral Traffic',
+    social: 'Social Media'
+  };
+  
+  const content = `
+    <div>
+      <h3 style="margin-bottom:16px;">${sourceNames[source]}</h3>
+      <div style="background:#f8fafc;border-radius:12px;padding:20px;margin-bottom:20px;">
+        <div style="font-size:36px;font-weight:700;color:#059669;margin-bottom:8px;">${source === 'organic' ? '1,102' : source === 'direct' ? '735' : source === 'referral' ? '367' : '245'}</div>
+        <div style="color:#64748b;">visitors</div>
+      </div>
+      
+      <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;">Top Sources</h4>
+      ${source === 'organic' ? `
+        <div class="page-list-item">Google <span class="page-meta">65%</span></div>
+        <div class="page-list-item">Bing <span class="page-meta">20%</span></div>
+        <div class="page-list-item">Yahoo <span class="page-meta">10%</span></div>
+        <div class="page-list-item">Other <span class="page-meta">5%</span></div>
+      ` : source === 'direct' ? `
+        <div class="page-list-item">Direct type-in <span class="page-meta">70%</span></div>
+        <div class="page-list-item">Bookmarks <span class="page-meta">30%</span></div>
+      ` : source === 'referral' ? `
+        <div class="page-list-item">example.com <span class="page-meta">45%</span></div>
+        <div class="page-list-item">blogger.com <span class="page-meta">30%</span></div>
+        <div class="page-list-item">medium.com <span class="page-meta">25%</span></div>
+      ` : `
+        <div class="page-list-item">Facebook <span class="page-meta">50%</span></div>
+        <div class="page-list-item">Twitter/X <span class="page-meta">30%</span></div>
+        <div class="page-list-item">LinkedIn <span class="page-meta">20%</span></div>
+      `}
+    </div>
+  `;
+  
+  showMetricModal(sourceNames[source], content);
+}
+
+// Show top pages
+function showTopPages() {
+  const content = `
+    <div>
+      <h3 style="margin-bottom:16px;">Top Landing Pages</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Page</th><th>Visits</th><th>% of Total</th></tr>
+        </thead>
+        <tbody>
+          <tr onclick="showPageDetails('/blog/seo-guide')" style="cursor:pointer;">
+            <td>/blog/seo-guide</td>
+            <td>1,245</td>
+            <td>18%</td>
+          </tr>
+          <tr onclick="showPageDetails('/tools/audit')" style="cursor:pointer;">
+            <td>/tools/audit</td>
+            <td>890</td>
+            <td>13%</td>
+          </tr>
+          <tr onclick="showPageDetails('/')" style="cursor:pointer;">
+            <td>/</td>
+            <td>765</td>
+            <td>11%</td>
+          </tr>
+          <tr onclick="showPageDetails('/pricing')" style="cursor:pointer;">
+            <td>/pricing</td>
+            <td>654</td>
+            <td>9%</td>
+          </tr>
+          <tr onclick="showPageDetails('/about')" style="cursor:pointer;">
+            <td>/about</td>
+            <td>432</td>
+            <td>6%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  showMetricModal('Top Landing Pages', content);
+}
+
+// Show page details
+function showPageDetails(page) {
+  const content = `
+    <div>
+      <h3 style="margin-bottom:8px;">Page Details</h3>
+      <div style="font-family:monospace;background:#f1f5f9;padding:8px;border-radius:8px;margin-bottom:20px;">${page}</div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;">
+          <div style="font-size:12px;color:#64748b;">Traffic</div>
+          <div style="font-size:24px;font-weight:700;">${page === '/blog/seo-guide' ? '1,245' : page === '/tools/audit' ? '890' : page === '/' ? '765' : page === '/pricing' ? '654' : '432'}</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;">
+          <div style="font-size:12px;color:#64748b;">Keywords</div>
+          <div style="font-size:24px;font-weight:700;">${page === '/blog/seo-guide' ? '28' : page === '/tools/audit' ? '67' : page === '/' ? '45' : page === '/pricing' ? '12' : '8'}</div>
+        </div>
+      </div>
+      
+      <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;">Top Keywords for this Page</h4>
+      <div class="page-list-item">seo guide <span class="page-meta">#4</span></div>
+      <div class="page-list-item">seo tools <span class="page-meta">#7</span></div>
+      <div class="page-list-item">website audit <span class="page-meta">#12</span></div>
+    </div>
+  `;
+  
+  showMetricModal(`Page: ${page}`, content);
 }
 </script>
 </body>
