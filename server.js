@@ -5,6 +5,9 @@ import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
+// Add this near the top with your other imports and configs
+const PSI_CACHE = new Map();
+const PSI_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours cache
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -842,19 +845,28 @@ app.get('/api/fetch-html', async (req,res)=>{
 });
 
 /* ================================================================
-   API 4c — GOOGLE PAGESPEED INSIGHTS (FREE — 25,000 req/day)
-   No API key needed for basic use
-   Key optional: set PAGESPEED_API_KEY in .env for higher limits
+   API 4c — GOOGLE PAGESPEED INSIGHTS (CACHED for 24h)
 ================================================================ */
 app.get('/api/pagespeed', async (req,res)=>{
   try {
     const { url, strategy='mobile' } = req.query;
     if (!url) return res.status(400).json({success:false,error:'No URL provided'});
     const target = url.startsWith('http') ? url : 'https://'+url;
+    
+    // Create cache key
+    const cacheKey = `${target}_${strategy}`;
+    const cached = PSI_CACHE.get(cacheKey);
+    
+    // Return cached result if fresh
+    if (cached && (Date.now() - cached.timestamp) < PSI_CACHE_TTL) {
+      console.log(`✅ Returning cached PSI for ${cacheKey}`);
+      return res.json(cached.data);
+    }
+    
     const PSI_KEY = process.env.PAGESPEED_API_KEY || '';
     const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(target)}&strategy=${strategy}&category=performance&category=seo&category=accessibility&category=best-practices${PSI_KEY?'&key='+PSI_KEY:''}`;
 
-    const r = await fetch(apiUrl, { signal: AbortSignal.timeout(30000) });
+    const r = await fetch(apiUrl, { signal: AbortSignal.timeout(55000) });
     if (!r.ok) {
       const err = await r.json().catch(()=>({}));
       throw new Error(err?.error?.message || `PageSpeed API error ${r.status}`);
@@ -915,16 +927,71 @@ app.get('/api/pagespeed', async (req,res)=>{
         id:    a.id,
         title: a.title,
         score: Math.round((a.score||0)*100),
-        displayValue: a.displayValue || null
+        displayValue: a.displayValue || null,
+        description: a.description || null,
+        items: (a.details?.items||[]).slice(0,5).map(item=>({
+          url: item.url||item.source||item.label||'',
+          wastedBytes: item.wastedBytes||null,
+          wastedMs: item.wastedMs||null,
+          totalBytes: item.totalBytes||null,
+        }))
       }))
       .sort((a,b) => a.score - b.score)
-      .slice(0, 6);
+      .slice(0, 10);
+
+    // ── Passed Audits ──
+    const passedAudits = Object.values(audits)
+      .filter(a => a.score !== null && a.score >= 0.9)
+      .map(a => ({ id:a.id, title:a.title }))
+      .slice(0,20);
+
+    // ── Failed Audits (score 0-0.49) ──
+    const failedAudits = Object.values(audits)
+      .filter(a => a.score !== null && a.score < 0.5)
+      .map(a => ({ id:a.id, title:a.title, description:a.description||null, displayValue:a.displayValue||null }))
+      .slice(0,15);
+
+    // ── 3rd Party Summary ──
+    const thirdPartySummary = audits['third-party-summary'];
+    const thirdParties = thirdPartySummary?.details?.items
+      ? thirdPartySummary.details.items.slice(0,8).map(i=>({
+          entity: i.entity||'Unknown',
+          transferSize: i.transferSize||0,
+          blockingTime: i.blockingTime||0,
+          mainThreadTime: i.mainThreadTime||0
+        }))
+      : [];
+
+    // ── JS Libraries ──
+    const jsLibs = audits['js-libraries']?.details?.items
+      ? audits['js-libraries'].details.items.map(i=>({ name:i.name||'', version:i.version||'' }))
+      : [];
+
+    // ── Render Blocking ──
+    const renderBlocking = audits['render-blocking-resources'];
+    const renderBlockingItems = renderBlocking?.details?.items
+      ? renderBlocking.details.items.slice(0,6).map(i=>({
+          url: i.url||'',
+          totalBytes: i.totalBytes||0,
+          wastedMs: i.wastedMs||0
+        }))
+      : [];
+
+    // ── Unused CSS/JS ──
+    const unusedCSS = audits['unused-css-rules'];
+    const unusedJS  = audits['unused-javascript'];
+    const unusedCSSItems = unusedCSS?.details?.items?.slice(0,5).map(i=>({ url:i.url||'', wastedBytes:i.wastedBytes||0 }))||[];
+    const unusedJSItems  = unusedJS?.details?.items?.slice(0,5).map(i=>({ url:i.url||'', wastedBytes:i.wastedBytes||0 }))||[];
+
+    // ── Image Issues ──
+    const imgSizing = audits['uses-responsive-images'];
+    const imgItems = imgSizing?.details?.items?.slice(0,5).map(i=>({ url:i.url||'', wastedBytes:i.wastedBytes||0 }))||[];
 
     // ── Score colour helper ──
     const scoreCol = s => s>=90?'#059669':s>=50?'#f59e0b':'#ef4444';
     const scoreLabel = s => s>=90?'Good':s>=50?'Needs Improvement':'Poor';
 
-    res.json({
+    const response = {
       success:  true,
       url:      target,
       strategy,
@@ -945,8 +1012,25 @@ app.get('/api/pagespeed', async (req,res)=>{
       fieldData,
       opportunities,
       diagnostics,
+      passedAudits,
+      failedAudits,
+      thirdParties,
+      jsLibs,
+      renderBlockingItems,
+      unusedCSSItems,
+      unusedJSItems,
+      imgItems,
       fetchTime: new Date().toISOString()
+    };
+    
+    // Cache the result
+    PSI_CACHE.set(cacheKey, {
+      timestamp: Date.now(),
+      data: response
     });
+    
+    res.json(response);
+    
   } catch(err){
     res.status(500).json({success:false, error:err.message});
   }

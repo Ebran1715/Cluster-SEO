@@ -35,6 +35,9 @@
     .btn-sec{padding:10px 18px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;display:inline-flex;align-items:center;gap:6px;color:#475569;background:#fff;transition:all .2s;}
     .btn-sec:hover{border-color:#059669;color:#059669;}
     .btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px;}
+    .strategy-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+    .psi-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:#64748b;cursor:pointer;}
+    .psi-toggle input{margin:0;width:16px;height:16px;accent-color:#059669;}
     .strategy-wrap{display:flex;gap:8px;margin-bottom:20px;}
     .strat-btn{flex:1;padding:9px 12px;border:2px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;background:#fff;color:#64748b;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
     .strat-btn.active{border-color:#059669;background:#f0fdf4;color:#059669;}
@@ -67,6 +70,10 @@
     .psi-title{font-size:14px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;}
     .psi-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;background:#f0fdf4;color:#059669;border:1px solid #bbf7d0;}
     .psi-strategy{font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+    .psi-loading{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:24px;margin-top:20px;text-align:center;}
+    .psi-loading-bar{height:4px;background:linear-gradient(90deg,#059669,#10b981,#059669);background-size:200% 100%;animation:loading 1.5s ease infinite;border-radius:2px;margin:15px 0 10px;}
+    @keyframes loading{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+    .psi-status{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin:15px 0;font-size:13px;color:#334155;}
     .psi-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
     @media(max-width:600px){.psi-scores{grid-template-columns:repeat(2,1fr);}}
     .psi-score-box{text-align:center;padding:14px 8px;border:1px solid #e2e8f0;border-radius:12px;background:#fafafa;}
@@ -118,6 +125,198 @@
     .fetched-url{font-size:11px;color:#059669;font-family:'JetBrains Mono',monospace;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:6px 12px;margin-bottom:16px;word-break:break-all;}
     .error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px 20px;color:#991b1b;font-size:13px;display:flex;align-items:flex-start;gap:10px;}
     .psi-error{background:#fef9c3;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;font-size:12px;color:#713f12;margin-bottom:16px;}
+    .psi-skipped-badge{background:#f1f5f9;border:1px dashed #94a3b8;border-radius:10px;padding:12px 16px;margin-top:20px;font-size:13px;color:#64748b;display:flex;align-items:center;gap:10px;}
+    .psi-skipped-badge i{color:#f59e0b;}
+
+    /* Clickable diagnostics styles */
+    .diagnostic-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .diagnostic-header {
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+      transition: background 0.2s;
+    }
+
+    .diagnostic-header:hover {
+      background: #f1f5f9;
+    }
+
+    .diagnostic-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .diagnostic-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      font-size: 12px;
+    }
+
+    .diagnostic-title {
+      font-weight: 600;
+      color: #0f172a;
+      font-size: 13px;
+    }
+
+    .diagnostic-value {
+      font-weight: 700;
+      color: #059669;
+      margin-left: auto;
+      margin-right: 15px;
+      font-size: 13px;
+    }
+
+    .diagnostic-value-warn {
+      color: #f59e0b;
+    }
+
+    .diagnostic-value-poor {
+      color: #ef4444;
+    }
+
+    .diagnostic-arrow {
+      color: #94a3b8;
+      transition: transform 0.3s;
+      font-size: 12px;
+    }
+
+    .diagnostic-arrow.expanded {
+      transform: rotate(90deg);
+    }
+
+    .diagnostic-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background: #ffffff;
+      border-top: 1px solid transparent;
+    }
+
+    .diagnostic-details.expanded {
+      max-height: 800px;
+      border-top-color: #e2e8f0;
+      transition: max-height 0.5s ease-in;
+    }
+
+    .diagnostic-content {
+      padding: 16px 20px 20px 58px;
+    }
+
+    .diagnostic-url-list {
+      margin-top: 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .diagnostic-url-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #334155;
+      word-break: break-all;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .diagnostic-url-item:last-child {
+      border-bottom: none;
+    }
+
+    .diagnostic-url-item:hover {
+      background: #f8fafc;
+    }
+
+    .diagnostic-url-size {
+      color: #94a3b8;
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+
+    .diagnostic-badge {
+      background: #f1f5f9;
+      padding: 3px 8px;
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #475569;
+      margin-left: 8px;
+    }
+
+    .diagnostic-progress {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      margin: 10px 0 5px;
+      overflow: hidden;
+    }
+
+    .diagnostic-progress-fill {
+      height: 100%;
+      background: #059669;
+      border-radius: 2px;
+      width: 0%;
+    }
+
+    .diagnostic-note {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-radius: 6px;
+      border-left: 3px solid #059669;
+    }
+
+    .diagnostic-note i {
+      margin-right: 5px;
+      color: #059669;
+    }
+
+    .copy-btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #f1f5f9;
+      color: #059669;
+      border-color: #059669;
+    }
+
+    .view-all-btn {
+      text-align: center;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -147,7 +346,14 @@
             </div>
           </div>
 
-          <div class="lbl"><i class="fas fa-mobile-alt" style="color:#059669;"></i> PageSpeed Strategy</div>
+          <div class="strategy-header">
+            <div class="lbl"><i class="fas fa-mobile-alt" style="color:#059669;"></i> PageSpeed Strategy</div>
+            <label class="psi-toggle">
+              <input type="checkbox" id="skipPSI"> 
+              <i class="fas fa-bolt" style="color:#f59e0b;"></i> Skip PSI (faster results)
+            </label>
+          </div>
+          
           <div class="strategy-wrap">
             <button class="strat-btn active" id="btnMobile" onclick="setStrategy('mobile')"><i class="fas fa-mobile-alt"></i> Mobile</button>
             <button class="strat-btn" id="btnDesktop" onclick="setStrategy('desktop')"><i class="fas fa-desktop"></i> Desktop</button>
@@ -164,7 +370,7 @@
             <div class="empty-state">
               <i class="fas fa-stethoscope"></i>
               <h3>Enter a URL to get started</h3>
-              <p>Runs PageSpeed Insights + 22 SEO checks automatically.<br>No HTML copying needed.</p>
+              <p>Runs PageSpeed Insights + 22 SEO checks automatically.<br>SEO results appear in 2-3 seconds, PSI loads in background.</p>
             </div>
           </div>
 
@@ -176,9 +382,21 @@
 
 <script src="shared-layout.js"></script>
 <script>
-const API = 'http://localhost:8003';
+const API = '';
 let lastChecks = [];
 let currentStrategy = 'mobile';
+let skipPSI = false; // PSI loads by default now
+
+// Initialize checkbox
+document.addEventListener('DOMContentLoaded', function() {
+  const skipCheckbox = document.getElementById('skipPSI');
+  if (skipCheckbox) {
+    skipCheckbox.checked = skipPSI;
+    skipCheckbox.addEventListener('change', function(e) {
+      skipPSI = e.target.checked;
+    });
+  }
+});
 
 function setStrategy(s) {
   currentStrategy = s;
@@ -188,53 +406,149 @@ function setStrategy(s) {
 async function runAudit() {
   const rawUrl = document.getElementById('urlInput').value.trim();
   const keyword = document.getElementById('kwInput').value.trim();
-  if (!rawUrl) { alert('Please enter a URL'); return; }
+  
+  if (!rawUrl) { 
+    alert('Please enter a URL'); 
+    return; 
+  }
+  
   const url = rawUrl.startsWith('http') ? rawUrl : 'https://' + rawUrl;
   const btn = document.getElementById('btnRun');
+  
   btn.disabled = true;
-  btn.innerHTML = '<span class="spin" style="width:16px;height:16px;border-width:2px;margin-right:4px;"></span> Running...';
+  btn.innerHTML = '<span class="spin" style="width:16px;height:16px;border-width:2px;margin-right:4px;"></span> Fetching page...';
   document.getElementById('btnExport').style.display = 'none';
+  
+  // Show loading state
   document.getElementById('results').innerHTML = `
     <div style="text-align:center;padding:48px 24px;">
       <div class="spin" style="width:44px;height:44px;margin:0 auto 16px;"></div>
-      <div style="font-size:14px;font-weight:600;color:#334155;">Fetching page &amp; running audit...</div>
-      <div style="font-size:12px;color:#94a3b8;margin-top:6px;">PageSpeed Insights + 22 checks · Usually 5–15 seconds</div>
+      <div style="font-size:14px;font-weight:600;color:#334155;">Fetching page HTML...</div>
     </div>`;
 
   try {
-    const strategies = currentStrategy === 'both' ? ['mobile','desktop'] : [currentStrategy];
-    const requests = [
-      fetch(API + '/api/fetch-html?url=' + encodeURIComponent(url)).then(r=>r.json()),
-      ...strategies.map(s => fetch(API + '/api/pagespeed?url=' + encodeURIComponent(url) + '&strategy=' + s).then(r=>r.json()))
-    ];
-    const [fetchRes, ...psiRaws] = await Promise.allSettled(requests);
-    const fetchData = fetchRes.status==='fulfilled' ? fetchRes.value : null;
-    if (!fetchData || !fetchData.success) throw new Error(fetchData?.error || 'Could not fetch page HTML.');
+    // STEP 1: Fetch HTML
+    const fetchHtmlRes = await fetch(API + '/api/fetch-html?url=' + encodeURIComponent(url))
+      .then(r => r.json())
+      .catch(e => ({ success: false, error: e.message }));
+      
+    if (!fetchHtmlRes?.success) {
+      throw new Error(fetchHtmlRes?.error || 'Could not fetch page HTML.');
+    }
 
+    // STEP 2: Show SEO audit loading
+    document.getElementById('results').innerHTML = `
+      <div style="text-align:center;padding:48px 24px;">
+        <div class="spin" style="width:44px;height:44px;margin:0 auto 16px;"></div>
+        <div style="font-size:14px;font-weight:600;color:#334155;">Running SEO audit...</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:6px;">This takes 2-3 seconds</div>
+      </div>`;
+
+    // STEP 3: Run SEO audit
     const auditResp = await fetch(API + '/api/seo-audit', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ html: fetchData.html, keyword, url: fetchData.finalUrl || url })
-    });
-    const auditData = await auditResp.json();
-    if (!auditData.success) throw new Error(auditData.error || 'Audit failed.');
+      method: 'POST', 
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ 
+        html: fetchHtmlRes.html, 
+        keyword, 
+        url: fetchHtmlRes.finalUrl || url 
+      })
+    }).then(r => r.json());
 
-    const psiData = {};
-    psiRaws.forEach((r, i) => { if (r.status==='fulfilled' && r.value?.success) psiData[strategies[i]] = r.value; });
-
-    lastChecks = auditData.checks;
-    renderResults(auditData, psiData, fetchData.finalUrl || url);
+    if (!auditResp || !auditResp.success) {
+      throw new Error(auditResp?.error || 'SEO audit failed.');
+    }
+    
+    lastChecks = auditResp.checks || [];
+    
+    // STEP 4: Show SEO results IMMEDIATELY
+    renderResults(auditResp, {}, fetchHtmlRes.finalUrl || url);
     document.getElementById('btnExport').style.display = 'flex';
+    
+    // STEP 5: Load PageSpeed if not skipped
+    if (!skipPSI) {
+      loadPageSpeedInBackground(url, fetchHtmlRes.finalUrl || url, auditResp);
+    } else {
+      const psiNote = document.createElement('div');
+      psiNote.className = 'psi-skipped-badge';
+      psiNote.innerHTML = `
+        <i class="fas fa-info-circle"></i>
+        <span><strong>PageSpeed Insights skipped</strong> — Uncheck "Skip PSI" to load Core Web Vitals data.</span>
+      `;
+      document.getElementById('results').appendChild(psiNote);
+    }
+    
   } catch(err) {
+    console.error('Audit error:', err);
     document.getElementById('results').innerHTML = `
       <div class="error-box">
         <i class="fas fa-exclamation-circle" style="margin-top:2px;flex-shrink:0;"></i>
-        <div><strong>Could not complete audit</strong><br>
-        <span style="opacity:.8;">${escH(err.message)}</span><br>
-        <span style="font-size:11px;opacity:.6;margin-top:4px;display:block;">Some sites block automated requests. Try another URL.</span></div>
+        <div>
+          <strong>Could not complete audit</strong><br>
+          <span style="opacity:.8;">${escH(err.message)}</span><br>
+          <span style="font-size:11px;opacity:.6;margin-top:4px;display:block;">Some sites block automated requests. Try another URL.</span>
+        </div>
       </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-stethoscope"></i> Run Full Audit';
   }
-  btn.disabled = false;
-  btn.innerHTML = '<i class="fas fa-stethoscope"></i> Run Full Audit';
+}
+
+async function loadPageSpeedInBackground(url, finalUrl, auditData) {
+  try {
+    const strategies = currentStrategy === 'both' ? ['mobile','desktop'] : [currentStrategy];
+    
+    const psiLoadingDiv = document.createElement('div');
+    psiLoadingDiv.id = 'psi-loading';
+    psiLoadingDiv.className = 'psi-loading';
+    psiLoadingDiv.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div class="spin" style="width:24px;height:24px;border-width:2px;"></div>
+        <div style="font-weight:600;color:#334155;">Loading PageSpeed Insights...</div>
+      </div>
+      <div class="psi-loading-bar"></div>
+      <div style="font-size:12px;color:#94a3b8;">This takes 10-20 seconds · You can continue viewing SEO results</div>
+    `;
+    
+    document.getElementById('results').appendChild(psiLoadingDiv);
+    
+    const psiRequests = strategies.map(s =>
+      fetch(API + '/api/pagespeed?url=' + encodeURIComponent(url) + '&strategy=' + s)
+        .then(r => r.json())
+        .catch(e => ({ success: false, error: e.message }))
+    );
+
+    const psiRaws = await Promise.all(psiRequests);
+    
+    const psiData = {};
+    psiRaws.forEach((r, i) => {
+      if (r?.success) psiData[strategies[i]] = r;
+    });
+    
+    const loadingEl = document.getElementById('psi-loading');
+    if (loadingEl) loadingEl.remove();
+    
+    if (auditData) {
+      renderResults(auditData, psiData, finalUrl);
+      // Auto-expand first diagnostic after rendering
+      setTimeout(expandFirstDiagnostic, 500);
+    }
+    
+  } catch(err) {
+    console.error('PSI background load error:', err);
+    const loadingEl = document.getElementById('psi-loading');
+    if (loadingEl) loadingEl.remove();
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'psi-error';
+    errorDiv.style.marginTop = '20px';
+    errorDiv.innerHTML = `
+      <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+      <strong>PageSpeed Insights timed out</strong> — The API is slow today. SEO results are still complete.
+    `;
+    document.getElementById('results').appendChild(errorDiv);
+  }
 }
 
 function scoreColor(s){ return s>=90?'#059669':s>=50?'#f59e0b':'#ef4444'; }
@@ -249,8 +563,6 @@ function renderResults(auditData, psiData, url) {
   if (psiKeys.length > 0) {
     psiKeys.forEach(strat => { html += renderPSI(psiData[strat], strat); });
     html += '<div class="section-divider"></div>';
-  } else {
-    html += `<div class="psi-error"><i class="fas fa-info-circle" style="margin-right:6px;"></i><strong>PageSpeed unavailable</strong> — Google API may be rate-limited or the page is not publicly accessible. SEO checks below are still complete.</div>`;
   }
 
   const {score,grade,gradeLabel,gradeColor,totalPoints,maxPoints,checks,summary,meta} = auditData;
@@ -307,10 +619,14 @@ function renderResults(auditData, psiData, url) {
 }
 
 function renderPSI(d, strat) {
+  if (!d || !d.scores) {
+    return `<div class="psi-error">PageSpeed data incomplete</div>`;
+  }
+  
   const icon = strat==='mobile'?'fa-mobile-alt':'fa-desktop';
   const stratLabel = strat.charAt(0).toUpperCase()+strat.slice(1);
-  const s = d.scores||{};
-  const v = d.vitals||{};
+  const s = d.scores || {};
+  const v = d.vitals || {};
 
   let html = `<div class="psi-panel">
     <div class="psi-header">
@@ -319,9 +635,15 @@ function renderPSI(d, strat) {
     </div>
     <div class="psi-scores">`;
 
-  [['performance','Performance','fa-tachometer-alt'],['seo','SEO','fa-search'],['accessibility','Accessibility','fa-universal-access'],['bestPractices','Best Practices','fa-shield-alt']]
-  .forEach(([key,label])=>{
-    const sc = s[key]||{score:0,color:'#94a3b8',label:'N/A'};
+  const scoreCategories = [
+    ['performance','Performance','fa-tachometer-alt'],
+    ['seo','SEO','fa-search'], 
+    ['accessibility','Accessibility','fa-universal-access'],
+    ['bestPractices','Best Practices','fa-shield-alt']
+  ];
+  
+  scoreCategories.forEach(([key,label])=>{
+    const sc = s[key] || {score:0, color:'#94a3b8', label:'N/A'};
     html+=`<div class="psi-score-box">
       <div class="psi-score-ring" style="border-color:${sc.color};background:${sc.color}18;">
         <div class="psi-score-num" style="color:${sc.color}">${sc.score}</div>
@@ -333,9 +655,19 @@ function renderPSI(d, strat) {
   html += '</div>';
 
   html += `<div class="section-title" style="font-size:13px;margin-bottom:10px;"><i class="fas fa-heartbeat" style="color:#ef4444;"></i> Core Web Vitals</div><div class="cwv-grid">`;
-  [['lcp','LCP','Largest Contentful Paint'],['tbt','TBT','Total Blocking Time'],['cls','CLS','Cumulative Layout Shift'],['fcp','FCP','First Contentful Paint'],['si','SI','Speed Index'],['tti','TTI','Time to Interactive']]
-  .forEach(([key,name,full])=>{
-    const vt=v[key]||{}; const cls=vitalCls(vt.score);
+  
+  const vitalCategories = [
+    ['lcp','LCP','Largest Contentful Paint'],
+    ['tbt','TBT','Total Blocking Time'],
+    ['cls','CLS','Cumulative Layout Shift'],
+    ['fcp','FCP','First Contentful Paint'],
+    ['si','SI','Speed Index'],
+    ['tti','TTI','Time to Interactive']
+  ];
+  
+  vitalCategories.forEach(([key,name,full])=>{
+    const vt = v[key] || {value:'—', score:null, good:'—'};
+    const cls = vt.score ? (vt.score>=90?'cwv-good':vt.score>=50?'cwv-warn':'cwv-poor') : '';
     html+=`<div class="cwv-box ${cls}">
       <div class="cwv-val">${vt.value||'—'}</div>
       <div class="cwv-name">${name} <span style="font-weight:400;opacity:.6;">${full}</span></div>
@@ -344,37 +676,20 @@ function renderPSI(d, strat) {
   });
   html += '</div>';
 
-  if (d.fieldData?.hasCrux) {
-    const fd=d.fieldData;
-    const catC=c=>c==='FAST'?'cat-good':c==='AVERAGE'?'cat-ni':'cat-poor';
-    const catL=c=>c==='FAST'?'Good':c==='AVERAGE'?'Needs Improvement':'Poor';
-    const fi=[];
-    if(fd.lcp?.percentiles?.p75)fi.push({l:'LCP (p75)',v:fd.lcp.percentiles.p75+'ms',c:fd.lcp.category});
-    if(fd.fid?.percentiles?.p75)fi.push({l:'FID (p75)',v:fd.fid.percentiles.p75+'ms',c:fd.fid.category});
-    if(fd.cls?.percentiles?.p75)fi.push({l:'CLS (p75)',v:fd.cls.percentiles.p75,c:fd.cls.category});
-    if(fd.fcp?.percentiles?.p75)fi.push({l:'FCP (p75)',v:fd.fcp.percentiles.p75+'ms',c:fd.fcp.category});
-    if(fd.inp?.percentiles?.p75)fi.push({l:'INP (p75)',v:fd.inp.percentiles.p75+'ms',c:fd.inp.category});
-    if(fi.length>0){
-      html+=`<div class="section-title" style="font-size:13px;margin:12px 0 8px;"><i class="fas fa-users" style="color:#7c3aed;"></i> Real-User Field Data (CrUX)</div>
-      <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;">`;
-      fi.forEach(x=>{ html+=`<div class="field-bar"><div class="field-label">${x.l}</div><div class="field-val">${x.v}</div><div style="margin-left:auto;"><span class="field-cat ${catC(x.c)}">${catL(x.c)}</span></div></div>`; });
-      html+='</div>';
-    }
-  }
-
-  if (d.opportunities?.length>0) {
+  // Speed Opportunities
+  if (d.opportunities && Array.isArray(d.opportunities) && d.opportunities.length > 0) {
     html+=`<div class="section-divider" style="margin:16px 0 12px;"></div>
     <div class="section-title" style="font-size:13px;margin-bottom:10px;"><i class="fas fa-bolt" style="color:#f59e0b;"></i> Speed Opportunities</div>
     <div class="opp-list">`;
-    d.opportunities.forEach(o=>{
-      const cls=o.score<50?'opp-poor':'opp-warn';
-      const ic=o.score<50?'#fee2e2':'#fef9c3';
-      const it=o.score<50?'#7f1d1d':'#713f12';
+    d.opportunities.slice(0,5).forEach(o=>{
+      const cls = o.score<50 ? 'opp-poor' : 'opp-warn';
+      const ic = o.score<50 ? '#fee2e2' : '#fef9c3';
+      const it = o.score<50 ? '#7f1d1d' : '#713f12';
       html+=`<div class="opp-item ${cls}">
         <div class="opp-icon" style="background:${ic};color:${it}"><i class="fas fa-bolt"></i></div>
         <div style="flex:1;">
-          <div class="opp-title">${escH(o.title)}</div>
-          ${o.savings?`<div class="opp-saving"><i class="fas fa-clock" style="margin-right:4px;"></i>Save: ${o.savings}</div>`:''}
+          <div class="opp-title">${escH(o.title || 'Opportunity')}</div>
+          ${o.savings?`<div class="opp-saving"><i class="fas fa-clock"></i>Save: ${o.savings}</div>`:''}
           ${o.displayValue?`<div class="opp-desc">${escH(o.displayValue)}</div>`:''}
         </div>
       </div>`;
@@ -382,14 +697,154 @@ function renderPSI(d, strat) {
     html+='</div>';
   }
 
+  // CLICKABLE DIAGNOSTICS SECTION
+  if (d.diagnostics && Array.isArray(d.diagnostics) && d.diagnostics.length > 0) {
+    html += `<div class="section-divider" style="margin:16px 0 12px;"></div>
+    <div class="section-title" style="font-size:13px;margin-bottom:10px;">
+      <i class="fas fa-stethoscope" style="color:#7c3aed;"></i> Diagnostics 
+      <span class="diagnostic-badge">${d.diagnostics.length} items</span>
+    </div>
+    <div id="diagnostics-container">`;
+    
+    d.diagnostics.slice(0, 8).forEach((diag, index) => {
+      const valueClass = diag.score < 50 ? 'diagnostic-value-poor' : diag.score < 90 ? 'diagnostic-value-warn' : '';
+      const displayValue = diag.displayValue || '';
+      const hasDetails = diag.items && diag.items.length > 0;
+      
+      // Determine icon based on diagnostic type
+      let iconClass = 'fa-chart-line';
+      if (diag.id?.includes('unused-css')) iconClass = 'fa-css3-alt';
+      else if (diag.id?.includes('unused-javascript')) iconClass = 'fa-js';
+      else if (diag.id?.includes('render-blocking')) iconClass = 'fa-ban';
+      else if (diag.id?.includes('bootup-time')) iconClass = 'fa-clock';
+      else if (diag.id?.includes('mainthread')) iconClass = 'fa-tasks';
+      else if (diag.id?.includes('legacy')) iconClass = 'fa-code-branch';
+      
+      html += `
+      <div class="diagnostic-item" data-index="diag-${index}">
+        <div class="diagnostic-header" onclick="toggleDiagnostic(this)">
+          <div class="diagnostic-header-left">
+            <div class="diagnostic-icon">
+              <i class="fas ${iconClass}"></i>
+            </div>
+            <span class="diagnostic-title">${escH(diag.title || 'Diagnostic')}</span>
+          </div>
+          <span class="diagnostic-value ${valueClass}">${escH(displayValue)}</span>
+          <span class="diagnostic-arrow"><i class="fas fa-chevron-right"></i></span>
+        </div>
+        <div class="diagnostic-details" id="diag-details-${index}">
+          <div class="diagnostic-content">`;
+      
+      // Add description if available
+      if (diag.description) {
+        html += `<div class="diagnostic-note"><i class="fas fa-info-circle"></i> ${escH(diag.description)}</div>`;
+      }
+      
+      // Add items if available
+      if (hasDetails) {
+        html += `<div class="diagnostic-url-list">`;
+        diag.items.slice(0, 5).forEach(item => {
+          const url = item.url || item.source || 'Unknown';
+          const shortUrl = url.length > 60 ? '...' + url.slice(-57) : url;
+          const wasted = item.wastedBytes ? Math.round(item.wastedBytes / 1024) + ' KiB' : 
+                        item.wastedMs ? Math.round(item.wastedMs) + ' ms' : '';
+          
+          html += `
+          <div class="diagnostic-url-item" onclick="event.stopPropagation()">
+            <span title="${escH(url)}">${escH(shortUrl)}</span>
+            ${wasted ? `<span class="diagnostic-url-size">${escH(wasted)}</span>` : ''}
+          </div>`;
+        });
+        if (diag.items.length > 5) {
+          html += `<div class="diagnostic-url-item" style="justify-content:center;color:#059669;font-weight:600;">
+            <i class="fas fa-plus-circle"></i> +${diag.items.length - 5} more items
+          </div>`;
+        }
+        html += `</div>`;
+      }
+      
+      // Add progress bar for scores
+      if (diag.score !== undefined && diag.score !== null) {
+        const barColor = diag.score >= 90 ? '#059669' : diag.score >= 50 ? '#f59e0b' : '#ef4444';
+        html += `<div class="diagnostic-progress">
+          <div class="diagnostic-progress-fill" style="width:${diag.score}%; background:${barColor};"></div>
+        </div>`;
+      }
+      
+      // Add copy button
+      html += `<div style="text-align:right; margin-top:10px;">
+        <button class="copy-btn" onclick="copyDiagnosticDetails(this)">
+          <i class="fas fa-copy"></i> Copy details
+        </button>
+      </div>`;
+      
+      html += `
+          </div>
+        </div>
+      </div>`;
+    });
+    
+    html += `</div>`;
+    
+    // Add view all button if more than 8
+    if (d.diagnostics.length > 8) {
+      html += `<div class="view-all-btn">
+        <button class="btn-sec" onclick="showAllDiagnostics()" style="padding:6px 14px;">
+          <i class="fas fa-chevron-down"></i> View all ${d.diagnostics.length} diagnostics
+        </button>
+      </div>`;
+    }
+  }
+
   html+='</div>';
   return html;
+}
+
+// Toggle diagnostic details
+function toggleDiagnostic(header) {
+  const item = header.closest('.diagnostic-item');
+  const details = item.querySelector('.diagnostic-details');
+  const arrow = header.querySelector('.diagnostic-arrow');
+  
+  details.classList.toggle('expanded');
+  arrow.classList.toggle('expanded');
+}
+
+// Copy diagnostic details
+function copyDiagnosticDetails(btn) {
+  const content = btn.closest('.diagnostic-content').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+    }, 2000);
+  });
+}
+
+// Show all diagnostics
+function showAllDiagnostics() {
+  alert('Full diagnostics view coming soon! This will show all diagnostic items.');
+}
+
+// Auto-expand first diagnostic
+function expandFirstDiagnostic() {
+  const firstItem = document.querySelector('.diagnostic-item');
+  if (firstItem) {
+    const header = firstItem.querySelector('.diagnostic-header');
+    const details = firstItem.querySelector('.diagnostic-details');
+    const arrow = firstItem.querySelector('.diagnostic-arrow');
+    if (details && arrow) {
+      details.classList.add('expanded');
+      arrow.classList.add('expanded');
+    }
+  }
 }
 
 function clearAll() {
   document.getElementById('urlInput').value='';
   document.getElementById('kwInput').value='';
-  document.getElementById('results').innerHTML=`<div class="empty-state"><i class="fas fa-stethoscope"></i><h3>Enter a URL to get started</h3><p>Runs PageSpeed Insights + 22 SEO checks automatically.</p></div>`;
+  document.getElementById('results').innerHTML=`<div class="empty-state"><i class="fas fa-stethoscope"></i><h3>Enter a URL to get started</h3><p>Runs PageSpeed Insights + 22 SEO checks automatically.<br>SEO results appear in 2-3 seconds, PSI loads in background.</p></div>`;
   document.getElementById('btnExport').style.display='none';
   lastChecks=[];
 }
