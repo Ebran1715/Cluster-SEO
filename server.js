@@ -8,6 +8,8 @@ import { fileURLToPath } from 'url';
 // Add this near the top with your other imports and configs
 const PSI_CACHE = new Map();
 const PSI_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours cache
+// Add this near the top with your other constants
+const stopWords = new Set(['The','In','It','At','On','An','By','As','To','Of','Or','And','But','For','With','From','This','That','These','Those','They','Their','There','Then','When','Where','While','Which','Who','What','How','Also','Both','Each','Such','More','Most','Many','Some','Other','After','Before','During','Since','Although','However','Therefore','Moreover','Furthermore','Additionally','Nevertheless','Meanwhile','Artificial','Intelligence','United','States','Kingdom','January','February','March','April','June','July','August','September','October','November','December']);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -1168,153 +1170,614 @@ app.post('/api/seo-audit', (req,res)=>{
 });
 
 /* ================================================================
-   API 6 — COMPETITOR ANALYSIS
+   API 14 — COMPETITOR ANALYSIS WITH SE RANKING FREE DEMO
 ================================================================ */
-app.post('/api/competitor-analysis', (req,res)=>{
+app.post('/api/competitor-analysis', async (req, res) => {
   try {
-    const { yourKeywords=[], competitorKeywords=[] } = req.body;
-    const parseL = input=>input.map(item=>{ if(typeof item==='object'&&item)return item; const p=String(item).split(',').map(s=>s.trim()); return {keyword:p[0],volume:parseInt(p[1])||0}; }).filter(k=>k.keyword&&k.keyword.length>1);
-    const yours=parseL(yourKeywords), comps=parseL(competitorKeywords);
-    if(!yours.length||!comps.length) return res.status(400).json({success:false,error:'Both keyword lists required'});
-    const yourSet=new Set(yours.map(k=>k.keyword.toLowerCase()));
-    const compSet=new Set(comps.map(k=>k.keyword.toLowerCase()));
-    const enrichKw=(k,extra={})=>{ const intent=detectIntent(k.keyword); const diff=estimateDifficulty(k.keyword); return {...k,intent,difficulty:diff.label,difficultyColor:diff.color,pageType:recommendPageType(k.keyword,intent),funnelStage:funnelStage(intent),opportunityScore:(({Easy:4,Low:3,Medium:2,Hard:1}[diff.label]||1))*((k.volume||0)>10000?5:(k.volume||0)>1000?3:(k.volume||0)>100?2:1),...extra}; };
-    const shared=yours.filter(k=>compSet.has(k.keyword.toLowerCase())).map(k=>enrichKw(k));
-    const onlyYours=yours.filter(k=>!compSet.has(k.keyword.toLowerCase())).map(k=>enrichKw(k));
-    const onlyComp=comps.filter(k=>!yourSet.has(k.keyword.toLowerCase())).map(k=>enrichKw(k)).sort((a,b)=>b.opportunityScore-a.opportunityScore||(b.volume||0)-(a.volume||0));
-    const union=new Set([...yourSet,...compSet]);
-    const overlapPct=Math.round((shared.length/Math.max(union.size,1))*100);
-    const buildD=kws=>{ const d={Informational:[],Transactional:[],Commercial:[],Navigational:[]}; kws.forEach(k=>d[detectIntent(k.keyword)].push(k)); return d; };
-    const yD=buildD(yours), cD=buildD(comps);
-    const intentComparison=['Transactional','Commercial','Informational','Navigational'].map(intent=>({ intent, yourCount:yD[intent].length, compCount:cD[intent].length, yourPct:Math.round((yD[intent].length/Math.max(yours.length,1))*100), compPct:Math.round((cD[intent].length/Math.max(comps.length,1))*100), diff:Math.round(((yD[intent].length/Math.max(yours.length,1))-(cD[intent].length/Math.max(comps.length,1)))*100) }));
-    const yourClusters=new Set(yours.map(k=>clusterKey(k.keyword)));
-    const clusterGaps={};
-    comps.forEach(k=>{ const ck=clusterKey(k.keyword); if(!yourClusters.has(ck)){ if(!clusterGaps[ck])clusterGaps[ck]={clusterName:ck.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '),keywords:[],totalVolume:0}; clusterGaps[ck].keywords.push(k); clusterGaps[ck].totalVolume+=k.volume||0; } });
-    const topicGaps=Object.values(clusterGaps).sort((a,b)=>b.totalVolume-a.totalVolume||b.keywords.length-a.keywords.length).slice(0,20).map(c=>({...c,intent:detectIntent(c.keywords[0].keyword),pageType:recommendPageType(c.keywords[0].keyword,detectIntent(c.keywords[0].keyword))}));
-    const quickWins=onlyComp.filter(k=>k.difficulty==='Easy'||k.difficulty==='Low').slice(0,15);
-    const highValue=onlyComp.filter(k=>(k.volume||0)>1000).slice(0,10);
-    const yO=yours.length-shared.length, cO=comps.length-shared.length, tot=yO+shared.length+cO;
-    res.json({ success:true, stats:{yourKeywords:yours.length,compKeywords:comps.length,shared:shared.length,yourAdvantage:onlyYours.length,missing:onlyComp.length,overlapPct}, overlap:{yourPct:Math.round((yO/Math.max(tot,1))*100),sharedPct:Math.round((shared.length/Math.max(tot,1))*100),compPct:Math.round((cO/Math.max(tot,1))*100)}, shared, onlyYours, onlyComp, quickWins, highValue, topicGaps, intentComparison });
-  } catch(err){ res.status(500).json({success:false,error:err.message}); }
+    const { yourKeywords = [], competitorKeywords = [] } = req.body;
+    
+    // Parse keywords (keep your existing parser)
+    const parseL = input => input.map(item => {
+      if (typeof item === 'object' && item) return item;
+      const p = String(item).split(',').map(s => s.trim());
+      return { keyword: p[0], volume: parseInt(p[1]) || 0 };
+    }).filter(k => k.keyword && k.keyword.length > 1);
+
+    const yours = parseL(yourKeywords);
+    const comps = parseL(competitorKeywords);
+
+    if (!yours.length || !comps.length) {
+      return res.status(400).json({ success: false, error: 'Both keyword lists required' });
+    }
+
+    // Try to get real competitor data from SE Ranking demo (COMPLETELY FREE)
+    let enhancedKeywords = false;
+    
+    try {
+      // SE Ranking provides a free demo endpoint - NO API KEY NEEDED!
+      const demoResponse = await fetch('https://api.seranking.com/v1/demo/keywords/suggestions', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          keywords: yours.slice(0, 5).map(k => k.keyword),
+          source: 'google_us'
+        })
+      });
+      
+      if (demoResponse.ok) {
+        const demoData = await demoResponse.json();
+        console.log('✅ Got SE Ranking demo data');
+        
+        // Update volumes with demo data if available
+        if (demoData.data && demoData.data.length) {
+          demoData.data.forEach(item => {
+            // Update your keywords
+            yours.forEach(k => {
+              if (k.keyword.toLowerCase() === item.keyword.toLowerCase()) {
+                k.volume = item.volume || k.volume;
+              }
+            });
+            // Update competitor keywords
+            comps.forEach(k => {
+              if (k.keyword.toLowerCase() === item.keyword.toLowerCase()) {
+                k.volume = item.volume || k.volume;
+              }
+            });
+          });
+          enhancedKeywords = true;
+        }
+      }
+    } catch (demoError) {
+      console.log('SE Ranking demo unavailable, using your data');
+    }
+
+    // Try to get competitor domains
+    let competitorDomains = [];
+    try {
+      const domainResponse = await fetch('https://api.seranking.com/v1/demo/domain/competitors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domains: yours.slice(0, 3).map(k => k.keyword.replace(/\s+/g, '')),
+          source: 'google_us'
+        })
+      });
+      
+      if (domainResponse.ok) {
+        const domainData = await domainResponse.json();
+        competitorDomains = domainData.data || [];
+      }
+    } catch (e) {
+      // Ignore errors, just use what we have
+    }
+
+    // YOUR EXISTING NLP ANALYSIS CODE CONTINUES HERE
+    // (Keep all your detectIntent, estimateDifficulty, etc.)
+    
+    const yourSet = new Set(yours.map(k => k.keyword.toLowerCase()));
+    const compSet = new Set(comps.map(k => k.keyword.toLowerCase()));
+    
+    // Your enrichment function
+    const enrichKw = (k, extra = {}) => {
+      const intent = detectIntent(k.keyword);
+      const diff = estimateDifficulty(k.keyword);
+      return {
+        ...k,
+        intent,
+        difficulty: diff.label,
+        difficultyColor: diff.color,
+        pageType: recommendPageType(k.keyword, intent),
+        funnelStage: funnelStage(intent),
+        opportunityScore: (({ Easy: 4, Low: 3, Medium: 2, Hard: 1 }[diff.label] || 1)) *
+          ((k.volume || 0) > 10000 ? 5 : (k.volume || 0) > 1000 ? 3 : (k.volume || 0) > 100 ? 2 : 1),
+        ...extra
+      };
+    };
+
+    const shared = yours.filter(k => compSet.has(k.keyword.toLowerCase())).map(k => enrichKw(k));
+    const onlyYours = yours.filter(k => !compSet.has(k.keyword.toLowerCase())).map(k => enrichKw(k));
+    const onlyComp = comps.filter(k => !yourSet.has(k.keyword.toLowerCase()))
+      .map(k => enrichKw(k))
+      .sort((a, b) => b.opportunityScore - a.opportunityScore || (b.volume || 0) - (a.volume || 0));
+
+    const union = new Set([...yourSet, ...compSet]);
+    const overlapPct = Math.round((shared.length / Math.max(union.size, 1)) * 100);
+    
+    // Intent distribution
+    const buildD = kws => {
+      const d = { Informational: [], Transactional: [], Commercial: [], Navigational: [] };
+      kws.forEach(k => d[detectIntent(k.keyword)].push(k));
+      return d;
+    };
+
+    const yD = buildD(yours);
+    const cD = buildD(comps);
+    
+    const intentComparison = ['Transactional', 'Commercial', 'Informational', 'Navigational'].map(intent => ({
+      intent,
+      yourCount: yD[intent].length,
+      compCount: cD[intent].length,
+      yourPct: Math.round((yD[intent].length / Math.max(yours.length, 1)) * 100),
+      compPct: Math.round((cD[intent].length / Math.max(comps.length, 1)) * 100),
+      diff: Math.round(((yD[intent].length / Math.max(yours.length, 1)) - (cD[intent].length / Math.max(comps.length, 1))) * 100)
+    }));
+
+    // Topic clusters
+    const yourClusters = new Set(yours.map(k => clusterKey(k.keyword)));
+    const clusterGaps = {};
+    comps.forEach(k => {
+      const ck = clusterKey(k.keyword);
+      if (!yourClusters.has(ck)) {
+        if (!clusterGaps[ck]) {
+          clusterGaps[ck] = {
+            clusterName: ck.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+            keywords: [],
+            totalVolume: 0
+          };
+        }
+        clusterGaps[ck].keywords.push(k);
+        clusterGaps[ck].totalVolume += k.volume || 0;
+      }
+    });
+
+    const topicGaps = Object.values(clusterGaps)
+      .sort((a, b) => b.totalVolume - a.totalVolume || b.keywords.length - a.keywords.length)
+      .slice(0, 20)
+      .map(c => ({
+        ...c,
+        intent: detectIntent(c.keywords[0].keyword),
+        pageType: recommendPageType(c.keywords[0].keyword, detectIntent(c.keywords[0].keyword))
+      }));
+
+    const quickWins = onlyComp.filter(k => k.difficulty === 'Easy' || k.difficulty === 'Low').slice(0, 15);
+    const highValue = onlyComp.filter(k => (k.volume || 0) > 1000).slice(0, 10);
+    
+    const yO = yours.length - shared.length;
+    const cO = comps.length - shared.length;
+    const tot = yO + shared.length + cO;
+
+    // Add note about data source
+    const dataSource = enhancedKeywords ? 'SE Ranking Demo' : 'Your Input';
+
+    res.json({
+      success: true,
+      stats: {
+        yourKeywords: yours.length,
+        compKeywords: comps.length,
+        shared: shared.length,
+        yourAdvantage: onlyYours.length,
+        missing: onlyComp.length,
+        overlapPct
+      },
+      overlap: {
+        yourPct: Math.round((yO / Math.max(tot, 1)) * 100),
+        sharedPct: Math.round((shared.length / Math.max(tot, 1)) * 100),
+        compPct: Math.round((cO / Math.max(tot, 1)) * 100)
+      },
+      shared,
+      onlyYours,
+      onlyComp,
+      quickWins,
+      highValue,
+      topicGaps,
+      intentComparison,
+      dataSource // Let the frontend know where data came from
+    });
+
+  } catch (err) {
+    console.error('Competitor analysis error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+/* ================================================================
+   API 15 — KEYWORD GAP ANALYSIS
+================================================================ */
+app.post('/api/keyword-gap', (req, res) => {
+  try {
+    const { yourKeywords = [], competitorKeywords = [] } = req.body;
+
+    // Parse keywords helper
+    const parseL = input => input.map(item => {
+      if (typeof item === 'object' && item) return item;
+      const p = String(item).split(',').map(s => s.trim());
+      return { keyword: p[0], volume: parseInt(p[1]) || 0 };
+    }).filter(k => k.keyword && k.keyword.length > 1);
+
+    const yours = parseL(yourKeywords);
+    const comps = parseL(competitorKeywords);
+
+    if (!yours.length || !comps.length) {
+      return res.status(400).json({ success: false, error: 'Both keyword lists required' });
+    }
+
+    const yourSet = new Set(yours.map(k => k.keyword.toLowerCase()));
+    const compSet = new Set(comps.map(k => k.keyword.toLowerCase()));
+
+    // Content briefs by intent
+    const BRIEFS = {
+      Transactional: 'Create a product or landing page optimized for conversion. Include clear CTAs, pricing, features, benefits, social proof (reviews/testimonials), and trust signals (guarantees, security badges). Add comparison tables if relevant.',
+      Commercial: 'Write a detailed comparison or review post. Compare features, pricing, pros/cons. Include a clear verdict/recommendation. Aim for 1,500+ words with expert analysis. Add rating stars, comparison charts, and user reviews if available.',
+      Informational: 'Create a comprehensive guide or pillar article. Cover the topic thoroughly with clear headings (H2/H3), examples, FAQs, statistics, and visuals (charts, screenshots, videos). Target 2,000+ words for authority.',
+      Navigational: 'Optimize your brand or about page, or create a dedicated landing page for this branded query. Ensure the page clearly represents the brand and provides easy navigation to key sections/products.'
+    };
+
+    const ACTIONS = {
+      Transactional: 'Create Product/Landing Page',
+      Commercial: 'Write Comparison/Review Article',
+      Informational: 'Write Blog Post/Guide',
+      Navigational: 'Optimize Brand/About Page'
+    };
+
+    // Calculate opportunity score based on difficulty and volume
+    const calculateOpportunity = (diff, volume) => {
+      const diffScore = { Easy: 4, Low: 3, Medium: 2, Hard: 1 }[diff] || 1;
+      const volScore = volume > 10000 ? 5 : volume > 1000 ? 3 : volume > 100 ? 2 : 1;
+      return diffScore * volScore;
+    };
+
+    // Find gaps (competitor keywords you don't have)
+    const gaps = comps
+      .filter(k => !yourSet.has(k.keyword.toLowerCase()))
+      .map(k => {
+        const intent = detectIntent(k.keyword);
+        const diff = estimateDifficulty(k.keyword);
+        const opportunity = calculateOpportunity(diff.label, k.volume);
+        
+        return {
+          ...k,
+          intent,
+          difficulty: diff.label,
+          difficultyColor: diff.color,
+          funnelStage: funnelStage(intent),
+          pageType: recommendPageType(k.keyword, intent),
+          opportunityScore: opportunity,
+          contentBrief: BRIEFS[intent],
+          recommendedAction: ACTIONS[intent]
+        };
+      })
+      .sort((a, b) => b.opportunityScore - a.opportunityScore || (b.volume || 0) - (a.volume || 0));
+
+    // Find shared keywords
+    const shared = comps
+      .filter(k => yourSet.has(k.keyword.toLowerCase()))
+      .map(k => {
+        const intent = detectIntent(k.keyword);
+        const diff = estimateDifficulty(k.keyword);
+        return { ...k, intent, difficulty: diff.label };
+      });
+
+    // Group gaps by intent
+    const gapsByIntent = {};
+    gaps.forEach(k => {
+      if (!gapsByIntent[k.intent]) gapsByIntent[k.intent] = [];
+      gapsByIntent[k.intent].push(k);
+    });
+
+    // Group gaps by funnel stage
+    const gapsByFunnel = { Awareness: [], Consideration: [], Decision: [] };
+    gaps.forEach(k => {
+      if (gapsByFunnel[k.funnelStage]) gapsByFunnel[k.funnelStage].push(k);
+    });
+
+    // Create topic clusters
+    const clusterMap = {};
+    gaps.forEach(k => {
+      const ck = clusterKey(k.keyword);
+      if (!clusterMap[ck]) {
+        clusterMap[ck] = {
+          clusterName: ck.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+          keywords: [],
+          totalVolume: 0
+        };
+      }
+      clusterMap[ck].keywords.push(k);
+      clusterMap[ck].totalVolume += k.volume || 0;
+    });
+
+    const topClusters = Object.values(clusterMap)
+      .sort((a, b) => b.totalVolume - a.totalVolume || b.keywords.length - a.keywords.length)
+      .slice(0, 15);
+
+    // Quick wins (Easy/Low difficulty)
+    const quickWins = gaps.filter(k => k.difficulty === 'Easy' || k.difficulty === 'Low').slice(0, 20);
+
+    // Calculate stats
+    const coverageRate = Math.round((shared.length / Math.max(comps.length, 1)) * 100);
+    const gapRate = Math.round((gaps.length / Math.max(comps.length, 1)) * 100);
+
+    res.json({
+      success: true,
+      stats: {
+        yourKeywords: yours.length,
+        compKeywords: comps.length,
+        gaps: gaps.length,
+        shared: shared.length,
+        coverageRate,
+        gapRate
+      },
+      gaps,
+      shared,
+      quickWins,
+      gapsByIntent,
+      gapsByFunnel,
+      topClusters,
+      intentOrder: ['Transactional', 'Commercial', 'Informational', 'Navigational']
+    });
+
+  } catch (err) {
+    console.error('Keyword gap error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 /* ================================================================
-   API 7 — KEYWORD GAP
-================================================================ */
-app.post('/api/keyword-gap', (req,res)=>{
-  try {
-    const { yourKeywords=[], competitorKeywords=[] } = req.body;
-    const parseL=input=>input.map(item=>{ if(typeof item==='object'&&item)return item; const p=String(item).split(',').map(s=>s.trim()); return {keyword:p[0],volume:parseInt(p[1])||0}; }).filter(k=>k.keyword&&k.keyword.length>1);
-    const yours=parseL(yourKeywords), comps=parseL(competitorKeywords);
-    if(!yours.length||!comps.length) return res.status(400).json({success:false,error:'Both lists required'});
-    const yourSet=new Set(yours.map(k=>k.keyword.toLowerCase()));
-    const BRIEFS={ Transactional:'Build a product or landing page. Include CTA, pricing, testimonials, and trust signals (reviews, guarantees, security badges).', Commercial:'Write a detailed comparison or review post. Cover features, pros/cons, pricing. Include a clear verdict. Aim for 1,500+ words.', Informational:'Create a comprehensive guide or pillar article. Cover the topic fully with subheadings, FAQs, examples, and visuals.', Navigational:'Optimise your brand or about page, or create a dedicated landing page for this brand query.' };
-    const ACTIONS={ Transactional:'Create product or landing page', Commercial:'Write comparison or review article', Informational:'Write blog post or guide', Navigational:'Optimise brand / about page' };
-    const gaps=comps.filter(k=>!yourSet.has(k.keyword.toLowerCase())).map(k=>{ const intent=detectIntent(k.keyword); const diff=estimateDifficulty(k.keyword); const opp=((({Easy:4,Low:3,Medium:2,Hard:1}[diff.label]||1))*((k.volume||0)>10000?5:(k.volume||0)>1000?3:(k.volume||0)>100?2:1)); return {...k,intent,difficulty:diff.label,difficultyColor:diff.color,funnelStage:funnelStage(intent),pageType:recommendPageType(k.keyword,intent),opportunityScore:opp,contentBrief:BRIEFS[intent],recommendedAction:ACTIONS[intent]}; }).sort((a,b)=>b.opportunityScore-a.opportunityScore||(b.volume||0)-(a.volume||0));
-    const shared=comps.filter(k=>yourSet.has(k.keyword.toLowerCase())).map(k=>{ const intent=detectIntent(k.keyword); const diff=estimateDifficulty(k.keyword); return {...k,intent,difficulty:diff.label}; });
-    const gapsByIntent={};
-    gaps.forEach(k=>{ if(!gapsByIntent[k.intent])gapsByIntent[k.intent]=[]; gapsByIntent[k.intent].push(k); });
-    const gapsByFunnel={Awareness:[],Consideration:[],Decision:[]};
-    gaps.forEach(k=>{ if(gapsByFunnel[k.funnelStage])gapsByFunnel[k.funnelStage].push(k); });
-    const clusterMap={};
-    gaps.forEach(k=>{ const ck=clusterKey(k.keyword); if(!clusterMap[ck])clusterMap[ck]={clusterName:ck.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '),keywords:[],totalVolume:0}; clusterMap[ck].keywords.push(k); clusterMap[ck].totalVolume+=k.volume||0; });
-    const topClusters=Object.values(clusterMap).sort((a,b)=>b.totalVolume-a.totalVolume||b.keywords.length-a.keywords.length).slice(0,15);
-    const quickWins=gaps.filter(k=>k.difficulty==='Easy'||k.difficulty==='Low').slice(0,20);
-    const coverageRate=Math.round((shared.length/Math.max(comps.length,1))*100);
-    const gapRate=Math.round((gaps.length/Math.max(comps.length,1))*100);
-    res.json({success:true,stats:{yourKeywords:yours.length,compKeywords:comps.length,gaps:gaps.length,shared:shared.length,coverageRate,gapRate},gaps,shared,quickWins,gapsByIntent,gapsByFunnel,topClusters,intentOrder:['Transactional','Commercial','Informational','Navigational']});
-  } catch(err){ res.status(500).json({success:false,error:err.message}); }
-});
-
-/* ================================================================
-   API 8 — WIKIPEDIA ENTITY
+   API 8 — WIKIPEDIA ENTITY (Enhanced with Real Content Extraction)
 ================================================================ */
 app.get('/api/wikipedia-entity', async (req,res)=>{
   try {
     const topic=(req.query.topic||req.query.q||'').trim();
     if(!topic) return res.status(400).json({success:false,error:'No topic provided'});
-    const enc=encodeURIComponent(topic), BASE='https://en.wikipedia.org';
-    const [sumR,lnkR,catR,introR]=await Promise.allSettled([
+    
+    const enc=encodeURIComponent(topic);
+    const BASE='https://en.wikipedia.org';
+    
+    // Fetch all Wikipedia data in parallel
+    const [sumR, lnkR, catR, introR, sectionsR] = await Promise.allSettled([
       fetch(`${BASE}/api/rest_v1/page/summary/${enc}`).then(r=>r.json()),
-      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=links&pllimit=100&format=json&origin=*`).then(r=>r.json()),
-      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=categories&cllimit=50&format=json&origin=*&clshow=!hidden`).then(r=>r.json()),
-      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=extracts&exlimit=1&explaintext=true&exsectionformat=plain&format=json&origin=*`).then(r=>r.json())
+      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=links&pllimit=500&format=json&origin=*`).then(r=>r.json()),
+      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=categories&cllimit=100&format=json&origin=*&clshow=!hidden`).then(r=>r.json()),
+      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=extracts&exlimit=1&explaintext=true&exsectionformat=plain&format=json&origin=*`).then(r=>r.json()),
+      fetch(`${BASE}/w/api.php?action=parse&page=${enc}&prop=sections&format=json&origin=*`).then(r=>r.json())
     ]);
+    
     const sum=sumR.status==='fulfilled'?sumR.value:{};
-    if(!sum.title||sum.type?.includes('not_found')) return res.status(404).json({success:false,error:`No Wikipedia article found for "${topic}".`});
+    if(!sum.title||sum.type?.includes('not_found')) {
+      return res.status(404).json({success:false,error:`No Wikipedia article found for "${topic}".`});
+    }
+    
+    // Extract related links
     let relatedLinks=[];
-    if(lnkR.status==='fulfilled'){ const pg=Object.values(lnkR.value?.query?.pages||{})[0]; relatedLinks=(pg?.links||[]).map(l=>l.title).filter(t=>!t.includes(':')&&!t.includes('(disambiguation)')); }
+    if(lnkR.status==='fulfilled'){ 
+      const pg=Object.values(lnkR.value?.query?.pages||{})[0]; 
+      relatedLinks=(pg?.links||[])
+        .map(l=>l.title)
+        .filter(t=>!t.includes(':') && !t.includes('(disambiguation)'))
+        .slice(0, 50);
+    }
+    
+    // Extract categories
     let categories=[];
-    if(catR.status==='fulfilled'){ const pg=Object.values(catR.value?.query?.pages||{})[0]; categories=(pg?.categories||[]).map(c=>c.title.replace('Category:','')).filter(c=>!c.match(/^(Articles|Wikipedia|Pages|CS1|Webarchive|All |Use |Coordinates|Short description|Good article|Featured|Cleanup)/)); }
-    // Use full intro text for better entity/fact extraction
+    if(catR.status==='fulfilled'){ 
+      const pg=Object.values(catR.value?.query?.pages||{})[0]; 
+      categories=(pg?.categories||[])
+        .map(c=>c.title.replace('Category:',''))
+        .filter(c=>!c.match(/^(Articles|Wikipedia|Pages|CS1|Webarchive|All |Use |Coordinates|Short description|Good article|Featured|Cleanup)/))
+        .slice(0, 30);
+    }
+    
+    // Get full text content
     let fullIntro='';
-    if(introR.status==='fulfilled'){ const pg=Object.values(introR.value?.query?.pages||{})[0]; fullIntro=pg?.extract||''; }
-    const text=fullIntro||sum.extract||''; const entities={people:[],organizations:[],places:[],dates:[],numbers:[]};
-    let m;
-    // People: broad name pattern (First [Middle] Last where each part starts uppercase)
-    // Matches: John McCarthy, Alan Turing, Yann LeCun, Geoffrey Hinton, Marvin Minsky etc.
-    const namePat=/\b([A-Z][A-Za-z]{1,14}(?:\s+[A-Z][A-Za-z]{1,14}){1,2})\b/g;
-    const stopWords=new Set(['The','In','It','At','On','An','By','As','To','Of','Or','And','But','For','With','From','This','That','These','Those','They','Their','There','Then','When','Where','While','Which','Who','What','How','Also','Both','Each','Such','More','Most','Many','Some','Other','After','Before','During','Since','Although','However','Therefore','Moreover','Furthermore','Additionally','Nevertheless','Meanwhile','Artificial','Intelligence','United','States','Kingdom','January','February','March','April','June','July','August','September','October','November','December']);
-    const personSignal=/\b(born|died|proposed|coined|won|wrote|founded|invented|developed|said|known|named|called|organized|created|introduced|described|argued|published|received|awarded|professor|scientist|researcher|engineer|pioneer|author|philosopher|mathematician|CEO|president|director|founder|minister)\b/i;
-    const nonPerson=/^(Turing Test|Turing Award|Modern AI|Deep Learning|Machine Learning|Natural Language|Neural Network|Dartmouth Conference|United States|United Kingdom|New York|Los Angeles|San Francisco|Hong Kong|North America|South America|West Africa|East Asia|Middle East|Nobel Prize|World War|Cold War|Real World|Computer Science|Search Engine|Social Media|Open Source|Real Time)$/i;
-    // Collect all name candidates with their match positions
-    const nameCandidates=new Map();
-    while((m=namePat.exec(text))!==null){
-      const n=m[1].trim(); const parts=n.split(' ');
-      if(parts.length>=2&&parts.length<=3&&!stopWords.has(parts[0])&&!stopWords.has(parts[parts.length-1])&&!/^[A-Z]{2,}$/.test(n)&&n.length<40&&!nonPerson.test(n)){
-        if(!nameCandidates.has(n)) nameCandidates.set(n,[]);
-        nameCandidates.get(n).push(m.index);
+    if(introR.status==='fulfilled'){ 
+      const pg=Object.values(introR.value?.query?.pages||{})[0]; 
+      fullIntro=pg?.extract||''; 
+    }
+    const text = fullIntro || sum.extract || '';
+    
+    // Extract article sections
+    let sections = [];
+    if(sectionsR.status==='fulfilled' && sectionsR.value?.parse?.sections) {
+      sections = sectionsR.value.parse.sections.map(s => s.line).filter(s => s && !s.includes('References') && !s.includes('External links'));
+    }
+    
+    // IMPROVED ENTITY EXTRACTION
+    const entities = { people:[], organizations:[], places:[], dates:[], numbers:[] };
+    
+    // Better person name extraction using NLP-like patterns
+    const personPatterns = [
+      /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\s+(?:is|was|born|died|known for|founded|created|developed|invented|discovered|authored|wrote|said|argued|proposed|coined)\b/gi,
+      /\b(?:by|from|according to|attributed to)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\b/gi,
+      /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})(?:,|\s+)(?:the\s+)?(?:founder|CEO|president|director|professor|scientist|author|painter|composer|engineer)\b/gi
+    ];
+    
+    personPatterns.forEach(pattern => {
+      let m;
+      while((m = pattern.exec(text)) !== null) {
+        const name = m[1].trim();
+        if(name.length > 3 && name.split(' ').length >= 2 && !entities.people.includes(name)) {
+          entities.people.push(name);
+        }
+      }
+    });
+    
+    // Add known people from context
+    const knownPeople = text.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\b/g) || [];
+    knownPeople.forEach(name => {
+      if(name.split(' ').length >= 2 && 
+         name.length > 3 && 
+         !entities.people.includes(name) && 
+         !stopWords.has(name.split(' ')[0]) &&
+         !stopWords.has(name.split(' ')[name.split(' ').length-1])) {
+        
+        // Check if this name appears in a context that suggests it's a person
+        const context = text.slice(Math.max(0, text.indexOf(name) - 50), Math.min(text.length, text.indexOf(name) + 100));
+        if(/\b(born|died|said|wrote|founded|created|developed|invented|discovered|authored|argued|proposed|coined)\b/i.test(context)) {
+          if(!entities.people.includes(name)) entities.people.push(name);
+        }
+      }
+    });
+    
+    // Extract organizations
+    const orgPatterns = [
+      /\b([A-Z][A-Za-z0-9]+(?:\s+[A-Z][A-Za-z0-9]+){0,3})\s+(?:Inc|Corp|Ltd|LLC|PLC|Group|Holdings|Technologies|Systems|Solutions|University|College|Institute|Foundation|Association|Organization|Corporation|Company)\b/gi,
+      /\b(?:at|joins?|founded|acquired by|owned by|backed by)\s+([A-Z][A-Za-z0-9]+(?:\s+[A-Z][A-Za-z0-9]+){0,3})\b/gi
+    ];
+    
+    orgPatterns.forEach(pattern => {
+      let m;
+      while((m = pattern.exec(text)) !== null) {
+        const org = m[1].trim();
+        if(org.length > 2 && !entities.organizations.includes(org)) {
+          entities.organizations.push(org);
+        }
+      }
+    });
+    
+    // Extract places
+    const placePatterns = [
+      /\b(in|at|near|from|to|located in|based in|headquartered in)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b/gi,
+      /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?:,|\s+)(?:[A-Z]{2}|United States|UK|USA|Canada|Australia|Europe|Asia|Africa)\b/gi
+    ];
+    
+    placePatterns.forEach(pattern => {
+      let m;
+      while((m = pattern.exec(text)) !== null) {
+        const place = (m[2] || m[1]).trim();
+        if(place.length > 3 && !entities.places.includes(place) && 
+           !['January','February','March','April','May','June','July','August','September','October','November','December'].includes(place)) {
+          entities.places.push(place);
+        }
+      }
+    });
+    
+    // Extract dates
+    const datePatterns = [
+      /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/g,
+      /\b\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}\b/g,
+      /\b\d{4}\b/g
+    ];
+    
+    datePatterns.forEach(pattern => {
+      let m;
+      while((m = pattern.exec(text)) !== null) {
+        if(!entities.dates.includes(m[0])) entities.dates.push(m[0]);
+      }
+    });
+    
+    // Extract numbers/statistics
+    const numberPatterns = [
+      /\b\d+(?:[,.]\d+)?(?:\s*(?:million|billion|trillion|thousand|percent|%|km|mi|kg|lb|years|people|dollars|euros|pounds))\b/gi,
+      /\b(?:over|more than|approximately|about|around)\s+(\d+(?:[,.]\d+)?)\b/gi
+    ];
+    
+    numberPatterns.forEach(pattern => {
+      let m;
+      while((m = pattern.exec(text)) !== null) {
+        if(!entities.numbers.includes(m[0])) entities.numbers.push(m[0]);
+      }
+    });
+    
+    // Deduplicate entities
+    Object.keys(entities).forEach(key => {
+      entities[key] = [...new Set(entities[key])].slice(0, 30);
+    });
+    
+    // IMPROVED KEY FACTS EXTRACTION
+    const keyFacts = (text.match(/[^.!?]+[.!?]/g) || [])
+      .filter(s => {
+        const lower = s.toLowerCase();
+        return (
+          /\d{4}/.test(s) || // Contains a year
+          /\b(founded|created|developed|invented|established|introduced|launched|released|discovered|first|largest|most|known for|famous for)\b/i.test(lower) ||
+          /\b(CEO|president|founder|director|professor|scientist|author)\b/i.test(lower) ||
+          /\b(million|billion|trillion|percent|%)\b/i.test(lower)
+        );
+      })
+      .map(s => s.trim())
+      .slice(0, 15);
+    
+    // IMPROVED SEMANTIC KEYWORDS - Now based on actual Wikipedia content
+    const semanticKeywords = generateSemanticKeywords(text, topic, categories, sections);
+    
+    // Clean up and limit
+    const uniqueKeywords = [...new Set(semanticKeywords)].filter(kw => kw.length > 3).slice(0, 40);
+    
+    res.json({
+      success: true,
+      topic: sum.title,
+      description: sum.description,
+      extract: sum.extract,
+      thumbnail: sum.thumbnail?.source || null,
+      url: sum.content_urls?.desktop?.page || null,
+      entities,
+      relatedLinks: relatedLinks.slice(0, 50),
+      categories: categories.slice(0, 30),
+      sections: sections.slice(0, 20),
+      keyFacts,
+      semanticKeywords: uniqueKeywords
+    });
+    
+  } catch(err){ 
+    console.error('Wikipedia API error:', err); 
+    res.status(500).json({success:false, error:err.message}); 
+  }
+});
+
+// Helper function to generate semantic keywords from actual content
+function generateSemanticKeywords(text, topic, categories, sections) {
+  const keywords = new Set();
+  const words = text.toLowerCase().split(/\s+/);
+  const stopWords = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','from','as','is','was','were','be','been','have','has','had','do','does','did','will','would','could','should','may','might','that','this','these','those','it','its','we','our','you','your','they','their','he','she','his','her','i','my','me','us','him','them','who','which','what','when','where','how','why','not','also','more','most','some','any','all','each','other','into','than','then','there','here','so','if','about','after','before','just','only','very','can','no']);
+  
+  // Extract noun phrases (2-3 word combinations that appear frequently)
+  for (let i = 0; i < words.length - 1; i++) {
+    // 2-word phrases
+    if (!stopWords.has(words[i]) && !stopWords.has(words[i+1])) {
+      const phrase2 = words[i] + ' ' + words[i+1];
+      if (phrase2.length > 5) keywords.add(phrase2);
+    }
+    
+    // 3-word phrases
+    if (i < words.length - 2) {
+      if (!stopWords.has(words[i]) && !stopWords.has(words[i+1]) && !stopWords.has(words[i+2])) {
+        const phrase3 = words[i] + ' ' + words[i+1] + ' ' + words[i+2];
+        if (phrase3.length > 8) keywords.add(phrase3);
       }
     }
-    // Check ALL occurrences of each candidate for person context
-    nameCandidates.forEach((positions,n)=>{
-      const hasContext=positions.some(pos=>{
-        const ctx=text.slice(Math.max(0,pos-80),pos+n.length+80);
-        return personSignal.test(ctx)||/,\s*(?:and\s+)?[A-Z][a-z]+\s+[A-Z]/.test(ctx);
-      });
-      if(hasContext&&!entities.people.includes(n)) entities.people.push(n);
+  }
+  
+  // Add category-based keywords
+  categories.forEach(cat => {
+    const catWords = cat.toLowerCase().split(/\s+/);
+    catWords.forEach(word => {
+      if (word.length > 4 && !stopWords.has(word)) {
+        keywords.add(word);
+      }
     });
-    // Orgs: formal names + "companies like X, Y" + known orgs
-    [
-      /\b([A-Z][A-Za-z0-9]{1,20}(?:\s+[A-Z][A-Za-z0-9]{1,20}){0,3})\s+(?:Inc\.|Corp\.|Ltd\.|LLC|PLC|Group|Corporation|Company|University|Institute|Foundation|Lab|Labs)/g,
-    ].forEach(pat=>{ while((m=pat.exec(text))!==null){ const o=(m[1]||'').trim(); if(o.length>1&&!new Set(['THE','AND','OR','FOR','OF','IN','ON','AT','TO','BY','AN','IS','IT','AS','BE','A']).has(o)&&!entities.organizations.includes(o))entities.organizations.push(o); } });
-    // "companies/organisations like X, Y, Z"
-    const orgListPat=/(?:companies|organisations|organizations|firms|labs|researchers at)\s+(?:like|such as|including)\s+((?:[A-Z][A-Za-z0-9]+(?:\s+[A-Z][A-Za-z0-9]+)?,?\s*(?:and\s+)?){1,8})/g;
-    while((m=orgListPat.exec(text))!==null){ m[1].split(/,\s*|\s+and\s+/).forEach(o=>{ o=o.trim(); if(o.length>1&&/^[A-Z]/.test(o)&&!entities.organizations.includes(o))entities.organizations.push(o); }); }
-    ['United States','United Kingdom','Germany','France','Japan','China','India','Russia','Italy','Spain','Australia','Canada','Brazil'].forEach(p=>{ if(text.includes(p)&&!entities.places.includes(p))entities.places.push(p); });
-    const inP=/\bin\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?=\s*[,.]|\s+[a-z])/g;
-    while((m=inP.exec(text))!==null){ const p=m[1].trim(); if(p.length>3&&!['January','February','March','April','May','June','July','August','September','October','November','December'].includes(p)&&!entities.places.includes(p))entities.places.push(p); }
-    const dp=/\b(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}|(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}|\b\d{4}\b)/g;
-    while((m=dp.exec(text))!==null){ if(!entities.dates.includes(m[0]))entities.dates.push(m[0]); }
-    const np=/\b(\d+(?:[,.]\d+)?(?:\s*(?:million|billion|trillion|thousand|percent|%|km|mi|kg|lb|metres?|feet|acres?)))\b/gi;
-    while((m=np.exec(text))!==null){ if(!entities.numbers.includes(m[0]))entities.numbers.push(m[0]); }
-    // Key facts: sentences with numbers OR important signal words
-    const keyFacts=(text.match(/[^.!?]+[.!?]/g)||[])
-      .filter(s=>/\d/.test(s)||/\b(founded|created|developed|invented|established|introduced|launched|released|discovered|first|largest|most|known as|defined as|refers to|is a|are a)\b/i.test(s))
-      .slice(0,10).map(s=>s.trim());
-    // Semantic keywords: context-aware based on topic type
-    const topicLower=topic.toLowerCase();
-    const yr=new Date().getFullYear();
-    const isPerson=entities.people.some(p=>p.toLowerCase().includes(topicLower.split(' ')[0].toLowerCase()))||(sum.description||'').toLowerCase().includes('born')||(sum.description||'').toLowerCase().match(/businessman|entrepreneur|politician|scientist|author|actor|musician|athlete|ceo|founder|president/);
-    const isPlace=(sum.description||'').toLowerCase().match(/city|country|town|village|region|state|nation|continent|island|river|mountain/)||entities.places.includes(topic);
-    const isOrg=(sum.description||'').toLowerCase().match(/company|corporation|organisation|organization|university|institute|foundation|agency|department/);
-    let semanticKeywords=[];
-    if(isPerson){
-      semanticKeywords=[topicLower,`${topicLower} net worth`,`${topicLower} age`,`${topicLower} biography`,`${topicLower} education`,`${topicLower} career`,`${topicLower} achievements`,`${topicLower} companies`,`${topicLower} early life`,`${topicLower} ${yr}`,`${topicLower} news`,`${topicLower} wife`,`${topicLower} children`];
-    } else if(isPlace){
-      semanticKeywords=[topicLower,`${topicLower} history`,`${topicLower} population`,`${topicLower} capital`,`${topicLower} culture`,`${topicLower} economy`,`things to do in ${topicLower}`,`best places in ${topicLower}`,`${topicLower} travel guide`,`${topicLower} ${yr}`,`visit ${topicLower}`,`${topicLower} facts`];
-    } else if(isOrg){
-      semanticKeywords=[topicLower,`${topicLower} history`,`${topicLower} products`,`${topicLower} services`,`${topicLower} revenue`,`${topicLower} ceo`,`${topicLower} headquarters`,`${topicLower} founded`,`${topicLower} employees`,`${topicLower} ${yr}`,`${topicLower} stock`,`${topicLower} review`];
-    } else {
-      semanticKeywords=[topicLower,`what is ${topicLower}`,`${topicLower} definition`,`${topicLower} history`,`${topicLower} explained`,`how does ${topicLower} work`,`${topicLower} examples`,`${topicLower} benefits`,`${topicLower} vs`,`${topicLower} types`,`${topicLower} ${yr}`,`best ${topicLower}`,`${topicLower} for beginners`];
+  });
+  
+  // Add section titles as keywords
+  sections.forEach(section => {
+    const sectionLower = section.toLowerCase();
+    if (sectionLower.length > 3 && !stopWords.has(sectionLower)) {
+      keywords.add(sectionLower);
+      
+      // Add "history of [topic]" if section contains history
+      if (sectionLower.includes('history')) {
+        keywords.add(`history of ${topic.toLowerCase()}`);
+      }
+      // Add "types of [topic]" if section contains types
+      if (sectionLower.includes('types') || sectionLower.includes('kinds')) {
+        keywords.add(`types of ${topic.toLowerCase()}`);
+      }
     }
-    // Add category-based keywords
-    semanticKeywords=[...semanticKeywords,...categories.slice(0,4).map(cat=>cat.toLowerCase().replace(/,.*$/,'').trim())].filter((v,i,a)=>v&&v.length>2&&a.indexOf(v)===i);
-    // Cap entities per category to avoid noise
-    Object.keys(entities).forEach(k=>{ entities[k]=entities[k].slice(0,25); });
-    res.json({success:true,topic:sum.title,description:sum.description,extract:sum.extract,thumbnail:sum.thumbnail?.source||null,url:sum.content_urls?.desktop?.page||null,entities,relatedLinks:relatedLinks.slice(0,50),categories:categories.slice(0,25),keyFacts,semanticKeywords});
-  } catch(err){ res.status(500).json({success:false,error:err.message}); }
-});
+  });
+  
+  // Add topic variations
+  keywords.add(topic.toLowerCase());
+  keywords.add(`what is ${topic.toLowerCase()}`);
+  keywords.add(`${topic.toLowerCase()} definition`);
+  keywords.add(`${topic.toLowerCase()} examples`);
+  keywords.add(`${topic.toLowerCase()} explained`);
+  
+  // Convert to array and sort by length (more specific first)
+  return Array.from(keywords)
+    .filter(kw => kw.split(' ').length <= 4) // Keep only up to 4-word phrases
+    .sort((a, b) => b.length - a.length)
+    .slice(0, 50);
+}
 
 /* ================================================================
    API 9 — BACKLINKS
