@@ -29,6 +29,7 @@
     "npm": ">=9.0.0"
   },
   "dependencies": {
+    "apify-client": "^2.22.2",
     "axios": "^1.13.6",
     "compression": "^1.8.1",
     "compromise": "^14.15.0",

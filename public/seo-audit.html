@@ -1031,6 +1031,250 @@
   background: #059669;
   color: white;
 }
+/* ========== RESPONSIVE STYLES - ADD THIS AT THE END ========== */
+
+/* Tablet and Medium Screens */
+@media screen and (max-width: 992px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+  
+  .speed-metrics {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .psi-panels-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .two-col {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .strategy-wrap {
+    flex-wrap: wrap;
+  }
+  
+  .strat-btn {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+}
+
+/* Mobile Landscape */
+@media screen and (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .speed-metrics {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .score-hero {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+  }
+  
+  .score-circle {
+    margin: 0 auto;
+  }
+  
+  .psi-scores {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .cwv-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .issue-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .issue-card-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .strategy-tabs {
+    flex-direction: column;
+  }
+  
+  .strategy-tabs .strat-btn {
+    width: 100%;
+  }
+}
+
+/* Mobile Portrait */
+@media screen and (max-width: 576px) {
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .psi-scores {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .cwv-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .btn-row {
+    flex-direction: column;
+  }
+  
+  .btn-run, .btn-sec {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .url-input-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .url-prefix {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  #urlInput {
+    width: 100%;
+  }
+  
+  .graph-bar-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .graph-bar-label {
+    width: auto;
+  }
+  
+  .graph-bar-wrapper {
+    width: 100%;
+  }
+  
+  .stats-modal {
+    width: 95%;
+    margin: 10px;
+  }
+  
+  .data-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .tool-hero h1 {
+    font-size: 24px;
+  }
+  
+  .tool-hero p {
+    font-size: 12px;
+  }
+  
+  .card-body {
+    padding: 16px;
+  }
+}
+
+/* Small Mobile */
+@media screen and (max-width: 380px) {
+  .stats-mini-card {
+    padding: 12px;
+  }
+  
+  .stats-mini-value {
+    font-size: 20px;
+  }
+  
+  .speed-metric-value {
+    font-size: 24px;
+  }
+  
+  .time-range-selector {
+    flex-direction: column;
+  }
+  
+  .time-range-btn {
+    width: 100%;
+  }
+  
+  .keyword-tag {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}
+
+/* Ensure existing grids are responsive */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.speed-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.psi-panels-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* Fix for strategy tabs */
+.strategy-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+/* Modal responsive fixes */
+.stats-modal {
+  max-width: 90%;
+  max-height: 85vh;
+}
+
+.stats-modal-content {
+  padding: 16px;
+}
+
+/* Touch-friendly improvements */
+.stat-card-clickable,
+.issue-card,
+.btn-run,
+.btn-sec,
+.strat-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Loading state improvements */
+.spin {
+  border-width: 3px;
+}
+
+/* Font size adjustments */
+body {
+  font-size: 14px;
+}
+
+h1 { font-size: clamp(20px, 5vw, 32px); }
+h2 { font-size: clamp(18px, 4vw, 24px); }
+h3 { font-size: clamp(16px, 3.5vw, 20px); }
+h4 { font-size: clamp(14px, 3vw, 16px); }
   </style>
 </head>
 <body>
@@ -1132,20 +1376,20 @@ function setStrategy(s) {
 }
 
 // Show refresh button when results exist
-function checkAndShowRefreshButton() {
-  const resultsDiv = document.getElementById('results');
-  const refreshBtn = document.getElementById('refreshWithStrategy');
-  if (resultsDiv && !resultsDiv.innerHTML.includes('empty-state') && !resultsDiv.innerHTML.includes('loading')) {
-    refreshBtn.style.display = 'inline-flex';
-  } else {
-    refreshBtn.style.display = 'none';
-  }
-}
+// function checkAndShowRefreshButton() {
+//   const resultsDiv = document.getElementById('results');
+//   const refreshBtn = document.getElementById('refreshWithStrategy');
+//   if (resultsDiv && !resultsDiv.innerHTML.includes('empty-state') && !resultsDiv.innerHTML.includes('loading')) {
+//     refreshBtn.style.display = 'inline-flex';
+//   } else {
+//     refreshBtn.style.display = 'none';
+//   }
+// }
 
-// Call this after renderResults
-function afterRender() {
-  checkAndShowRefreshButton();
-}
+// // Call this after renderResults
+// function afterRender() {
+//   checkAndShowRefreshButton();
+// }
 
 // Refresh with current strategy
 function refreshWithCurrentStrategy() {
@@ -1280,7 +1524,7 @@ async function runAudit() {
 
 }
 // Call this after rendering
-afterRender();
+// afterRender();
 
 async function loadPageSpeedInBackground(url, finalUrl, auditData) {
   try {
