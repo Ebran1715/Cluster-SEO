@@ -1506,6 +1506,272 @@ app.post('/api/competitor-analysis', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+/* ================================================================
+   API — KEYWORD GAP ANALYSIS (AI-powered via Groq — FREE)
+   Replace your existing /api/keyword-gap route with this
+================================================================ */
+
+app.post('/api/keyword-gap', async (req, res) => {
+  try {
+    const { yourKeywords = [], competitorKeywords = [] } = req.body;
+
+    // Parse keywords helper
+    const parseL = input => input.map(item => {
+      if (typeof item === 'object' && item) return item;
+      const p = String(item).split(',').map(s => s.trim());
+      return { keyword: p[0], volume: parseInt(p[1]) || 0 };
+    }).filter(k => k.keyword && k.keyword.length > 1);
+
+    const yours = parseL(yourKeywords);
+    const comps = parseL(competitorKeywords);
+
+    if (!yours.length || !comps.length) {
+      return res.status(400).json({ success: false, error: 'Both keyword lists required' });
+    }
+
+    const yourSet = new Set(yours.map(k => k.keyword.toLowerCase()));
+
+    // Find gap keywords (competitor has, you don't)
+    const gapKeywords = comps.filter(k => !yourSet.has(k.keyword.toLowerCase()));
+    const shared      = comps.filter(k =>  yourSet.has(k.keyword.toLowerCase()));
+
+    if (!gapKeywords.length) {
+      return res.json({
+        success: true,
+        stats: {
+          yourKeywords: yours.length, compKeywords: comps.length,
+          gaps: 0, shared: shared.length,
+          coverageRate: 100, gapRate: 0
+        },
+        gaps: [], shared, quickWins: [],
+        gapsByIntent: {}, gapsByFunnel: { Awareness:[], Consideration:[], Decision:[] },
+        topClusters: [], intentOrder: []
+      });
+    }
+
+    // ── Send gap keywords to Groq AI for intelligent analysis ──
+    // Process in batches of 30 to stay within token limits
+    const BATCH = 30;
+    let allAnalysed = [];
+
+    for (let i = 0; i < gapKeywords.length; i += BATCH) {
+      const batch = gapKeywords.slice(i, i + BATCH);
+
+      const prompt = `You are an expert SEO strategist. Analyse these keyword gaps and return ONLY a valid JSON array. No markdown, no explanation — pure JSON array only.
+
+These are keywords a competitor ranks for that our site does NOT rank for yet.
+
+Keywords to analyse:
+${batch.map(k => `- "${k.keyword}"${k.volume ? ` (search volume: ${k.volume})` : ''}`).join('\n')}
+
+Return a JSON array where each item has this exact structure:
+{
+  "keyword": "exact keyword here",
+  "intent": "Transactional|Commercial|Informational|Navigational",
+  "difficulty": "Easy|Low|Medium|Hard",
+  "funnelStage": "Awareness|Consideration|Decision",
+  "pageType": "specific page type recommendation",
+  "opportunityScore": <number 1-20>,
+  "contentBrief": "specific 2-3 sentence content brief for this exact keyword",
+  "recommendedAction": "specific action to take"
+}
+
+RULES:
+- intent: 
+  * Transactional = user wants to buy/sign up (buy, price, cheap, deal, order, shop)
+  * Commercial = user is researching before buying (best, review, vs, compare, top, alternative)
+  * Informational = user wants to learn (how, what, why, guide, tutorial, tips, examples)
+  * Navigational = user wants a specific brand/site
+  
+- difficulty:
+  * Easy = long tail 4+ words, niche topic, low competition
+  * Low = 3 words, moderate specificity
+  * Medium = 2 words, competitive niche
+  * Hard = 1-2 words, highly competitive head term
+
+- opportunityScore 1-20:
+  * Consider search volume (higher = more opportunity)
+  * Consider difficulty (easier = more opportunity)
+  * Consider intent (Transactional/Commercial = higher value)
+  * Score 15-20 = must target, 8-14 = good opportunity, 1-7 = low priority
+
+- contentBrief: Write a SPECIFIC brief for THIS keyword, not generic advice.
+  Example for "best trail running shoes": "Create a comprehensive roundup reviewing the top 10 trail running shoes tested on different terrain types. Include a comparison table with grip, weight, waterproofing scores. Target runners training for their first trail race."
+
+- recommendedAction: Be specific e.g. "Write 2000-word buyer's guide" not just "Write article"
+
+- funnelStage:
+  * Decision = Transactional intent
+  * Consideration = Commercial intent  
+  * Awareness = Informational or Navigational intent`;
+
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.2,
+          max_tokens: 2000,
+          response_format: { type: 'json_object' }
+        })
+      });
+
+      const groqData = await groqRes.json();
+      if (groqData.error) throw new Error(`Groq error: ${groqData.error.message}`);
+
+      const raw = groqData?.choices?.[0]?.message?.content || '';
+      if (!raw) throw new Error('AI returned empty response');
+
+      let parsed;
+      try {
+        const clean = raw.replace(/```json\s*|```\s*/g, '').trim();
+        // Groq with json_object mode returns {keywords:[...]} or [...] 
+        const obj = JSON.parse(clean);
+        // Handle both array and wrapped object responses
+        parsed = Array.isArray(obj) ? obj : 
+                 Array.isArray(obj.keywords) ? obj.keywords :
+                 Array.isArray(obj.gaps) ? obj.gaps :
+                 Array.isArray(obj.results) ? obj.results :
+                 Object.values(obj)[0]; // fallback: take first array value
+        if (!Array.isArray(parsed)) parsed = [];
+      } catch(e) {
+        console.error('JSON parse error for batch:', e.message);
+        // Fallback: use basic analysis for this batch
+        parsed = batch.map(k => fallbackAnalysis(k));
+      }
+
+      // Merge AI results with original volume data
+      parsed.forEach(aiKw => {
+        const original = batch.find(k => k.keyword.toLowerCase() === (aiKw.keyword||'').toLowerCase());
+        allAnalysed.push({
+          keyword:          aiKw.keyword || (original?.keyword || ''),
+          volume:           original?.volume || 0,
+          intent:           aiKw.intent || 'Informational',
+          difficulty:       aiKw.difficulty || 'Medium',
+          funnelStage:      aiKw.funnelStage || 'Awareness',
+          pageType:         aiKw.pageType || 'Blog Post/Guide',
+          opportunityScore: Math.min(20, Math.max(1, parseInt(aiKw.opportunityScore) || 5)),
+          contentBrief:     aiKw.contentBrief || '',
+          recommendedAction:aiKw.recommendedAction || 'Create content'
+        });
+      });
+
+      // Small delay between batches to respect rate limits
+      if (i + BATCH < gapKeywords.length) {
+        await new Promise(r => setTimeout(r, 500));
+      }
+    }
+
+    // Sort by opportunity score desc, then volume desc
+    allAnalysed.sort((a, b) =>
+      b.opportunityScore - a.opportunityScore || (b.volume || 0) - (a.volume || 0)
+    );
+
+    // Group by intent
+    const gapsByIntent = {};
+    allAnalysed.forEach(k => {
+      if (!gapsByIntent[k.intent]) gapsByIntent[k.intent] = [];
+      gapsByIntent[k.intent].push(k);
+    });
+
+    // Group by funnel stage
+    const gapsByFunnel = { Awareness: [], Consideration: [], Decision: [] };
+    allAnalysed.forEach(k => {
+      if (gapsByFunnel[k.funnelStage]) gapsByFunnel[k.funnelStage].push(k);
+    });
+
+    // Topic clusters — group by first 2 meaningful words
+    const clusterMap = {};
+    allAnalysed.forEach(k => {
+      const ck = clusterKey(k.keyword);
+      if (!clusterMap[ck]) {
+        clusterMap[ck] = { clusterName: toTitleCase(ck), keywords: [], totalVolume: 0 };
+      }
+      clusterMap[ck].keywords.push(k);
+      clusterMap[ck].totalVolume += k.volume || 0;
+    });
+
+    const topClusters = Object.values(clusterMap)
+      .sort((a, b) => b.totalVolume - a.totalVolume || b.keywords.length - a.keywords.length)
+      .slice(0, 15);
+
+    // Quick wins = Easy or Low difficulty, sorted by opportunity score
+    const quickWins = allAnalysed
+      .filter(k => k.difficulty === 'Easy' || k.difficulty === 'Low')
+      .slice(0, 20);
+
+    const coverageRate = Math.round((shared.length / Math.max(comps.length, 1)) * 100);
+    const gapRate      = Math.round((allAnalysed.length / Math.max(comps.length, 1)) * 100);
+
+    res.json({
+      success: true,
+      stats: {
+        yourKeywords: yours.length,
+        compKeywords: comps.length,
+        gaps:         allAnalysed.length,
+        shared:       shared.length,
+        coverageRate,
+        gapRate
+      },
+      gaps:         allAnalysed,
+      shared,
+      quickWins,
+      gapsByIntent,
+      gapsByFunnel,
+      topClusters,
+      intentOrder: ['Transactional', 'Commercial', 'Informational', 'Navigational']
+    });
+
+  } catch (err) {
+    console.error('Keyword gap error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/* ── Fallback analysis if AI fails for a batch ── */
+function fallbackAnalysis(k) {
+  const kw   = k.keyword.toLowerCase();
+  const words = kw.trim().split(/\s+/).length;
+
+  let intent = 'Informational';
+  if (/buy|price|cheap|deal|discount|order|shop|purchase|coupon/.test(kw))  intent = 'Transactional';
+  else if (/best|top|review|vs|compare|alternative|recommend/.test(kw))     intent = 'Commercial';
+  else if (/how|what|why|guide|tutorial|learn|tips|examples/.test(kw))      intent = 'Informational';
+  else if (/login|sign in|official|website|download/.test(kw))              intent = 'Navigational';
+
+  const difficulty = words >= 4 ? 'Easy' : words === 3 ? 'Low' : words === 2 ? 'Medium' : 'Hard';
+  const funnelStage = intent === 'Transactional' ? 'Decision' : intent === 'Commercial' ? 'Consideration' : 'Awareness';
+  const diffScore = { Easy:4, Low:3, Medium:2, Hard:1 }[difficulty];
+  const volScore  = k.volume > 10000 ? 5 : k.volume > 1000 ? 3 : k.volume > 100 ? 2 : 1;
+
+  return {
+    keyword:           k.keyword,
+    volume:            k.volume || 0,
+    intent,
+    difficulty,
+    funnelStage,
+    pageType:          intent === 'Transactional' ? 'Product/Landing Page' : intent === 'Commercial' ? 'Comparison/Review' : 'Blog Post/Guide',
+    opportunityScore:  Math.min(20, diffScore * volScore),
+    contentBrief:      `Create a comprehensive ${intent.toLowerCase()} page targeting "${k.keyword}".`,
+    recommendedAction: intent === 'Transactional' ? 'Create Landing Page' : intent === 'Commercial' ? 'Write Comparison Article' : 'Write Blog Post/Guide'
+  };
+}
+
+// /* ── Helpers ── */
+// function clusterKey(kw) {
+//   const stopWords = new Set(['a','an','the','for','and','or','to','in','of','with','how','what','best','is','are','does','do','can']);
+//   const words = kw.toLowerCase().split(/\s+/).filter(w => !stopWords.has(w));
+//   return words.slice(0, 2).join(' ');
+// }
+
+function toTitleCase(str) {
+  return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
 /* ================================================================
    API 15 — KEYWORD GAP ANALYSIS
 ================================================================ */
