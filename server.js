@@ -1302,15 +1302,16 @@ app.post('/api/seo-audit', (req,res)=>{
     res.json({ success:true, score, grade, gradeLabel, gradeColor, totalPoints:pts.total, maxPoints:pts.max, checks, summary:{ pass:checks.filter(c=>c.status==='pass').length, warn:checks.filter(c=>c.status==='warn').length, fail:checks.filter(c=>c.status==='fail').length }, meta:{ wordCount, sentences:sentCount, avgWordsPerSentence:parseFloat(avgWPS.toFixed(1)), readabilityScore:parseFloat(flesch.toFixed(0)), readability:readLabel } });
   } catch(err){ console.error('SEO audit error:',err); res.status(500).json({success:false,error:err.message}); }
 });
-
 /* ================================================================
-   API 14 — COMPETITOR ANALYSIS WITH SE RANKING FREE DEMO
+   API — COMPETITOR ANALYSIS (AI-powered via Groq — FREE)
+   Replace your existing /api/competitor-analysis route with this
+   Uses same GROQ_API_KEY already in your .env
 ================================================================ */
+
 app.post('/api/competitor-analysis', async (req, res) => {
   try {
     const { yourKeywords = [], competitorKeywords = [] } = req.body;
-    
-    // Parse keywords (keep your existing parser)
+
     const parseL = input => input.map(item => {
       if (typeof item === 'object' && item) return item;
       const p = String(item).split(',').map(s => s.trim());
@@ -1318,187 +1319,241 @@ app.post('/api/competitor-analysis', async (req, res) => {
     }).filter(k => k.keyword && k.keyword.length > 1);
 
     const yours = parseL(yourKeywords);
-    const comps = parseL(competitorKeywords);
+    const comps  = parseL(competitorKeywords);
 
     if (!yours.length || !comps.length) {
       return res.status(400).json({ success: false, error: 'Both keyword lists required' });
     }
 
-    // Try to get real competitor data from SE Ranking demo (COMPLETELY FREE)
-    let enhancedKeywords = false;
-    
-    try {
-      // SE Ranking provides a free demo endpoint - NO API KEY NEEDED!
-      const demoResponse = await fetch('https://api.seranking.com/v1/demo/keywords/suggestions', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          keywords: yours.slice(0, 5).map(k => k.keyword),
-          source: 'google_us'
-        })
-      });
-      
-      if (demoResponse.ok) {
-        const demoData = await demoResponse.json();
-        console.log('✅ Got SE Ranking demo data');
-        
-        // Update volumes with demo data if available
-        if (demoData.data && demoData.data.length) {
-          demoData.data.forEach(item => {
-            // Update your keywords
-            yours.forEach(k => {
-              if (k.keyword.toLowerCase() === item.keyword.toLowerCase()) {
-                k.volume = item.volume || k.volume;
-              }
-            });
-            // Update competitor keywords
-            comps.forEach(k => {
-              if (k.keyword.toLowerCase() === item.keyword.toLowerCase()) {
-                k.volume = item.volume || k.volume;
-              }
-            });
-          });
-          enhancedKeywords = true;
-        }
-      }
-    } catch (demoError) {
-      console.log('SE Ranking demo unavailable, using your data');
-    }
-
-    // Try to get competitor domains
-    let competitorDomains = [];
-    try {
-      const domainResponse = await fetch('https://api.seranking.com/v1/demo/domain/competitors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          domains: yours.slice(0, 3).map(k => k.keyword.replace(/\s+/g, '')),
-          source: 'google_us'
-        })
-      });
-      
-      if (domainResponse.ok) {
-        const domainData = await domainResponse.json();
-        competitorDomains = domainData.data || [];
-      }
-    } catch (e) {
-      // Ignore errors, just use what we have
-    }
-
-    // YOUR EXISTING NLP ANALYSIS CODE CONTINUES HERE
-    // (Keep all your detectIntent, estimateDifficulty, etc.)
-    
     const yourSet = new Set(yours.map(k => k.keyword.toLowerCase()));
     const compSet = new Set(comps.map(k => k.keyword.toLowerCase()));
-    
-    // Your enrichment function
-    const enrichKw = (k, extra = {}) => {
-      const intent = detectIntent(k.keyword);
-      const diff = estimateDifficulty(k.keyword);
-      return {
-        ...k,
-        intent,
-        difficulty: diff.label,
-        difficultyColor: diff.color,
-        pageType: recommendPageType(k.keyword, intent),
-        funnelStage: funnelStage(intent),
-        opportunityScore: (({ Easy: 4, Low: 3, Medium: 2, Hard: 1 }[diff.label] || 1)) *
-          ((k.volume || 0) > 10000 ? 5 : (k.volume || 0) > 1000 ? 3 : (k.volume || 0) > 100 ? 2 : 1),
-        ...extra
-      };
-    };
 
-    const shared = yours.filter(k => compSet.has(k.keyword.toLowerCase())).map(k => enrichKw(k));
-    const onlyYours = yours.filter(k => !compSet.has(k.keyword.toLowerCase())).map(k => enrichKw(k));
-    const onlyComp = comps.filter(k => !yourSet.has(k.keyword.toLowerCase()))
-      .map(k => enrichKw(k))
-      .sort((a, b) => b.opportunityScore - a.opportunityScore || (b.volume || 0) - (a.volume || 0));
+    const sharedRaw   = yours.filter(k =>  compSet.has(k.keyword.toLowerCase()));
+    const onlyYours   = yours.filter(k => !compSet.has(k.keyword.toLowerCase()));
+    const onlyCompRaw = comps.filter(k => !yourSet.has(k.keyword.toLowerCase()));
 
-    const union = new Set([...yourSet, ...compSet]);
-    const overlapPct = Math.round((shared.length / Math.max(union.size, 1)) * 100);
-    
-    // Intent distribution
-    const buildD = kws => {
+    // ── AI-analyse all three groups in parallel batches ──
+    const BATCH = 30;
+
+    async function analyseBatch(keywords, context) {
+      if (!keywords.length) return [];
+      let results = [];
+
+      for (let i = 0; i < keywords.length; i += BATCH) {
+        const batch = keywords.slice(i, i + BATCH);
+
+        const prompt = `You are an expert SEO strategist. Analyse these keywords and return ONLY a valid JSON array. No markdown, no explanation — pure JSON array only.
+
+Context: ${context}
+
+Keywords to analyse:
+${batch.map(k => `- "${k.keyword}"${k.volume ? ` (volume: ${k.volume})` : ''}`).join('\n')}
+
+Return a JSON array where each item has this exact structure:
+{
+  "keyword": "exact keyword",
+  "intent": "Transactional|Commercial|Informational|Navigational",
+  "difficulty": "Easy|Low|Medium|Hard",
+  "funnelStage": "Awareness|Consideration|Decision",
+  "pageType": "specific page type",
+  "opportunityScore": <number 1-20>,
+  "contentAngle": "specific 1-2 sentence content angle for this exact keyword",
+  "recommendedAction": "specific action"
+}
+
+RULES:
+- intent:
+  * Transactional = user wants to buy/sign up (buy, price, cheap, order, shop, hire, get)
+  * Commercial = researching before buying (best, review, vs, compare, top, alternative)
+  * Informational = wants to learn (how, what, why, guide, tutorial, tips, examples, definition)
+  * Navigational = wants specific brand/site (login, official, download, brand name alone)
+
+- difficulty:
+  * Easy = 4+ words, long tail, niche
+  * Low = 3 words, moderate competition
+  * Medium = 2 words, competitive
+  * Hard = 1-2 words, high competition head term
+
+- opportunityScore 1-20:
+  * Higher volume = higher score
+  * Easier difficulty = higher score
+  * Transactional/Commercial intent = higher score
+  * 15-20 = must target, 8-14 = good opportunity, 1-7 = low priority
+
+- pageType: Be specific e.g. "Buyer's guide", "Product comparison", "How-to tutorial", "Brand landing page", "FAQ page", "Listicle", "Case study"
+
+- contentAngle: Write a SPECIFIC angle for THIS keyword. Not generic.
+  Example for "best noise cancelling headphones under 100": "Create a budget buyer's guide testing 8 headphones under $100, with real-world noise cancellation scores and a clear top pick for commuters."
+
+- funnelStage:
+  * Decision = Transactional
+  * Consideration = Commercial
+  * Awareness = Informational or Navigational`;
+
+        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.2,
+            max_tokens: 2000,
+            response_format: { type: 'json_object' }
+          })
+        });
+
+        const groqData = await groqRes.json();
+        if (groqData.error) throw new Error(`Groq error: ${groqData.error.message}`);
+
+        const raw = groqData?.choices?.[0]?.message?.content || '';
+        let parsed = [];
+
+        try {
+          const clean = raw.replace(/```json\s*|```\s*/g, '').trim();
+          const obj = JSON.parse(clean);
+          parsed = Array.isArray(obj) ? obj :
+                   Array.isArray(obj.keywords) ? obj.keywords :
+                   Array.isArray(obj.results)  ? obj.results  :
+                   Array.isArray(obj.data)      ? obj.data     :
+                   Object.values(obj).find(v => Array.isArray(v)) || [];
+        } catch(e) {
+          console.error('JSON parse error:', e.message);
+          parsed = batch.map(k => fallbackAnalysis(k));
+        }
+
+        // Merge AI results with original volume data
+        parsed.forEach(aiKw => {
+          const original = batch.find(k =>
+            k.keyword.toLowerCase() === (aiKw.keyword || '').toLowerCase()
+          );
+          results.push({
+            keyword:           aiKw.keyword || (original?.keyword || ''),
+            volume:            original?.volume || 0,
+            intent:            aiKw.intent || 'Informational',
+            difficulty:        aiKw.difficulty || 'Medium',
+            funnelStage:       aiKw.funnelStage || 'Awareness',
+            pageType:          aiKw.pageType || 'Blog Post',
+            opportunityScore:  Math.min(20, Math.max(1, parseInt(aiKw.opportunityScore) || 5)),
+            contentAngle:      aiKw.contentAngle || '',
+            recommendedAction: aiKw.recommendedAction || 'Create content',
+          });
+        });
+
+        if (i + BATCH < keywords.length) {
+          await new Promise(r => setTimeout(r, 400));
+        }
+      }
+
+      return results;
+    }
+
+    // Run all three groups in parallel
+    const [sharedAnalysed, onlyYoursAnalysed, onlyCompAnalysed] = await Promise.all([
+      analyseBatch(sharedRaw,   'Keywords both sites target — contested battlegrounds'),
+      analyseBatch(onlyYours,   'Keywords only your site targets — your unique advantages'),
+      analyseBatch(onlyCompRaw, 'Keywords only the competitor targets — your gaps and opportunities'),
+    ]);
+
+    // Sort gaps by opportunity score desc
+    onlyCompAnalysed.sort((a, b) =>
+      b.opportunityScore - a.opportunityScore || (b.volume || 0) - (a.volume || 0)
+    );
+
+    // Quick wins = Easy/Low difficulty gaps
+    const quickWins = onlyCompAnalysed
+      .filter(k => k.difficulty === 'Easy' || k.difficulty === 'Low')
+      .slice(0, 25);
+
+    // High value = high volume gaps
+    const highValue = onlyCompAnalysed
+      .filter(k => (k.volume || 0) > 1000)
+      .slice(0, 10);
+
+    // Intent comparison
+    const buildDist = kws => {
       const d = { Informational: [], Transactional: [], Commercial: [], Navigational: [] };
-      kws.forEach(k => d[detectIntent(k.keyword)].push(k));
+      kws.forEach(k => { if (d[k.intent]) d[k.intent].push(k); });
       return d;
     };
 
-    const yD = buildD(yours);
-    const cD = buildD(comps);
-    
+    const yD = buildDist([...sharedAnalysed, ...onlyYoursAnalysed]);
+    const cD = buildDist([...sharedAnalysed, ...onlyCompAnalysed]);
+    const allYours = [...sharedAnalysed, ...onlyYoursAnalysed];
+    const allComps = [...sharedAnalysed, ...onlyCompAnalysed];
+
     const intentComparison = ['Transactional', 'Commercial', 'Informational', 'Navigational'].map(intent => ({
       intent,
       yourCount: yD[intent].length,
       compCount: cD[intent].length,
-      yourPct: Math.round((yD[intent].length / Math.max(yours.length, 1)) * 100),
-      compPct: Math.round((cD[intent].length / Math.max(comps.length, 1)) * 100),
-      diff: Math.round(((yD[intent].length / Math.max(yours.length, 1)) - (cD[intent].length / Math.max(comps.length, 1))) * 100)
+      yourPct:   Math.round((yD[intent].length / Math.max(allYours.length, 1)) * 100),
+      compPct:   Math.round((cD[intent].length / Math.max(allComps.length, 1)) * 100),
+      diff:      Math.round(((yD[intent].length / Math.max(allYours.length, 1)) -
+                             (cD[intent].length / Math.max(allComps.length, 1))) * 100),
+      recommendedAction: {
+        Transactional: 'Create product/landing pages with strong CTAs',
+        Commercial:    'Write comparison and review content',
+        Informational: 'Build pillar content and guides',
+        Navigational:  'Strengthen brand presence and landing pages'
+      }[intent]
     }));
 
-    // Topic clusters
-    const yourClusters = new Set(yours.map(k => clusterKey(k.keyword)));
-    const clusterGaps = {};
-    comps.forEach(k => {
+    // Topic clusters — gaps only
+    const yourClusterSet = new Set(allYours.map(k => clusterKey(k.keyword)));
+    const clusterMap = {};
+    onlyCompAnalysed.forEach(k => {
       const ck = clusterKey(k.keyword);
-      if (!yourClusters.has(ck)) {
-        if (!clusterGaps[ck]) {
-          clusterGaps[ck] = {
-            clusterName: ck.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-            keywords: [],
-            totalVolume: 0
+      if (!yourClusterSet.has(ck)) {
+        if (!clusterMap[ck]) {
+          clusterMap[ck] = {
+            clusterName:  toTitleCase(ck),
+            keywords:     [],
+            totalVolume:  0,
+            intent:       k.intent,
+            pageType:     k.pageType,
           };
         }
-        clusterGaps[ck].keywords.push(k);
-        clusterGaps[ck].totalVolume += k.volume || 0;
+        clusterMap[ck].keywords.push(k);
+        clusterMap[ck].totalVolume += k.volume || 0;
       }
     });
 
-    const topicGaps = Object.values(clusterGaps)
+    const topicGaps = Object.values(clusterMap)
       .sort((a, b) => b.totalVolume - a.totalVolume || b.keywords.length - a.keywords.length)
-      .slice(0, 20)
-      .map(c => ({
-        ...c,
-        intent: detectIntent(c.keywords[0].keyword),
-        pageType: recommendPageType(c.keywords[0].keyword, detectIntent(c.keywords[0].keyword))
-      }));
+      .slice(0, 20);
 
-    const quickWins = onlyComp.filter(k => k.difficulty === 'Easy' || k.difficulty === 'Low').slice(0, 15);
-    const highValue = onlyComp.filter(k => (k.volume || 0) > 1000).slice(0, 10);
-    
-    const yO = yours.length - shared.length;
-    const cO = comps.length - shared.length;
-    const tot = yO + shared.length + cO;
-
-    // Add note about data source
-    const dataSource = enhancedKeywords ? 'SE Ranking Demo' : 'Your Input';
+    // Overlap stats
+    const union = new Set([...yourSet, ...compSet]);
+    const overlapPct = Math.round((sharedRaw.length / Math.max(union.size, 1)) * 100);
+    const yO  = yours.length - sharedRaw.length;
+    const cO  = comps.length - sharedRaw.length;
+    const tot = yO + sharedRaw.length + cO;
 
     res.json({
       success: true,
+      dataSource: 'Groq AI (Llama 3.3 70B)',
       stats: {
-        yourKeywords: yours.length,
-        compKeywords: comps.length,
-        shared: shared.length,
-        yourAdvantage: onlyYours.length,
-        missing: onlyComp.length,
-        overlapPct
+        yourKeywords:  yours.length,
+        compKeywords:  comps.length,
+        shared:        sharedAnalysed.length,
+        yourAdvantage: onlyYoursAnalysed.length,
+        missing:       onlyCompAnalysed.length,
+        overlapPct,
       },
       overlap: {
-        yourPct: Math.round((yO / Math.max(tot, 1)) * 100),
-        sharedPct: Math.round((shared.length / Math.max(tot, 1)) * 100),
-        compPct: Math.round((cO / Math.max(tot, 1)) * 100)
+        yourPct:   Math.round((yO  / Math.max(tot, 1)) * 100),
+        sharedPct: Math.round((sharedRaw.length / Math.max(tot, 1)) * 100),
+        compPct:   Math.round((cO  / Math.max(tot, 1)) * 100),
       },
-      shared,
-      onlyYours,
-      onlyComp,
+      shared:          sharedAnalysed,
+      onlyYours:       onlyYoursAnalysed,
+      onlyComp:        onlyCompAnalysed,
       quickWins,
       highValue,
       topicGaps,
       intentComparison,
-      dataSource // Let the frontend know where data came from
     });
 
   } catch (err) {
@@ -1506,6 +1561,34 @@ app.post('/api/competitor-analysis', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+/* ── Fallback if AI fails ── */
+function fallbackAnalysis(k) {
+  const kw    = k.keyword.toLowerCase();
+  const words = kw.trim().split(/\s+/).length;
+
+  let intent = 'Informational';
+  if (/buy|price|cheap|deal|discount|order|shop|purchase|hire/.test(kw))  intent = 'Transactional';
+  else if (/best|top|review|vs|compare|alternative|recommend/.test(kw))   intent = 'Commercial';
+  else if (/login|sign in|official|website|download/.test(kw))            intent = 'Navigational';
+
+  const difficulty  = words >= 4 ? 'Easy' : words === 3 ? 'Low' : words === 2 ? 'Medium' : 'Hard';
+  const funnelStage = intent === 'Transactional' ? 'Decision' : intent === 'Commercial' ? 'Consideration' : 'Awareness';
+  const diffScore   = { Easy: 4, Low: 3, Medium: 2, Hard: 1 }[difficulty];
+  const volScore    = k.volume > 10000 ? 5 : k.volume > 1000 ? 3 : k.volume > 100 ? 2 : 1;
+
+  return {
+    keyword:           k.keyword,
+    volume:            k.volume || 0,
+    intent,
+    difficulty,
+    funnelStage,
+    pageType:          intent === 'Transactional' ? 'Product/Landing Page' : intent === 'Commercial' ? 'Comparison/Review' : 'Blog Post/Guide',
+    opportunityScore:  Math.min(20, diffScore * volScore),
+    contentAngle:      `Create a comprehensive ${intent.toLowerCase()} page targeting "${k.keyword}".`,
+    recommendedAction: intent === 'Transactional' ? 'Create Landing Page' : intent === 'Commercial' ? 'Write Comparison Article' : 'Write Blog Post/Guide',
+  };
+}
 
 /* ================================================================
    API — KEYWORD GAP ANALYSIS (AI-powered via Groq — FREE)
@@ -1733,34 +1816,34 @@ RULES:
   }
 });
 
-/* ── Fallback analysis if AI fails for a batch ── */
-function fallbackAnalysis(k) {
-  const kw   = k.keyword.toLowerCase();
-  const words = kw.trim().split(/\s+/).length;
+// /* ── Fallback analysis if AI fails for a batch ── */
+// function fallbackAnalysis(k) {
+//   const kw   = k.keyword.toLowerCase();
+//   const words = kw.trim().split(/\s+/).length;
 
-  let intent = 'Informational';
-  if (/buy|price|cheap|deal|discount|order|shop|purchase|coupon/.test(kw))  intent = 'Transactional';
-  else if (/best|top|review|vs|compare|alternative|recommend/.test(kw))     intent = 'Commercial';
-  else if (/how|what|why|guide|tutorial|learn|tips|examples/.test(kw))      intent = 'Informational';
-  else if (/login|sign in|official|website|download/.test(kw))              intent = 'Navigational';
+//   let intent = 'Informational';
+//   if (/buy|price|cheap|deal|discount|order|shop|purchase|coupon/.test(kw))  intent = 'Transactional';
+//   else if (/best|top|review|vs|compare|alternative|recommend/.test(kw))     intent = 'Commercial';
+//   else if (/how|what|why|guide|tutorial|learn|tips|examples/.test(kw))      intent = 'Informational';
+//   else if (/login|sign in|official|website|download/.test(kw))              intent = 'Navigational';
 
-  const difficulty = words >= 4 ? 'Easy' : words === 3 ? 'Low' : words === 2 ? 'Medium' : 'Hard';
-  const funnelStage = intent === 'Transactional' ? 'Decision' : intent === 'Commercial' ? 'Consideration' : 'Awareness';
-  const diffScore = { Easy:4, Low:3, Medium:2, Hard:1 }[difficulty];
-  const volScore  = k.volume > 10000 ? 5 : k.volume > 1000 ? 3 : k.volume > 100 ? 2 : 1;
+//   const difficulty = words >= 4 ? 'Easy' : words === 3 ? 'Low' : words === 2 ? 'Medium' : 'Hard';
+//   const funnelStage = intent === 'Transactional' ? 'Decision' : intent === 'Commercial' ? 'Consideration' : 'Awareness';
+//   const diffScore = { Easy:4, Low:3, Medium:2, Hard:1 }[difficulty];
+//   const volScore  = k.volume > 10000 ? 5 : k.volume > 1000 ? 3 : k.volume > 100 ? 2 : 1;
 
-  return {
-    keyword:           k.keyword,
-    volume:            k.volume || 0,
-    intent,
-    difficulty,
-    funnelStage,
-    pageType:          intent === 'Transactional' ? 'Product/Landing Page' : intent === 'Commercial' ? 'Comparison/Review' : 'Blog Post/Guide',
-    opportunityScore:  Math.min(20, diffScore * volScore),
-    contentBrief:      `Create a comprehensive ${intent.toLowerCase()} page targeting "${k.keyword}".`,
-    recommendedAction: intent === 'Transactional' ? 'Create Landing Page' : intent === 'Commercial' ? 'Write Comparison Article' : 'Write Blog Post/Guide'
-  };
-}
+//   return {
+//     keyword:           k.keyword,
+//     volume:            k.volume || 0,
+//     intent,
+//     difficulty,
+//     funnelStage,
+//     pageType:          intent === 'Transactional' ? 'Product/Landing Page' : intent === 'Commercial' ? 'Comparison/Review' : 'Blog Post/Guide',
+//     opportunityScore:  Math.min(20, diffScore * volScore),
+//     contentBrief:      `Create a comprehensive ${intent.toLowerCase()} page targeting "${k.keyword}".`,
+//     recommendedAction: intent === 'Transactional' ? 'Create Landing Page' : intent === 'Commercial' ? 'Write Comparison Article' : 'Write Blog Post/Guide'
+//   };
+// }
 
 // /* ── Helpers ── */
 // function clusterKey(kw) {
