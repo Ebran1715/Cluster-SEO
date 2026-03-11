@@ -9,7 +9,21 @@ import { fileURLToPath } from 'url';
 const PSI_CACHE = new Map();
 const PSI_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours cache
 // Add this near the top with your other constants
-const stopWords = new Set(['The','In','It','At','On','An','By','As','To','Of','Or','And','But','For','With','From','This','That','These','Those','They','Their','There','Then','When','Where','While','Which','Who','What','How','Also','Both','Each','Such','More','Most','Many','Some','Other','After','Before','During','Since','Although','However','Therefore','Moreover','Furthermore','Additionally','Nevertheless','Meanwhile','Artificial','Intelligence','United','States','Kingdom','January','February','March','April','June','July','August','September','October','November','December']);
+const stopWords = new Set([
+  'the','a','an','and','or','but','in','on','at','to','for','of','with',
+  'by','from','as','is','was','were','be','been','have','has','had','do',
+  'does','did','will','would','could','should','may','might','that','this',
+  'these','those','it','its','we','our','you','your','they','their','he',
+  'she','his','her','i','my','me','us','him','them','who','which','what',
+  'when','where','how','why','not','also','more','most','some','any','all',
+  'each','other','into','than','then','there','here','so','if','about',
+  'after','before','just','only','very','can','no','such','known','called',
+  'often','later','early','new','old','first','last','many','several','two',
+  'three','four','five','six','seven','eight','nine','ten','however',
+  'although','since','while','during','between','among','through','along',
+  'following','across','behind','beyond','including','until','use','used'
+]);
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -78,6 +92,126 @@ app.get('/auth/google', (req,res)=>{
     prompt:        'consent'
   });
   res.redirect(url);
+});
+
+/* ================================================================
+   ADD THIS ROUTE TO YOUR server.js
+   Paste it alongside your other app.get('/api/...') routes
+   
+   Uses Groq API — 100% FREE, no billing, no credit card
+   Get key at: console.groq.com → API Keys → Create API Key
+   Add to .env: GROQ_API_KEY=gsk_...
+================================================================ */
+
+app.post('/api/gemini-extract', async (req, res) => {
+  try {
+    const { topic, description, fullText, sections, categories } = req.body;
+    if (!topic) return res.status(400).json({ success: false, error: 'No topic provided' });
+
+    const prompt = `You are an expert SEO analyst and NLP specialist. Analyse this Wikipedia article and return ONLY a valid JSON object. No markdown, no explanation, no extra text — pure JSON only.
+
+TOPIC: ${topic}
+DESCRIPTION: ${description}
+ARTICLE TEXT:
+${fullText}
+
+ARTICLE SECTIONS: ${(sections||[]).join(' | ')}
+CATEGORIES: ${(categories||[]).join(', ')}
+
+Return this exact JSON structure:
+{
+  "topicType": "person|company|place|concept|technology|event|creative|other",
+  "entities": {
+    "people": [],
+    "organizations": [],
+    "places": [],
+    "dates": [],
+    "numbers": []
+  },
+  "keyFacts": [],
+  "semanticKeywords": []
+}
+
+ENTITY RULES:
+- people: Real full person names (2+ words) mentioned in the article only. No job titles, no generic terms.
+- organizations: Real company/institution/government names from the article.
+- places: Real geographic locations (cities, countries, regions) from the article.
+- dates: Specific years or date expressions from the article text.
+- numbers: Key statistics, financial figures, measurements from the article.
+- Max 20 per category. Only real entities actually in the text.
+
+KEY FACTS (10-15 items):
+- The most important factual sentences from the article text.
+- Each must be a complete, self-contained sentence from the article.
+- No invented content — only real facts from the text.
+
+SEMANTIC KEYWORDS (40-50 items):
+- Realistic Google search queries someone would type to research this exact topic.
+- Every keyword MUST include the topic name "${topic}".
+- Use modifiers based on topic type:
+  * person → net worth, wife, age, biography, children, companies, quotes, house, education, nationality, early life, career, height, religion
+  * company → ceo, products, revenue, valuation, investors, competitors, api, pricing, headquarters, stock, founded, acquisition, employees
+  * place → population, map, things to do, weather, hotels, economy, history, culture, tourism, government, language, capital
+  * concept/technology → definition, how it works, examples, tutorial, types, applications, benefits, disadvantages, vs, use cases, future, guide, introduction
+  * event → date, cause, timeline, impact, aftermath, victims, response, documentary
+  * creative → cast, plot, review, release date, awards, sequel, director, soundtrack, trailer
+- DO NOT include: Wikipedia section names, legal case names, scandal phrases, "works cited", or anything not a real Google search query.`;
+
+    // ── Groq API call (free, fast, no billing needed) ──
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.2,
+        max_tokens: 1500,
+        response_format: { type: 'json_object' }  // forces pure JSON — no markdown fences
+      })
+    });
+
+    const groqData = await groqRes.json();
+
+    // Handle API errors
+    if (groqData.error) {
+      return res.status(500).json({ success: false, error: `Groq error: ${groqData.error.message}` });
+    }
+
+    const raw = groqData?.choices?.[0]?.message?.content || '';
+    if (!raw) return res.status(500).json({ success: false, error: 'AI returned empty response.' });
+
+    // Parse JSON
+    let parsed;
+    try {
+      const clean = raw.replace(/```json\s*|```\s*/g, '').trim();
+      const match = clean.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('No JSON found');
+      parsed = JSON.parse(match[0]);
+    } catch (e) {
+      return res.status(500).json({ success: false, error: 'AI returned invalid JSON. Try again.' });
+    }
+
+    res.json({
+      success: true,
+      topicType:        parsed.topicType        || 'general',
+      entities: {
+        people:        (parsed.entities?.people        || []).slice(0, 20),
+        organizations: (parsed.entities?.organizations || []).slice(0, 20),
+        places:        (parsed.entities?.places        || []).slice(0, 20),
+        dates:         (parsed.entities?.dates         || []).slice(0, 20),
+        numbers:       (parsed.entities?.numbers       || []).slice(0, 20),
+      },
+      keyFacts:         (parsed.keyFacts         || []).slice(0, 15),
+      semanticKeywords: (parsed.semanticKeywords || []).slice(0, 50),
+    });
+
+  } catch (err) {
+    console.error('AI extract error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // Step 2: Google redirects back here with ?code=
@@ -1512,188 +1646,124 @@ app.post('/api/keyword-gap', (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
 /* ================================================================
-   API 8 — WIKIPEDIA ENTITY (Enhanced with Real Content Extraction)
+   WIKIPEDIA ENTITY EXPLORER — Improved API
+   Uses: Wikipedia REST API + MediaWiki API + Wikidata API (all free)
 ================================================================ */
-app.get('/api/wikipedia-entity', async (req,res)=>{
+
+
+// ── Main handler ───────────────────────────────────────────────
+app.get('/api/wikipedia-entity', async (req, res) => {
   try {
-    const topic=(req.query.topic||req.query.q||'').trim();
-    if(!topic) return res.status(400).json({success:false,error:'No topic provided'});
-    
-    const enc=encodeURIComponent(topic);
-    const BASE='https://en.wikipedia.org';
-    
-    // Fetch all Wikipedia data in parallel
-    const [sumR, lnkR, catR, introR, sectionsR] = await Promise.allSettled([
-      fetch(`${BASE}/api/rest_v1/page/summary/${enc}`).then(r=>r.json()),
-      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=links&pllimit=500&format=json&origin=*`).then(r=>r.json()),
-      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=categories&cllimit=100&format=json&origin=*&clshow=!hidden`).then(r=>r.json()),
-      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=extracts&exlimit=1&explaintext=true&exsectionformat=plain&format=json&origin=*`).then(r=>r.json()),
-      fetch(`${BASE}/w/api.php?action=parse&page=${enc}&prop=sections&format=json&origin=*`).then(r=>r.json())
+    const topic = (req.query.topic || req.query.q || '').trim();
+    if (!topic) return res.status(400).json({ success: false, error: 'No topic provided' });
+
+    const enc = encodeURIComponent(topic);
+    const BASE = 'https://en.wikipedia.org';
+
+    // ── 1. Parallel fetch: summary + links + categories + full extract + sections + wikidata ──
+    const [sumR, lnkR, catR, introR, sectionsR, wikidataR, searchR] = await Promise.allSettled([
+      // REST summary (thumbnail, description, short extract)
+      fetch(`${BASE}/api/rest_v1/page/summary/${enc}`).then(r => r.json()),
+
+      // Internal links (related topics)
+      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=links&pllimit=500&format=json&origin=*`).then(r => r.json()),
+
+      // Categories
+      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=categories&cllimit=100&format=json&origin=*&clshow=!hidden`).then(r => r.json()),
+
+      // Full plaintext extract (for NLP)
+      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=extracts&exlimit=1&explaintext=true&exsectionformat=plain&format=json&origin=*`).then(r => r.json()),
+
+      // Section headings
+      fetch(`${BASE}/w/api.php?action=parse&page=${enc}&prop=sections&format=json&origin=*`).then(r => r.json()),
+
+      // Wikidata entity — for structured facts (aliases, instance-of, etc.)
+      fetch(`${BASE}/w/api.php?action=query&titles=${enc}&prop=pageprops&ppprop=wikibase_item&format=json&origin=*`)
+        .then(r => r.json())
+        .then(async data => {
+          const pages = Object.values(data?.query?.pages || {});
+          const qid = pages[0]?.pageprops?.wikibase_item;
+          if (!qid) return null;
+          const wd = await fetch(
+            `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qid}&languages=en&props=labels|descriptions|aliases|claims&format=json&origin=*`
+          ).then(r => r.json());
+          return { qid, entity: wd?.entities?.[qid] };
+        }),
+
+      // Wikipedia search — for related topics beyond direct links
+      fetch(`${BASE}/w/api.php?action=query&list=search&srsearch=${enc}&srlimit=20&format=json&origin=*`).then(r => r.json()),
     ]);
-    
-    const sum=sumR.status==='fulfilled'?sumR.value:{};
-    if(!sum.title||sum.type?.includes('not_found')) {
-      return res.status(404).json({success:false,error:`No Wikipedia article found for "${topic}".`});
+
+    // ── 2. Validate article exists ──
+    const sum = sumR.status === 'fulfilled' ? sumR.value : {};
+    if (!sum.title || sum.type?.includes('not_found') || sum.title === 'Not found') {
+      return res.status(404).json({ success: false, error: `No Wikipedia article found for "${topic}".` });
     }
-    
-    // Extract related links
-    let relatedLinks=[];
-    if(lnkR.status==='fulfilled'){ 
-      const pg=Object.values(lnkR.value?.query?.pages||{})[0]; 
-      relatedLinks=(pg?.links||[])
-        .map(l=>l.title)
-        .filter(t=>!t.includes(':') && !t.includes('(disambiguation)'))
-        .slice(0, 50);
+
+    // ── 3. Full article text ──
+    let fullText = '';
+    if (introR.status === 'fulfilled') {
+      const pg = Object.values(introR.value?.query?.pages || {})[0];
+      fullText = pg?.extract || '';
     }
-    
-    // Extract categories
-    let categories=[];
-    if(catR.status==='fulfilled'){ 
-      const pg=Object.values(catR.value?.query?.pages||{})[0]; 
-      categories=(pg?.categories||[])
-        .map(c=>c.title.replace('Category:',''))
-        .filter(c=>!c.match(/^(Articles|Wikipedia|Pages|CS1|Webarchive|All |Use |Coordinates|Short description|Good article|Featured|Cleanup)/))
+    // Fallback to REST summary extract
+    const text = fullText || sum.extract || '';
+    // Work on intro paragraph only for speed (first 3000 chars)
+    const introText = text.slice(0, 6000);
+
+    // ── 4. Section headings ──
+    let sections = [];
+    if (sectionsR.status === 'fulfilled' && sectionsR.value?.parse?.sections) {
+      sections = sectionsR.value.parse.sections
+        .map(s => s.line.replace(/<[^>]+>/g, '')) // strip HTML tags
+        .filter(s => s && !['References','External links','See also','Notes','Bibliography','Further reading','Footnotes'].includes(s));
+    }
+
+    // ── 5. Categories ──
+    let categories = [];
+    if (catR.status === 'fulfilled') {
+      const pg = Object.values(catR.value?.query?.pages || {})[0];
+      categories = (pg?.categories || [])
+        .map(c => c.title.replace('Category:', ''))
+        .filter(c => !c.match(/^(Articles|Wikipedia|Pages|CS1|Webarchive|All |Use |Coordinates|Short description|Good articles|Featured|Cleanup|Disambiguation|Redirects)/))
         .slice(0, 30);
     }
-    
-    // Get full text content
-    let fullIntro='';
-    if(introR.status==='fulfilled'){ 
-      const pg=Object.values(introR.value?.query?.pages||{})[0]; 
-      fullIntro=pg?.extract||''; 
+
+    // ── 6. Related links (internal Wikipedia links) ──
+    let relatedLinks = [];
+    if (lnkR.status === 'fulfilled') {
+      const pg = Object.values(lnkR.value?.query?.pages || {})[0];
+      relatedLinks = (pg?.links || [])
+        .map(l => l.title)
+        .filter(t => !t.includes(':') && !t.includes('(disambiguation)') && t !== sum.title)
+        .slice(0, 50);
     }
-    const text = fullIntro || sum.extract || '';
-    
-    // Extract article sections
-    let sections = [];
-    if(sectionsR.status==='fulfilled' && sectionsR.value?.parse?.sections) {
-      sections = sectionsR.value.parse.sections.map(s => s.line).filter(s => s && !s.includes('References') && !s.includes('External links'));
+
+    // Add search results as additional related topics
+    if (searchR.status === 'fulfilled') {
+      const searchResults = (searchR.value?.query?.search || [])
+        .map(r => r.title)
+        .filter(t => t !== sum.title && !relatedLinks.includes(t));
+      relatedLinks = [...relatedLinks, ...searchResults].slice(0, 60);
     }
-    
-    // IMPROVED ENTITY EXTRACTION
-    const entities = { people:[], organizations:[], places:[], dates:[], numbers:[] };
-    
-    // Better person name extraction using NLP-like patterns
-    const personPatterns = [
-      /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\s+(?:is|was|born|died|known for|founded|created|developed|invented|discovered|authored|wrote|said|argued|proposed|coined)\b/gi,
-      /\b(?:by|from|according to|attributed to)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})\b/gi,
-      /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2})(?:,|\s+)(?:the\s+)?(?:founder|CEO|president|director|professor|scientist|author|painter|composer|engineer)\b/gi
-    ];
-    
-    personPatterns.forEach(pattern => {
-      let m;
-      while((m = pattern.exec(text)) !== null) {
-        const name = m[1].trim();
-        if(name.length > 3 && name.split(' ').length >= 2 && !entities.people.includes(name)) {
-          entities.people.push(name);
-        }
-      }
-    });
-    
-    // Add known people from context
-    const knownPeople = text.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\b/g) || [];
-    knownPeople.forEach(name => {
-      if(name.split(' ').length >= 2 && 
-         name.length > 3 && 
-         !entities.people.includes(name) && 
-         !stopWords.has(name.split(' ')[0]) &&
-         !stopWords.has(name.split(' ')[name.split(' ').length-1])) {
-        
-        // Check if this name appears in a context that suggests it's a person
-        const context = text.slice(Math.max(0, text.indexOf(name) - 50), Math.min(text.length, text.indexOf(name) + 100));
-        if(/\b(born|died|said|wrote|founded|created|developed|invented|discovered|authored|argued|proposed|coined)\b/i.test(context)) {
-          if(!entities.people.includes(name)) entities.people.push(name);
-        }
-      }
-    });
-    
-    // Extract organizations
-    const orgPatterns = [
-      /\b([A-Z][A-Za-z0-9]+(?:\s+[A-Z][A-Za-z0-9]+){0,3})\s+(?:Inc|Corp|Ltd|LLC|PLC|Group|Holdings|Technologies|Systems|Solutions|University|College|Institute|Foundation|Association|Organization|Corporation|Company)\b/gi,
-      /\b(?:at|joins?|founded|acquired by|owned by|backed by)\s+([A-Z][A-Za-z0-9]+(?:\s+[A-Z][A-Za-z0-9]+){0,3})\b/gi
-    ];
-    
-    orgPatterns.forEach(pattern => {
-      let m;
-      while((m = pattern.exec(text)) !== null) {
-        const org = m[1].trim();
-        if(org.length > 2 && !entities.organizations.includes(org)) {
-          entities.organizations.push(org);
-        }
-      }
-    });
-    
-    // Extract places
-    const placePatterns = [
-      /\b(in|at|near|from|to|located in|based in|headquartered in)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b/gi,
-      /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?:,|\s+)(?:[A-Z]{2}|United States|UK|USA|Canada|Australia|Europe|Asia|Africa)\b/gi
-    ];
-    
-    placePatterns.forEach(pattern => {
-      let m;
-      while((m = pattern.exec(text)) !== null) {
-        const place = (m[2] || m[1]).trim();
-        if(place.length > 3 && !entities.places.includes(place) && 
-           !['January','February','March','April','May','June','July','August','September','October','November','December'].includes(place)) {
-          entities.places.push(place);
-        }
-      }
-    });
-    
-    // Extract dates
-    const datePatterns = [
-      /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/g,
-      /\b\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}\b/g,
-      /\b\d{4}\b/g
-    ];
-    
-    datePatterns.forEach(pattern => {
-      let m;
-      while((m = pattern.exec(text)) !== null) {
-        if(!entities.dates.includes(m[0])) entities.dates.push(m[0]);
-      }
-    });
-    
-    // Extract numbers/statistics
-    const numberPatterns = [
-      /\b\d+(?:[,.]\d+)?(?:\s*(?:million|billion|trillion|thousand|percent|%|km|mi|kg|lb|years|people|dollars|euros|pounds))\b/gi,
-      /\b(?:over|more than|approximately|about|around)\s+(\d+(?:[,.]\d+)?)\b/gi
-    ];
-    
-    numberPatterns.forEach(pattern => {
-      let m;
-      while((m = pattern.exec(text)) !== null) {
-        if(!entities.numbers.includes(m[0])) entities.numbers.push(m[0]);
-      }
-    });
-    
-    // Deduplicate entities
-    Object.keys(entities).forEach(key => {
-      entities[key] = [...new Set(entities[key])].slice(0, 30);
-    });
-    
-    // IMPROVED KEY FACTS EXTRACTION
-    const keyFacts = (text.match(/[^.!?]+[.!?]/g) || [])
-      .filter(s => {
-        const lower = s.toLowerCase();
-        return (
-          /\d{4}/.test(s) || // Contains a year
-          /\b(founded|created|developed|invented|established|introduced|launched|released|discovered|first|largest|most|known for|famous for)\b/i.test(lower) ||
-          /\b(CEO|president|founder|director|professor|scientist|author)\b/i.test(lower) ||
-          /\b(million|billion|trillion|percent|%)\b/i.test(lower)
-        );
-      })
-      .map(s => s.trim())
-      .slice(0, 15);
-    
-    // IMPROVED SEMANTIC KEYWORDS - Now based on actual Wikipedia content
-    const semanticKeywords = generateSemanticKeywords(text, topic, categories, sections);
-    
-    // Clean up and limit
-    const uniqueKeywords = [...new Set(semanticKeywords)].filter(kw => kw.length > 3).slice(0, 40);
-    
+
+    // ── 7. Wikidata structured data ──
+    let wikidataInfo = null;
+    if (wikidataR.status === 'fulfilled' && wikidataR.value) {
+      wikidataInfo = wikidataR.value;
+    }
+
+    // ── 8. Entity extraction (improved) ──
+    const entities = extractEntities(text, sum.title);
+
+    // ── 9. Key facts (improved) ──
+    const keyFacts = extractKeyFacts(text, sum.title);
+
+    // ── 10. Semantic keywords (improved) ──
+    const semanticKeywords = generateSemanticKeywords(text, sum.title, categories, sections, relatedLinks);
+
+    // ── 11. Return ──
     res.json({
       success: true,
       topic: sum.title,
@@ -1701,84 +1771,310 @@ app.get('/api/wikipedia-entity', async (req,res)=>{
       extract: sum.extract,
       thumbnail: sum.thumbnail?.source || null,
       url: sum.content_urls?.desktop?.page || null,
+      wikidataId: wikidataInfo?.qid || null,
       entities,
       relatedLinks: relatedLinks.slice(0, 50),
-      categories: categories.slice(0, 30),
-      sections: sections.slice(0, 20),
+      categories,
+      sections: sections.slice(0, 25),
       keyFacts,
-      semanticKeywords: uniqueKeywords
+      semanticKeywords: semanticKeywords.slice(0, 50),
     });
-    
-  } catch(err){ 
-    console.error('Wikipedia API error:', err); 
-    res.status(500).json({success:false, error:err.message}); 
+
+  } catch (err) {
+    console.error('Wikipedia API error:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// Helper function to generate semantic keywords from actual content
-function generateSemanticKeywords(text, topic, categories, sections) {
-  const keywords = new Set();
-  const words = text.toLowerCase().split(/\s+/);
-  const stopWords = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','from','as','is','was','were','be','been','have','has','had','do','does','did','will','would','could','should','may','might','that','this','these','those','it','its','we','our','you','your','they','their','he','she','his','her','i','my','me','us','him','them','who','which','what','when','where','how','why','not','also','more','most','some','any','all','each','other','into','than','then','there','here','so','if','about','after','before','just','only','very','can','no']);
-  
-  // Extract noun phrases (2-3 word combinations that appear frequently)
-  for (let i = 0; i < words.length - 1; i++) {
-    // 2-word phrases
-    if (!stopWords.has(words[i]) && !stopWords.has(words[i+1])) {
-      const phrase2 = words[i] + ' ' + words[i+1];
-      if (phrase2.length > 5) keywords.add(phrase2);
+
+/* ================================================================
+   ENTITY EXTRACTION — NER-style using pattern + context windows
+================================================================ */
+function extractEntities(text, topicTitle) {
+  const entities = { people: [], organizations: [], places: [], dates: [], numbers: [] };
+  if (!text) return entities;
+
+  const sentences = text.match(/[^.!?\n]+[.!?\n]/g) || [];
+
+  // ── People ──
+  // Strategy: multi-word capitalized sequences near person-signal words
+  const personSignals = /\b(born|died|was|founded|created|developed|invented|discovered|authored|wrote|said|argued|proposed|coined|directed|led|served|appointed|awarded|won|received|studied|attended|graduated|married|collaborated|worked)\b/i;
+  const personTitles = /\b(Mr|Mrs|Ms|Dr|Prof|Sir|Dame|Lord|Lady|Captain|General|President|Senator|Chancellor|Minister|Archbishop|Bishop|Rabbi|Imam|Sheikh|Prince|Princess|Duke|Duchess|Count|Baron|Baroness)\b\.?/;
+
+  sentences.forEach(sent => {
+    // Look for person titles
+    const titleMatches = sent.matchAll(new RegExp(`${personTitles.source}\\s+([A-Z][a-z]+(?: [A-Z][a-z]+){0,2})`, 'g'));
+    for (const m of titleMatches) {
+      const name = m[2]?.trim();
+      if (name && name.length > 2) push(entities.people, name);
     }
-    
-    // 3-word phrases
-    if (i < words.length - 2) {
-      if (!stopWords.has(words[i]) && !stopWords.has(words[i+1]) && !stopWords.has(words[i+2])) {
-        const phrase3 = words[i] + ' ' + words[i+1] + ' ' + words[i+2];
-        if (phrase3.length > 8) keywords.add(phrase3);
-      }
+
+    // Look for "FirstName LastName" near person signals
+    if (personSignals.test(sent)) {
+      const names = [...sent.matchAll(/\b([A-Z][a-záéíóúàèìòùâêîôûäëïöüñ]+(?:\s+[A-Z][a-záéíóúàèìòùâêîôûäëïöüñ]+){1,2})\b/g)];
+      names.forEach(m => {
+        const name = m[1].trim();
+        if (
+          name.split(' ').length >= 2 &&
+          name.length > 4 &&
+          !isCommonPhrase(name)
+        ) push(entities.people, name);
+      });
+    }
+  });
+
+  // ── Organizations ──
+  const orgSuffixes = /\b(Inc\.?|Corp\.?|Ltd\.?|LLC|PLC|LLP|Co\.?|AG|GmbH|S\.A\.|N\.V\.|Group|Holdings?|Technologies|Systems|Solutions|Networks|Ventures|Partners|Associates|Industries|Enterprises|Communications|Services|International|Global|National|Federal|Foundation|Institute|Academy|Association|Alliance|Coalition|Union|Bureau|Agency|Authority|Commission|Department|Ministry|Organisation|Organization|Corporation|Incorporated)\b/;
+  const orgRegex = new RegExp(
+    `([A-Z][A-Za-z0-9&'\\-]+(?: [A-Z][A-Za-z0-9&'\\-]+){0,4})\\s+${orgSuffixes.source}`,
+    'g'
+  );
+
+  for (const m of text.matchAll(orgRegex)) {
+    push(entities.organizations, (m[1] + ' ' + m[2]).trim());
+  }
+
+  // Also catch ALL-CAPS acronyms (e.g. NASA, WHO, IBM, UNESCO)
+  for (const m of text.matchAll(/\b([A-Z]{2,8})\b/g)) {
+    const abbr = m[1];
+    if (abbr.length >= 2 && abbr.length <= 8 && !isDateToken(abbr)) {
+      push(entities.organizations, abbr);
     }
   }
-  
-  // Add category-based keywords
-  categories.forEach(cat => {
-    const catWords = cat.toLowerCase().split(/\s+/);
-    catWords.forEach(word => {
-      if (word.length > 4 && !stopWords.has(word)) {
-        keywords.add(word);
-      }
-    });
+
+  // ── Places ──
+  const placeSignals = /\b(in|at|near|from|to|located in|based in|headquartered in|born in|founded in|died in|city of|state of|country of|region of|province of|capital of)\b/gi;
+  const continents = new Set(['Africa','Asia','Europe','Antarctica','Australia','Oceania','Americas']);
+  const countries = new Set(['United States','United Kingdom','France','Germany','China','Japan','India','Brazil','Canada','Australia','Italy','Spain','Russia','Mexico','Indonesia','Turkey','Netherlands','Switzerland','Sweden','Norway','Denmark','Finland','Belgium','Austria','Poland','Portugal','Greece','Argentina','Chile','Colombia','Venezuela','Peru','Egypt','Nigeria','South Africa','Kenya','Ethiopia','Morocco','Algeria','Saudi Arabia','Iran','Iraq','Pakistan','Bangladesh','Vietnam','Thailand','Philippines','Malaysia','Singapore','Israel','UAE','Qatar','Kuwait','Bahrain','Oman','Jordan','Lebanon','Syria','Afghanistan','Ukraine','Romania','Czech','Hungary','Slovakia','Serbia','Croatia','Bosnia','Albania','Bulgaria','Latvia','Lithuania','Estonia']);
+
+  for (const m of text.matchAll(/\b(in|at|from|near|to)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b/g)) {
+    const place = m[2].trim();
+    if (place.length > 3 && !isMonth(place) && !isCommonPhrase(place)) {
+      push(entities.places, place);
+    }
+  }
+  // Always include countries/continents mentioned
+  [...countries, ...continents].forEach(place => {
+    if (text.includes(place)) push(entities.places, place);
   });
-  
-  // Add section titles as keywords
-  sections.forEach(section => {
-    const sectionLower = section.toLowerCase();
-    if (sectionLower.length > 3 && !stopWords.has(sectionLower)) {
-      keywords.add(sectionLower);
-      
-      // Add "history of [topic]" if section contains history
-      if (sectionLower.includes('history')) {
-        keywords.add(`history of ${topic.toLowerCase()}`);
-      }
-      // Add "types of [topic]" if section contains types
-      if (sectionLower.includes('types') || sectionLower.includes('kinds')) {
-        keywords.add(`types of ${topic.toLowerCase()}`);
-      }
+
+  // ── Dates ──
+  const dateRegexes = [
+    /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/g,
+    /\b\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}\b/g,
+    /\b(?:early|mid|late)\s+\d{4}s?\b/gi,
+    /\b\d{4}(?:–|−|-)\d{2,4}\b/g,
+    /\b(?:19|20)\d{2}\b/g, // specific 4-digit years
+  ];
+  dateRegexes.forEach(re => {
+    for (const m of text.matchAll(re)) {
+      push(entities.dates, m[0].trim());
     }
   });
-  
-  // Add topic variations
-  keywords.add(topic.toLowerCase());
-  keywords.add(`what is ${topic.toLowerCase()}`);
-  keywords.add(`${topic.toLowerCase()} definition`);
-  keywords.add(`${topic.toLowerCase()} examples`);
-  keywords.add(`${topic.toLowerCase()} explained`);
-  
-  // Convert to array and sort by length (more specific first)
-  return Array.from(keywords)
-    .filter(kw => kw.split(' ').length <= 4) // Keep only up to 4-word phrases
-    .sort((a, b) => b.length - a.length)
-    .slice(0, 50);
+
+  // ── Numbers / Statistics ──
+  const numRegexes = [
+    /\b\d[\d,]*(?:\.\d+)?\s*(?:million|billion|trillion|thousand)\b/gi,
+    /\b\d[\d,]*(?:\.\d+)?%/g,
+    /\$\d[\d,]*(?:\.\d+)?(?:\s*(?:million|billion|trillion))?\b/gi,
+    /\b\d[\d,]*(?:\.\d+)?\s*(?:km²?|mi²?|km\/h|mph|kg|lb|tonnes?|meters?|feet|acres?|hectares?|years?|months?|days?|hours?|minutes?|seconds?|people|employees|users|customers)\b/gi,
+  ];
+  numRegexes.forEach(re => {
+    for (const m of text.matchAll(re)) {
+      push(entities.numbers, m[0].trim());
+    }
+  });
+
+  // ── Deduplicate + limit ──
+  Object.keys(entities).forEach(key => {
+    entities[key] = dedupe(entities[key]).slice(0, 30);
+  });
+
+  return entities;
 }
 
+/* ================================================================
+   KEY FACTS — sentence-level scoring
+================================================================ */
+function extractKeyFacts(text, topic) {
+  if (!text) return [];
+
+  const sentences = text.match(/[^.!?\n]{30,300}[.!?]/g) || [];
+
+  const scored = sentences.map(s => {
+    let score = 0;
+    const lower = s.toLowerCase();
+
+    if (/\b(founded|established|created|launched|introduced|invented|discovered)\b/.test(lower)) score += 3;
+    if (/\b(first|largest|oldest|youngest|only|primary|main|major|leading|top)\b/.test(lower)) score += 2;
+    if (/\b(million|billion|trillion|percent|%)\b/.test(lower)) score += 2;
+    if (/\b(19|20)\d{2}\b/.test(s)) score += 2;
+    if (/\b(CEO|president|founder|director|professor|chairman|co-founder)\b/i.test(s)) score += 2;
+    if (/\b(award|prize|Nobel|Oscar|Grammy|Pulitzer|Olympic)\b/i.test(s)) score += 2;
+    if (new RegExp(topic, 'i').test(s)) score += 1;
+    if (/\b(headquartered|based|located)\b/.test(lower)) score += 1;
+    if (s.length > 80 && s.length < 250) score += 1;
+
+    return { s: s.trim(), score };
+  });
+
+  return scored
+    .filter(x => x.score >= 2)
+    .sort((a, b) => b.score - a.score)
+    .map(x => x.s)
+    .slice(0, 15);
+}
+
+/* ================================================================
+   SEMANTIC KEYWORDS — TF-IDF-inspired extraction from real content
+================================================================ */
+function generateSemanticKeywords(text, topic, categories, sections, relatedLinks) {
+  const keywords = new Set();
+  const topicLower = topic.toLowerCase();
+
+  // ── A. Topic variations (always include) ──
+  keywords.add(topicLower);
+  keywords.add(`what is ${topicLower}`);
+  keywords.add(`${topicLower} definition`);
+  keywords.add(`${topicLower} meaning`);
+  keywords.add(`${topicLower} explained`);
+  keywords.add(`${topicLower} overview`);
+  keywords.add(`${topicLower} introduction`);
+  keywords.add(`${topicLower} guide`);
+  keywords.add(`${topicLower} tutorial`);
+  keywords.add(`${topicLower} examples`);
+  keywords.add(`${topicLower} history`);
+  keywords.add(`history of ${topicLower}`);
+  keywords.add(`${topicLower} types`);
+  keywords.add(`types of ${topicLower}`);
+  keywords.add(`${topicLower} uses`);
+  keywords.add(`${topicLower} applications`);
+  keywords.add(`${topicLower} benefits`);
+  keywords.add(`${topicLower} vs`);
+  keywords.add(`${topicLower} how it works`);
+  keywords.add(`how does ${topicLower} work`);
+
+  // ── B. Section-based keywords ──
+  sections.forEach(section => {
+    const sLow = section.toLowerCase().trim();
+    if (!sLow || stopWords.has(sLow)) return;
+
+    keywords.add(sLow);
+    keywords.add(`${topicLower} ${sLow}`);
+
+    if (/history|origin|background/.test(sLow)) keywords.add(`history of ${topicLower}`);
+    if (/type|kind|variant|form|categor/.test(sLow)) keywords.add(`types of ${topicLower}`);
+    if (/application|use|usage/.test(sLow)) keywords.add(`${topicLower} applications`);
+    if (/benefit|advantage/.test(sLow)) keywords.add(`${topicLower} benefits`);
+    if (/disadvantage|limitation|drawback|challenge|criticism/.test(sLow)) keywords.add(`${topicLower} disadvantages`);
+    if (/future|develop|trend/.test(sLow)) keywords.add(`future of ${topicLower}`);
+    if (/comparison|vs|versus/.test(sLow)) keywords.add(`${topicLower} comparison`);
+    if (/example|case/.test(sLow)) keywords.add(`${topicLower} examples`);
+    if (/component|part|element|structure/.test(sLow)) keywords.add(`${topicLower} components`);
+  });
+
+  // ── C. Category-based keywords ──
+  categories.forEach(cat => {
+    const cLow = cat.toLowerCase().trim();
+    cLow.split(/\s+/).forEach(word => {
+      if (word.length > 4 && !stopWords.has(word)) keywords.add(word);
+    });
+    if (cLow.length > 5 && cLow.length < 60) keywords.add(cLow);
+  });
+
+  // ── D. TF-IDF-style noun phrase extraction from article text ──
+  // Count frequency of 1–3 word noun-phrase candidates
+  const wordFreq = {};
+  const cleanText = text.toLowerCase().replace(/[^a-z0-9 \n]/g, ' ');
+  const words = cleanText.split(/\s+/).filter(w => w.length > 3 && !stopWords.has(w));
+
+  words.forEach(w => { wordFreq[w] = (wordFreq[w] || 0) + 1; });
+
+  // Bigrams
+  for (let i = 0; i < words.length - 1; i++) {
+    if (!stopWords.has(words[i]) && !stopWords.has(words[i + 1])) {
+      const bigram = `${words[i]} ${words[i + 1]}`;
+      wordFreq[bigram] = (wordFreq[bigram] || 0) + 1;
+    }
+  }
+
+  // Trigrams
+  for (let i = 0; i < words.length - 2; i++) {
+    if (!stopWords.has(words[i]) && !stopWords.has(words[i + 1]) && !stopWords.has(words[i + 2])) {
+      const trigram = `${words[i]} ${words[i + 1]} ${words[i + 2]}`;
+      wordFreq[trigram] = (wordFreq[trigram] || 0) + 1;
+    }
+  }
+
+  // Pick terms with freq >= 2 (appear multiple times = likely important)
+  Object.entries(wordFreq)
+    .filter(([term, freq]) => freq >= 2 && term.length > 4)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 60)
+    .forEach(([term]) => keywords.add(term));
+
+  // ── E. Top related links become keyword suggestions ──
+  relatedLinks.slice(0, 20).forEach(link => {
+    const lLow = link.toLowerCase();
+    if (lLow.length > 3 && lLow.length < 50) keywords.add(lLow);
+  });
+
+  // ── F. Filter + sort ──
+  return [...keywords]
+    .map(k => k.trim())
+    .filter(k => {
+      if (k.length < 4 || k.length > 80) return false;
+      if (stopWords.has(k)) return false;
+      if (/^\d+$/.test(k)) return false; // pure numbers
+      return true;
+    })
+    .sort((a, b) => {
+      // Prioritize: topic-containing phrases > multi-word > single word
+      const aHasTopic = a.includes(topicLower) ? 1 : 0;
+      const bHasTopic = b.includes(topicLower) ? 1 : 0;
+      if (aHasTopic !== bHasTopic) return bHasTopic - aHasTopic;
+      return b.split(' ').length - a.split(' ').length;
+    })
+    .slice(0, 60);
+}
+
+/* ================================================================
+   HELPERS
+================================================================ */
+function push(arr, val) {
+  const v = val.trim();
+  if (v && !arr.includes(v)) arr.push(v);
+}
+
+function dedupe(arr) {
+  const seen = new Set();
+  return arr.filter(x => {
+    const k = x.toLowerCase().trim();
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
+function isMonth(s) {
+  return /^(January|February|March|April|May|June|July|August|September|October|November|December)$/.test(s);
+}
+
+function isDateToken(s) {
+  return /^(AD|BC|BCE|CE|AM|PM|UTC|GMT|EST|PST|CST|MST|EDT|PDT|CDT|MDT)$/.test(s);
+}
+
+function isCommonPhrase(s) {
+  const common = new Set([
+    'New York','Los Angeles','San Francisco','United States','United Kingdom',
+    'North America','South America','Middle East','East Asia','Southeast Asia',
+    'World War','Civil War','The World','The United','The New','The American',
+    'First World','Second World','Third World'
+  ]);
+  return common.has(s) ||
+    stopWords.has(s.toLowerCase()) ||
+    /^(The|A|An|This|That|These|Those|It|Its|His|Her|Their|Our|Your) /i.test(s);
+}
 /* ================================================================
    API 9 — BACKLINKS
 ================================================================ */

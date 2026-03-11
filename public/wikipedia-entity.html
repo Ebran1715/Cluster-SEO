@@ -3,25 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wikipedia Entity Explorer — ClusterSEO Pro</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Wikipedia Entity Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="shared.css">
 <style>
-:root{--dark:#1f2937;--dark2:#374151;--teal:#0ea5e9;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#7c3aed;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-700:#334155;--gray-900:#0f172a;--white:#fff;--font:'Sora',sans-serif;--shadow:0 20px 60px rgba(0,0,0,0.1);}
+:root{
+  --dark:#1f2937;--teal:#0ea5e9;--green:#10b981;--amber:#f59e0b;
+  --red:#ef4444;--purple:#7c3aed;
+  --gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+  --gray-400:#94a3b8;--gray-600:#475569;--gray-700:#334155;
+  --gray-900:#0f172a;--font:'Sora',sans-serif;
+  --shadow:0 20px 60px rgba(0,0,0,0.1);
+}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--font);background:#f0f4f8;color:var(--gray-900);min-height:100vh;}
-.tool-hero{background:linear-gradient(135deg,#374151,#1f2937);padding:52px 28px 40px;text-align:center;}
-.tool-hero h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:8px;}
-.tool-hero p{font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:14px;}
-.tool-back{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;text-decoration:none;}
+.hero{background:linear-gradient(135deg,#374151,#1f2937);padding:52px 28px 40px;text-align:center;}
+.hero h1{font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.03em;margin-bottom:8px;}
+.hero p{font-size:14px;color:rgba(255,255,255,0.6);}
+.badge-ai{display:inline-flex;align-items:center;gap:6px;margin-top:12px;background:rgba(66,133,244,0.2);border:1px solid rgba(66,133,244,0.4);border-radius:100px;padding:4px 14px;font-size:11px;font-weight:700;color:#93c5fd;letter-spacing:.04em;}
 .tool-section{padding:36px 20px 80px;}
 .tool-inner{max-width:1100px;margin:0 auto;}
 .card{background:#fff;border:1px solid var(--gray-200);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:20px;}
 .card-body{padding:24px;}
-/* Search */
 .search-row{display:flex;gap:10px;}
 .search-row input{flex:1;border:1.5px solid var(--gray-200);border-radius:10px;padding:13px 16px;font-size:14px;font-family:var(--font);color:var(--gray-700);background:#fafbfc;outline:none;transition:border-color .2s;}
 .search-row input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,165,233,.1);}
@@ -31,41 +35,31 @@ body{font-family:var(--font);background:#f0f4f8;color:var(--gray-900);min-height
 .btn-dark:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .btn-sec{background:#fff;border:1.5px solid var(--gray-200);color:var(--gray-600);font-size:12.5px;padding:9px 16px;}
 .btn-sec:hover{border-color:var(--teal);color:var(--teal);}
-.btn-teal{background:var(--teal);color:#fff;font-size:12px;padding:7px 14px;}
-.btn-teal:hover{opacity:.88;}
-/* Quick tags */
 .quick-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;align-items:center;}
 .qtag{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;background:#e0f2fe;color:#075985;border:1px solid rgba(14,165,233,.2);transition:all .15s;}
 .qtag:hover{background:#bae6fd;transform:translateY(-1px);}
-.qtag.history{background:#f1f5f9;color:#475569;border-color:var(--gray-200);}
-.qtag.history:hover{background:#e2e8f0;}
-/* Topic card */
 .topic-card{display:grid;grid-template-columns:auto 1fr;gap:20px;}
 @media(max-width:600px){.topic-card{grid-template-columns:1fr;}}
 .topic-thumb{width:150px;height:120px;border-radius:12px;object-fit:cover;border:1px solid var(--gray-200);flex-shrink:0;}
 .topic-thumb-ph{width:150px;height:120px;border-radius:12px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;color:var(--gray-300);font-size:2.5rem;border:1px solid var(--gray-200);flex-shrink:0;}
 .topic-title{font-size:1.4rem;font-weight:800;color:var(--gray-900);margin-bottom:4px;}
-.topic-desc{font-size:13px;color:var(--teal);font-weight:600;margin-bottom:8px;}
+.topic-desc{font-size:13px;color:var(--teal);font-weight:600;margin-bottom:6px;}
 .topic-extract{font-size:13px;color:var(--gray-600);line-height:1.7;}
 .topic-link{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 14px;background:var(--gray-100);border-radius:8px;font-size:12px;font-weight:600;color:var(--gray-600);text-decoration:none;transition:all .2s;}
 .topic-link:hover{background:var(--gray-200);}
-/* Tabs */
+.type-badge{display:inline-block;margin-bottom:8px;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:700;background:#ede9fe;color:#5b21b6;text-transform:uppercase;letter-spacing:.05em;}
 .tabs{display:flex;gap:4px;background:var(--gray-100);padding:4px;border-radius:10px;margin-bottom:18px;flex-wrap:wrap;}
 .tab{padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--gray-600);font-family:var(--font);transition:all .15s;display:flex;align-items:center;gap:5px;}
 .tab.active{background:#fff;color:var(--dark);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
 .tab-badge{background:var(--dark);color:#fff;border-radius:100px;padding:1px 6px;font-size:10px;}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
-/* Section card */
 .section-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;overflow:hidden;margin-bottom:14px;}
-.section-head{padding:13px 18px;border-bottom:1px solid var(--gray-100);background:var(--gray-50);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.section-head{padding:13px 18px;border-bottom:1px solid var(--gray-100);background:var(--gray-50);}
 .section-title{font-size:13px;font-weight:700;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
 .section-body{padding:16px 18px;}
-/* Tags */
 .tag-cloud{display:flex;flex-wrap:wrap;gap:7px;}
-.tag{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;cursor:default;transition:all .15s;border:1px solid transparent;}
-.tag.clickable{cursor:pointer;}
-.tag.clickable:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.1);}
+.tag{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid transparent;}
 .t-person{background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,.2);}
 .t-org{background:#e0f2fe;color:#075985;border-color:rgba(14,165,233,.2);}
 .t-place{background:#dcfce7;color:#14532d;border-color:rgba(34,197,94,.2);}
@@ -74,298 +68,401 @@ body{font-family:var(--font);background:#f0f4f8;color:var(--gray-900);min-height
 .t-cat{background:var(--gray-100);color:var(--gray-600);}
 .t-related{background:#f0fdf4;color:#14532d;cursor:pointer;}
 .t-related:hover{background:#dcfce7;}
-.t-semkw{background:#f0f9ff;color:#075985;cursor:pointer;}
-.t-semkw:hover{background:#e0f2fe;}
-/* Keyword list */
 .kw-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;font-size:13px;color:var(--gray-700);transition:background .15s;cursor:pointer;gap:8px;}
 .kw-item:hover{background:var(--gray-50);}
 .kw-copy-btn{font-size:10px;color:var(--gray-400);padding:2px 8px;border-radius:100px;border:1px solid var(--gray-200);white-space:nowrap;flex-shrink:0;transition:all .15s;}
 .kw-copy-btn:hover{background:var(--teal);color:#fff;border-color:var(--teal);}
-/* Fact items */
 .fact-item{font-size:13px;color:var(--gray-700);padding:8px 12px;border-left:3px solid var(--teal);background:var(--gray-50);border-radius:0 8px 8px 0;margin-bottom:8px;line-height:1.6;}
-/* Section headings list */
-.sec-item{padding:8px 12px;border-radius:8px;font-size:13px;color:var(--gray-700);background:var(--gray-50);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
-.sec-item i{color:var(--gray-400);font-size:11px;}
-/* Two cols */
-.two-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media(max-width:700px){.two-cols{grid-template-columns:1fr;}}
-/* Empty */
 .empty-state{text-align:center;padding:60px 24px;color:var(--gray-400);}
 .empty-state i{font-size:3rem;color:var(--gray-200);display:block;margin-bottom:14px;}
 .empty-state h3{font-size:16px;font-weight:700;color:var(--gray-500);margin-bottom:6px;}
 .spin{display:inline-block;width:30px;height:30px;border:3px solid var(--gray-200);border-top-color:var(--dark);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .notice{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#075985;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.notice-ai{background:#faf5ff;border-color:#ddd6fe;color:#5b21b6;}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:18px;}
+.stat-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;padding:14px;text-align:center;}
+.stat-num{font-size:1.6rem;font-weight:800;line-height:1;}
+.stat-lbl{font-size:10px;color:var(--gray-400);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.04em;}
+.progress-steps{display:flex;flex-direction:column;gap:10px;max-width:380px;margin:20px auto 0;}
+.step{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:10px;font-size:13px;color:var(--gray-400);background:var(--gray-50);border:1px solid var(--gray-200);}
+.step.active{color:var(--gray-700);border-color:var(--teal);background:#f0f9ff;}
+.step.done{color:var(--green);border-color:rgba(16,185,129,.3);background:#f0fdf4;}
+.step-icon{width:20px;text-align:center;flex-shrink:0;}
 </style>
 </head>
 <body>
-<div class="page-wrap">
-<section class="tool-hero">
-  <h1><i class="fab fa-wikipedia-w" style="margin-right:10px;"></i> Wikipedia Entity Explorer</h1>
-  <p>Look up any topic — extract entities, key facts, semantic keywords, article sections and related topics</p>
-  <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
-</section>
+
+<div class="hero">
+  <h1><i class="fab fa-wikipedia-w" style="margin-right:10px;"></i>Wikipedia Entity Explorer</h1>
+  <p>Extract entities, key facts, semantic keywords and related topics from any Wikipedia article</p>
+  <div class="badge-ai"><i class="fab fa-google"></i> AI-Powered by Google Gemini (Free)</div>
+</div>
+
 <section class="tool-section">
 <div class="tool-inner">
   <div class="card">
     <div class="card-body">
       <div class="search-row">
-        <input type="text" id="topicInput" placeholder="Enter any topic, person, company, place or concept..." value="Artificial intelligence" onkeydown="if(event.key==='Enter')lookupTopic()">
-        <button class="btn btn-dark" id="btnLookup" onclick="lookupTopic()"><i class="fab fa-wikipedia-w"></i> Lookup</button>
+        <input type="text" id="topicInput"
+               placeholder="Enter any topic, person, company, place or concept..."
+               value="Artificial intelligence"
+               onkeydown="if(event.key==='Enter')lookupTopic()">
+        <button class="btn btn-dark" id="btnLookup" onclick="lookupTopic()">
+          <i class="fab fa-wikipedia-w"></i> Lookup
+        </button>
       </div>
-      <div class="quick-tags" id="quickTags">
+      <div class="quick-tags">
         <span style="font-size:12px;color:var(--gray-400);">Try:</span>
         <span class="qtag" onclick="quickSearch('Elon Musk')">Elon Musk</span>
         <span class="qtag" onclick="quickSearch('OpenAI')">OpenAI</span>
-        <span class="qtag" onclick="quickSearch('Search engine optimization')">SEO</span>
         <span class="qtag" onclick="quickSearch('Machine learning')">Machine learning</span>
         <span class="qtag" onclick="quickSearch('Apple Inc.')">Apple Inc.</span>
+        <span class="qtag" onclick="quickSearch('Climate change')">Climate change</span>
         <span class="qtag" onclick="quickSearch('Digital marketing')">Digital marketing</span>
-      </div>
-      <div id="historyRow" style="display:none;margin-top:8px;">
-        <div style="font-size:11px;color:var(--gray-400);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;"><i class="fas fa-history" style="margin-right:4px;"></i>Recent searches</div>
-        <div class="quick-tags" id="historyTags"></div>
       </div>
     </div>
   </div>
   <div id="results">
-    <div class="empty-state"><i class="fab fa-wikipedia-w"></i><h3>Enter a topic to explore</h3><p>Look up any topic to extract entities, key facts, semantic keywords and related Wikipedia links</p></div>
+    <div class="empty-state">
+      <i class="fab fa-wikipedia-w"></i>
+      <h3>Enter a topic to explore</h3>
+      <p>Wikipedia fetches the article &nbsp;·&nbsp; Gemini AI extracts entities, keywords &amp; facts</p>
+    </div>
   </div>
 </div>
 </section>
-</div>
-<script src="shared-layout.js"></script>
+
 <script>
-const API = '';
 let lastData = null;
-let searchHistory = JSON.parse(localStorage.getItem('wiki_history') || '[]');
 
-renderHistory();
+function quickSearch(t){ document.getElementById('topicInput').value = t; lookupTopic(); }
 
-function renderHistory() {
-  const row = document.getElementById('historyRow');
-  const tags = document.getElementById('historyTags');
-  if (!searchHistory.length) { row.style.display = 'none'; return; }
-  row.style.display = 'block';
-  tags.innerHTML = searchHistory.slice(0,8).map(t =>
-    `<span class="qtag history" onclick="quickSearch('${escH(t).replace(/'/g,"&#39;")}')"><i class="fas fa-history" style="font-size:10px;"></i> ${escH(t)}</span>`
-  ).join('');
-}
-
-function addToHistory(topic) {
-  searchHistory = [topic, ...searchHistory.filter(t => t !== topic)].slice(0, 10);
-  localStorage.setItem('wiki_history', JSON.stringify(searchHistory));
-  renderHistory();
-}
-
-function quickSearch(topic) {
-  document.getElementById('topicInput').value = topic;
-  lookupTopic();
-}
-
-async function lookupTopic() {
+/* ════════════════════════════════════════════════════════
+   MAIN
+════════════════════════════════════════════════════════ */
+async function lookupTopic(){
   const topic = document.getElementById('topicInput').value.trim();
-  if (!topic) { alert('Please enter a topic.'); return; }
+  if(!topic){ alert('Please enter a topic.'); return; }
 
   const btn = document.getElementById('btnLookup');
-  btn.disabled = true; btn.innerHTML = '<span class="spin" style="width:16px;height:16px;border-width:2px;"></span> Looking up...';
-  document.getElementById('results').innerHTML = `<div class="empty-state"><div class="spin"></div><p style="margin-top:14px;color:var(--gray-400);">Looking up "${escH(topic)}" on Wikipedia...</p></div>`;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin" style="width:16px;height:16px;border-width:2px;"></span> Loading...';
+  setProgress('wiki');
 
   try {
-    const res  = await fetch(API + '/api/wikipedia-entity?' + new URLSearchParams({topic}));
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Not found');
-    lastData = data;
-    addToHistory(data.topic);
-    renderResults(data);
-  } catch(err) {
-    document.getElementById('results').innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red);"></i><h3>Not found</h3><p>${escH(err.message)}<br><small>Try a different spelling or more specific term.</small></p></div>`;
+    // Step 1 — fetch raw Wikipedia data (free, no key)
+    const wikiData = await fetchWikipedia(topic);
+    setProgress('ai');
+
+    // Step 2 — your backend calls Gemini (API key safe in .env)
+    const aiData = await extractWithGemini(wikiData);
+    setProgress('done');
+
+    lastData = { ...wikiData, ...aiData };
+    renderResults(lastData);
+  } catch(err){
+    document.getElementById('results').innerHTML =
+      `<div class="empty-state">
+        <i class="fas fa-exclamation-circle" style="color:var(--red);font-size:2.5rem;margin-bottom:12px;display:block;"></i>
+        <h3>Error</h3><p>${escH(err.message)}</p>
+       </div>`;
   }
-  btn.disabled = false; btn.innerHTML = '<i class="fab fa-wikipedia-w"></i> Lookup';
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fab fa-wikipedia-w"></i> Lookup';
 }
 
-function renderResults(data) {
+function setProgress(step){
+  const done = '<i class="fas fa-check" style="color:var(--green);"></i>';
+  const spin = '<i class="fas fa-circle-notch fa-spin" style="color:var(--teal);"></i>';
+  const idle = ic => `<i class="fas ${ic}" style="color:var(--gray-300);"></i>`;
+  const s = (cls,icon,label) =>
+    `<div class="step ${cls}"><span class="step-icon">${icon}</span>${label}</div>`;
+  document.getElementById('results').innerHTML = `
+    <div class="empty-state">
+      <div class="spin"></div>
+      <div class="progress-steps">
+        ${s(step==='wiki'?'active':'done', step==='wiki'?spin:done, 'Fetching Wikipedia article…')}
+        ${s(step==='ai'?'active':step==='done'?'done':'', step==='done'?done:step==='ai'?spin:idle('robot'), 'Gemini AI extracting entities, keywords &amp; facts…')}
+        ${s(step==='done'?'active':'', idle('magic'), 'Rendering results…')}
+      </div>
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════════════
+   STEP 1 — Wikipedia (free, no key needed)
+════════════════════════════════════════════════════════ */
+async function fetchWikipedia(topic){
+  const enc = encodeURIComponent(topic);
+  const W = 'https://en.wikipedia.org';
+
+  const [sumR, lnkR, catR, introR, secR, srchR] = await Promise.allSettled([
+    fetch(`${W}/api/rest_v1/page/summary/${enc}`).then(r=>r.json()),
+    fetch(`${W}/w/api.php?action=query&titles=${enc}&prop=links&pllimit=500&format=json&origin=*`).then(r=>r.json()),
+    fetch(`${W}/w/api.php?action=query&titles=${enc}&prop=categories&cllimit=100&format=json&origin=*&clshow=!hidden`).then(r=>r.json()),
+    fetch(`${W}/w/api.php?action=query&titles=${enc}&prop=extracts&exlimit=1&explaintext=true&exsectionformat=plain&format=json&origin=*`).then(r=>r.json()),
+    fetch(`${W}/w/api.php?action=parse&page=${enc}&prop=sections&format=json&origin=*`).then(r=>r.json()),
+    fetch(`${W}/w/api.php?action=query&list=search&srsearch=${enc}&srlimit=20&format=json&origin=*`).then(r=>r.json()),
+  ]);
+
+  const sum = sumR.status==='fulfilled' ? sumR.value : {};
+  if(!sum.title || sum.type?.includes('not_found'))
+    throw new Error(`No Wikipedia article found for "${topic}". Try a different spelling.`);
+
+  let fullText = '';
+  if(introR.status==='fulfilled'){
+    const pg = Object.values(introR.value?.query?.pages||{})[0];
+    fullText = pg?.extract || '';
+  }
+  fullText = fullText || sum.extract || '';
+
+  let sections = [];
+  if(secR.status==='fulfilled' && secR.value?.parse?.sections){
+    const skip = new Set(['References','External links','See also','Notes',
+                          'Bibliography','Further reading','Footnotes','Works cited']);
+    sections = secR.value.parse.sections
+      .map(s=>s.line.replace(/<[^>]+>/g,''))
+      .filter(s=>s&&!skip.has(s));
+  }
+
+  let categories = [];
+  if(catR.status==='fulfilled'){
+    const pg = Object.values(catR.value?.query?.pages||{})[0];
+    categories = (pg?.categories||[])
+      .map(c=>c.title.replace('Category:',''))
+      .filter(c=>!/^(Articles|Wikipedia|Pages|CS1|Webarchive|All |Use |Coordinates|Short description|Good articles|Featured|Cleanup|Disambig|Redirects)/.test(c))
+      .slice(0,30);
+  }
+
+  let relatedLinks = [];
+  if(lnkR.status==='fulfilled'){
+    const pg = Object.values(lnkR.value?.query?.pages||{})[0];
+    relatedLinks = (pg?.links||[])
+      .map(l=>l.title)
+      .filter(t=>!t.includes(':')&&!t.includes('(disambiguation)')&&t!==sum.title)
+      .slice(0,50);
+  }
+  if(srchR.status==='fulfilled'){
+    (srchR.value?.query?.search||[])
+      .map(r=>r.title)
+      .filter(t=>t!==sum.title&&!relatedLinks.includes(t))
+      .slice(0,15).forEach(t=>relatedLinks.push(t));
+  }
+
+  return {
+    topic: sum.title,
+    description: sum.description||'',
+    extract: sum.extract||'',
+    thumbnail: sum.thumbnail?.source||null,
+    url: sum.content_urls?.desktop?.page||null,
+    fullText,
+    sections: sections.slice(0,30),
+    categories,
+    relatedLinks: relatedLinks.slice(0,60),
+  };
+}
+
+/* ════════════════════════════════════════════════════════
+   STEP 2 — calls YOUR backend /api/gemini-extract
+   API key stays safe in your .env file on the server
+════════════════════════════════════════════════════════ */
+async function extractWithGemini(wiki){
+  const resp = await fetch('/api/gemini-extract', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      topic:       wiki.topic,
+      description: wiki.description,
+      fullText:    wiki.fullText.slice(0, 4000),
+      sections:    wiki.sections.slice(0, 20),
+      categories:  wiki.categories.slice(0, 15),
+    })
+  });
+
+  const data = await resp.json();
+  if(!data.success) throw new Error(data.error || 'AI extraction failed.');
+
+  return {
+    topicType:        data.topicType        || 'general',
+    entities:         data.entities         || {people:[],organizations:[],places:[],dates:[],numbers:[]},
+    keyFacts:         data.keyFacts         || [],
+    semanticKeywords: data.semanticKeywords || [],
+  };
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDER
+════════════════════════════════════════════════════════ */
+function renderResults(data){
+  const e = data.entities||{};
+  const totalEnts = (e.people||[]).length+(e.organizations||[]).length+(e.places||[]).length;
   let html = '';
 
-  // ── Topic card ──
-  html += '<div class="card"><div class="card-body"><div class="topic-card">';
-  if (data.thumbnail) {
-    html += `<img class="topic-thumb" src="${escH(data.thumbnail)}" alt="${escH(data.topic)}" onerror="this.outerHTML='<div class=topic-thumb-ph><i class=fab fa-wikipedia-w></i></div>'">`;
+  // Topic card
+  html += `<div class="card"><div class="card-body"><div class="topic-card">`;
+  if(data.thumbnail){
+    html += `<img class="topic-thumb" src="${escH(data.thumbnail)}" alt="${escH(data.topic)}"
+      onerror="this.outerHTML='<div class=topic-thumb-ph><i class=\\'fab fa-wikipedia-w\\'></i></div>'">`;
   } else {
-    html += '<div class="topic-thumb-ph"><i class="fab fa-wikipedia-w"></i></div>';
+    html += `<div class="topic-thumb-ph"><i class="fab fa-wikipedia-w"></i></div>`;
   }
-  html += '<div>';
-  html += `<div class="topic-title">${escH(data.topic)}</div>`;
-  if (data.description) html += `<div class="topic-desc">${escH(data.description)}</div>`;
-  html += `<div class="topic-extract">${escH((data.extract||'').slice(0,450))}${(data.extract||'').length>450?'...':''}</div>`;
-  if (data.url) html += `<a class="topic-link" href="${escH(data.url)}" target="_blank" rel="noopener"><i class="fab fa-wikipedia-w"></i> Read full article <i class="fas fa-external-link-alt"></i></a>`;
-  html += '</div></div>';
-
-  // Action buttons
+  html += `<div>
+    <div class="topic-title">${escH(data.topic)}</div>
+    ${data.description?`<div class="topic-desc">${escH(data.description)}</div>`:''}
+    ${data.topicType?`<span class="type-badge">${escH(data.topicType)}</span>`:''}
+    <div class="topic-extract">${escH((data.extract||'').slice(0,420))}${(data.extract||'').length>420?'...':''}</div>
+    ${data.url?`<a class="topic-link" href="${escH(data.url)}" target="_blank" rel="noopener">
+      <i class="fab fa-wikipedia-w"></i> Read full article <i class="fas fa-external-link-alt"></i></a>`:''}
+  </div></div>`;
   html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-100);">
     <button class="btn btn-sec" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
     <button class="btn btn-sec" onclick="copyAllKeywords()"><i class="fas fa-copy"></i> Copy All Keywords</button>
-    <button class="btn btn-sec" onclick="sendToResearch()"><i class="fas fa-search"></i> Send to Keyword Research</button>
-  </div>`;
-  html += '</div></div>';
+  </div></div></div>`;
 
-  // ── Stats row ──
-  const e = data.entities || {};
-  const totalEntities = (e.people||[]).length + (e.organizations||[]).length + (e.places||[]).length;
-  html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:18px;">
-    ${statBox(totalEntities,'Entities','#0ea5e9')}
-    ${statBox((data.semanticKeywords||[]).length,'Semantic KWs','#7c3aed')}
-    ${statBox((data.keyFacts||[]).length,'Key Facts','#10b981')}
-    ${statBox((data.relatedLinks||[]).length,'Related Topics','#f59e0b')}
-    ${statBox((data.categories||[]).length,'Categories','#374151')}
+  // Stats
+  html += `<div class="stat-grid">
+    ${sb(totalEnts,'Entities','#0ea5e9')}
+    ${sb((data.semanticKeywords||[]).length,'Semantic KWs','#7c3aed')}
+    ${sb((data.keyFacts||[]).length,'Key Facts','#10b981')}
+    ${sb((data.relatedLinks||[]).length,'Related Topics','#f59e0b')}
+    ${sb((data.categories||[]).length,'Categories','#374151')}
+    ${sb((data.sections||[]).length,'Sections','#ef4444')}
   </div>`;
 
-  // ── Tabs ──
-  const kwCount = (data.semanticKeywords||[]).length;
-  const relCount = (data.relatedLinks||[]).length;
+  // Tabs
+  const kwC=(data.semanticKeywords||[]).length, relC=(data.relatedLinks||[]).length;
   html += `<div class="card"><div class="card-body">
     <div class="tabs">
-      <button class="tab active" data-tab="keywords" onclick="switchTab('keywords')"><i class="fas fa-search" style="color:var(--teal);"></i> Semantic Keywords <span class="tab-badge">${kwCount}</span></button>
-      <button class="tab" data-tab="entities" onclick="switchTab('entities')"><i class="fas fa-tags" style="color:var(--amber);"></i> Entities <span class="tab-badge">${totalEntities}</span></button>
-      <button class="tab" data-tab="facts" onclick="switchTab('facts')"><i class="fas fa-list-check" style="color:var(--green);"></i> Key Facts</button>
-      <button class="tab" data-tab="related" onclick="switchTab('related')"><i class="fas fa-link" style="color:var(--purple);"></i> Related Topics <span class="tab-badge">${relCount}</span></button>
-      <button class="tab" data-tab="categories" onclick="switchTab('categories')"><i class="fas fa-folder" style="color:var(--gray-600);"></i> Categories</button>
+      <button class="tab active" data-tab="kw"    onclick="switchTab('kw')">
+        <i class="fas fa-search"     style="color:var(--teal);"></i> Semantic Keywords <span class="tab-badge">${kwC}</span></button>
+      <button class="tab" data-tab="ent"   onclick="switchTab('ent')">
+        <i class="fas fa-tags"       style="color:var(--amber);"></i> Entities <span class="tab-badge">${totalEnts}</span></button>
+      <button class="tab" data-tab="facts" onclick="switchTab('facts')">
+        <i class="fas fa-list-check" style="color:var(--green);"></i> Key Facts</button>
+      <button class="tab" data-tab="rel"   onclick="switchTab('rel')">
+        <i class="fas fa-link"       style="color:var(--purple);"></i> Related <span class="tab-badge">${relC}</span></button>
+      <button class="tab" data-tab="cats"  onclick="switchTab('cats')">
+        <i class="fas fa-folder"     style="color:var(--gray-600);"></i> Categories</button>
+      <button class="tab" data-tab="secs"  onclick="switchTab('secs')">
+        <i class="fas fa-list"       style="color:var(--red);"></i> Sections</button>
     </div>`;
 
-  // Keywords tab
-  html += `<div id="panel-keywords" class="tab-panel active">`;
-  if (data.semanticKeywords && data.semanticKeywords.length) {
-    html += `<div class="notice"><i class="fas fa-lightbulb"></i> Click any keyword to copy it. Use "Copy All Keywords" to copy the full list at once.</div>`;
-    data.semanticKeywords.forEach(kw => {
-      html += `<div class="kw-item" onclick="copyKw(this,'${escH(kw).replace(/'/g,"&#39;")}')">
-        <span>${escH(kw)}</span>
-        <span class="kw-copy-btn">Copy</span>
-      </div>`;
+  // Keywords panel
+  html += `<div id="panel-kw" class="tab-panel active">`;
+  if(data.semanticKeywords?.length){
+    html += `<div class="notice notice-ai"><i class="fab fa-google"></i> Keywords generated by Gemini AI — real search queries based on topic type: <strong>${escH(data.topicType)}</strong></div>`;
+    data.semanticKeywords.forEach(kw=>{
+      html += `<div class="kw-item" onclick="copyKw(this,'${escAttr(kw)}')">
+        <span>${escH(kw)}</span><span class="kw-copy-btn">Copy</span></div>`;
     });
-  } else {
-    html += '<div style="text-align:center;padding:24px;color:var(--gray-400);">No semantic keywords found.</div>';
-  }
-  html += '</div>';
+  } else html += `<p style="text-align:center;padding:24px;color:var(--gray-400);">No keywords found.</p>`;
+  html += `</div>`;
 
-  // Entities tab
-  html += `<div id="panel-entities" class="tab-panel">`;
-  const entCats = [
-    {key:'people',label:'People',icon:'fa-user',cls:'t-person'},
-    {key:'organizations',label:'Organisations',icon:'fa-building',cls:'t-org'},
-    {key:'places',label:'Places',icon:'fa-map-marker-alt',cls:'t-place'},
-    {key:'dates',label:'Dates',icon:'fa-calendar',cls:'t-date'},
-    {key:'numbers',label:'Numbers & Stats',icon:'fa-hashtag',cls:'t-number'}
-  ];
-  entCats.forEach(cat => {
-    const items = (data.entities||{})[cat.key]||[];
-    if (!items.length) return;
+  // Entities panel
+  html += `<div id="panel-ent" class="tab-panel">`;
+  [{key:'people',label:'People',icon:'fa-user',cls:'t-person'},
+   {key:'organizations',label:'Organisations',icon:'fa-building',cls:'t-org'},
+   {key:'places',label:'Places',icon:'fa-map-marker-alt',cls:'t-place'},
+   {key:'dates',label:'Dates',icon:'fa-calendar',cls:'t-date'},
+   {key:'numbers',label:'Numbers & Stats',icon:'fa-hashtag',cls:'t-number'}
+  ].forEach(cat=>{
+    const items=(data.entities||{})[cat.key]||[];
+    if(!items.length) return;
     html += `<div class="section-card">
-      <div class="section-head"><div class="section-title"><i class="fas ${cat.icon}" style="color:var(--teal);"></i>${cat.label} (${items.length})</div></div>
-      <div class="section-body"><div class="tag-cloud">
-        ${items.slice(0,25).map(i=>`<span class="tag ${cat.cls}">${escH(i)}</span>`).join('')}
-        ${items.length>25?`<span class="tag t-cat">+${items.length-25} more</span>`:''}
+      <div class="section-head"><div class="section-title">
+        <i class="fas ${cat.icon}" style="color:var(--teal);"></i>${cat.label} (${items.length})
       </div></div>
-    </div>`;
+      <div class="section-body"><div class="tag-cloud">
+        ${items.map(i=>`<span class="tag ${cat.cls}">${escH(i)}</span>`).join('')}
+      </div></div></div>`;
   });
-  html += '</div>';
+  html += `</div>`;
 
-  // Facts tab
+  // Facts panel
   html += `<div id="panel-facts" class="tab-panel">`;
-  if (data.keyFacts && data.keyFacts.length) {
-    data.keyFacts.forEach(f => { html += `<div class="fact-item">${escH(f)}</div>`; });
-  } else {
-    html += '<div style="text-align:center;padding:24px;color:var(--gray-400);">No key facts extracted.</div>';
-  }
-  html += '</div>';
+  if(data.keyFacts?.length){
+    data.keyFacts.forEach(f=>{ html += `<div class="fact-item">${escH(f)}</div>`; });
+  } else html += `<p style="text-align:center;padding:24px;color:var(--gray-400);">No key facts extracted.</p>`;
+  html += `</div>`;
 
-  // Related tab
-  html += `<div id="panel-related" class="tab-panel">`;
-  if (data.relatedLinks && data.relatedLinks.length) {
-    html += `<div class="notice"><i class="fas fa-mouse-pointer"></i> Click any topic to look it up instantly.</div>`;
-    html += '<div class="tag-cloud">';
-    data.relatedLinks.slice(0,50).forEach(link => {
-      html += `<span class="tag t-related" onclick="quickSearch('${escH(link).replace(/'/g,"&#39;")}')" title="Click to look up">${escH(link)}</span>`;
+  // Related panel
+  html += `<div id="panel-rel" class="tab-panel">`;
+  if(data.relatedLinks?.length){
+    html += `<div class="notice"><i class="fas fa-mouse-pointer"></i> Click any topic to look it up instantly.</div>
+             <div class="tag-cloud">`;
+    data.relatedLinks.forEach(l=>{
+      html += `<span class="tag t-related" onclick="quickSearch('${escAttr(l)}')">${escH(l)}</span>`;
     });
-    html += '</div>';
-  } else {
-    html += '<div style="text-align:center;padding:24px;color:var(--gray-400);">No related topics found.</div>';
-  }
-  html += '</div>';
+    html += `</div>`;
+  } else html += `<p style="text-align:center;padding:24px;color:var(--gray-400);">No related topics.</p>`;
+  html += `</div>`;
 
-  // Categories tab
-  html += `<div id="panel-categories" class="tab-panel">`;
-  if (data.categories && data.categories.length) {
-    html += '<div class="tag-cloud">';
-    data.categories.forEach(c => { html += `<span class="tag t-cat">${escH(c)}</span>`; });
-    html += '</div>';
-  } else {
-    html += '<div style="text-align:center;padding:24px;color:var(--gray-400);">No categories found.</div>';
-  }
-  html += '</div>';
+  // Categories panel
+  html += `<div id="panel-cats" class="tab-panel">`;
+  if(data.categories?.length){
+    html += `<div class="tag-cloud">`;
+    data.categories.forEach(c=>{ html += `<span class="tag t-cat">${escH(c)}</span>`; });
+    html += `</div>`;
+  } else html += `<p style="text-align:center;padding:24px;color:var(--gray-400);">No categories.</p>`;
+  html += `</div>`;
 
-  html += '</div></div>'; // close card-body + card
+  // Sections panel
+  html += `<div id="panel-secs" class="tab-panel">`;
+  if(data.sections?.length){
+    data.sections.forEach(s=>{
+      html += `<div style="padding:8px 12px;border-radius:8px;font-size:13px;color:var(--gray-700);background:var(--gray-50);margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-angle-right" style="color:var(--gray-400);font-size:11px;"></i>${escH(s)}</div>`;
+    });
+  } else html += `<p style="text-align:center;padding:24px;color:var(--gray-400);">No sections.</p>`;
+  html += `</div>`;
 
+  html += `</div></div>`;
   document.getElementById('results').innerHTML = html;
 }
 
-function switchTab(id) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
+/* ── Utilities ── */
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+id));
 }
-
-function copyKw(el, kw) {
-  navigator.clipboard.writeText(kw).catch(() => {
-    const ta = document.createElement('textarea'); ta.value = kw;
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+function copyKw(el,kw){
+  navigator.clipboard.writeText(kw).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=kw;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
   });
-  const btn = el.querySelector('.kw-copy-btn');
-  if (btn) { btn.textContent = 'Copied!'; btn.style.background = 'var(--teal)'; btn.style.color = '#fff'; setTimeout(() => { btn.textContent = 'Copy'; btn.style.background = ''; btn.style.color = ''; }, 1200); }
+  const b=el.querySelector('.kw-copy-btn');
+  if(b){b.textContent='Copied!';b.style.background='var(--teal)';b.style.color='#fff';
+    setTimeout(()=>{b.textContent='Copy';b.style.background='';b.style.color='';},1200);}
 }
-
-function copyAllKeywords() {
-  if (!lastData || !lastData.semanticKeywords) return;
-  const text = lastData.semanticKeywords.join('\n');
-  navigator.clipboard.writeText(text).catch(() => {
-    const ta = document.createElement('textarea'); ta.value = text;
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+function copyAllKeywords(){
+  if(!lastData?.semanticKeywords) return;
+  const t=lastData.semanticKeywords.join('\n');
+  navigator.clipboard.writeText(t).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=t;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
   });
-  alert(`Copied ${lastData.semanticKeywords.length} keywords to clipboard!`);
+  alert(`Copied ${lastData.semanticKeywords.length} keywords!`);
 }
-
-function sendToResearch() {
-  if (!lastData || !lastData.semanticKeywords) return;
-  const kws = lastData.semanticKeywords.join('\n');
-  sessionStorage.setItem('research_prefill', kws);
-  window.location.href = 'research.html';
+function exportCSV(){
+  if(!lastData) return;
+  const rows=['Item,Category'];
+  const{entities:e,relatedLinks:r,categories:c,semanticKeywords:k}=lastData;
+  (e.people||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Person`));
+  (e.organizations||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Organisation`));
+  (e.places||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Place`));
+  (e.dates||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Date`));
+  (e.numbers||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Number`));
+  (r||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Related Link`));
+  (c||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Category`));
+  (k||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Semantic Keyword`));
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+  a.download=`wikipedia-${(lastData.topic||'export').replace(/\s+/g,'-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
-
-function exportCSV() {
-  if (!lastData) return;
-  const rows = ['Item,Category'];
-  const {entities, relatedLinks, categories, semanticKeywords} = lastData;
-  (entities.people||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Person`));
-  (entities.organizations||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Organisation`));
-  (entities.places||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Place`));
-  (entities.dates||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Date`));
-  (entities.numbers||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Number/Stat`));
-  (relatedLinks||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Related Link`));
-  (categories||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Category`));
-  (semanticKeywords||[]).forEach(i=>rows.push(`"${i.replace(/"/g,'""')}",Semantic Keyword`));
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([rows.join('\n')], {type:'text/csv'}));
-  a.download = `wikipedia-${(lastData.topic||'export').replace(/\s+/g,'-').toLowerCase()}-${today()}.csv`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-}
-
-function statBox(n, label, color) {
-  return `<div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;padding:14px;text-align:center;">
-    <div style="font-size:1.6rem;font-weight:800;color:${color};line-height:1;">${n}</div>
-    <div style="font-size:10px;color:var(--gray-400);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.04em;">${label}</div>
-  </div>`;
-}
-
-function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function today() { return new Date().toISOString().split('T')[0]; }
+function sb(n,l,c){return `<div class="stat-box"><div class="stat-num" style="color:${c};">${n}</div><div class="stat-lbl">${l}</div></div>`;}
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return String(s||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');}
 </script>
 </body>
 </html>
