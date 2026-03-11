@@ -42,25 +42,21 @@ textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.
 .btn-primary:hover{opacity:.9;transform:translateY(-1px);}
 .btn-secondary{background:var(--white);border:1.5px solid var(--gray-200);color:var(--gray-600);padding:10px 18px;font-size:13px;}
 .btn-secondary:hover{border-color:var(--purple);color:var(--purple);}
-/* Info bar */
 .info-bar{background:linear-gradient(135deg,rgba(124,58,237,.06),rgba(91,33,182,.04));border:1px solid rgba(124,58,237,.15);border-radius:var(--r);padding:14px 18px;font-size:13px;color:var(--gray-600);display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
 .info-bar strong{color:var(--purple);}
 .method-pill{padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:auto;}
 .mp-hf{background:#dcfce7;color:#14532d;}
 .mp-regex{background:#fef9c3;color:#713f12;}
-/* Stats */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:24px;}
 .stat-box{border:1.5px solid transparent;border-radius:var(--r-lg);padding:16px 12px;text-align:center;transition:transform .15s;}
 .stat-box:hover{transform:translateY(-2px);}
 .stat-icon{font-size:1rem;margin-bottom:7px;display:block;}
 .stat-num{font-size:1.9rem;font-weight:800;line-height:1;}
 .stat-label{font-size:10px;font-weight:600;margin-top:5px;text-transform:uppercase;letter-spacing:.04em;opacity:.7;}
-/* View toggle */
 .view-toggle{display:flex;gap:4px;background:var(--gray-100);border-radius:10px;padding:4px;margin-bottom:20px;}
 .vt-btn{flex:1;padding:9px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--gray-500);background:transparent;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px;}
 .vt-btn.active{background:var(--white);color:var(--gray-900);box-shadow:0 1px 4px rgba(0,0,0,.1);}
 .vt-btn:disabled{opacity:.4;cursor:not-allowed;}
-/* Entity sections */
 .entity-section{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px;}
 .entity-section:hover{box-shadow:0 4px 16px rgba(0,0,0,.07);}
 .ent-head{padding:13px 18px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;background:var(--gray-50);gap:12px;flex-wrap:wrap;}
@@ -73,11 +69,10 @@ textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.
 .tag:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.12);}
 .tag-mentions{font-size:10px;opacity:.65;font-weight:500;background:rgba(0,0,0,.08);padding:1px 5px;border-radius:100px;}
 .t-person{background:#fef3c7;color:#92400e;border-color:rgba(245,158,11,.25);}
-.t-org   {background:#e0f2fe;color:#075985;border-color:rgba(14,165,233,.25);}
-.t-place {background:#dcfce7;color:#14532d;border-color:rgba(34,197,94,.25);}
-.t-brand {background:#ede9fe;color:#5b21b6;border-color:rgba(124,58,237,.25);}
+.t-org{background:#e0f2fe;color:#075985;border-color:rgba(14,165,233,.25);}
+.t-place{background:#dcfce7;color:#14532d;border-color:rgba(34,197,94,.25);}
+.t-brand{background:#ede9fe;color:#5b21b6;border-color:rgba(124,58,237,.25);}
 .t-concept{background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-200);}
-/* Attributes view */
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
 .filter-lbl{font-size:12px;font-weight:600;color:var(--gray-500);}
 .filter-btn{padding:5px 13px;border:1.5px solid var(--gray-200);border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--gray-500);background:var(--white);transition:all .2s;}
@@ -90,28 +85,27 @@ textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.
 .attr-card-head{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--gray-100);}
 .attr-type-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
 .ati-person{background:#fef3c7;color:#92400e;}
-.ati-org   {background:#e0f2fe;color:#075985;}
-.ati-brand {background:#ede9fe;color:#5b21b6;}
+.ati-org{background:#e0f2fe;color:#075985;}
+.ati-brand{background:#ede9fe;color:#5b21b6;}
 .attr-name{font-size:14px;font-weight:700;color:var(--gray-900);flex:1;}
 .attr-entity-type{font-size:10px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em;}
 .sentiment-chip{padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0;}
 .sc-positive{background:#dcfce7;color:#14532d;}
 .sc-negative{background:#fee2e2;color:#7f1d1d;}
-.sc-mixed   {background:#fef9c3;color:#713f12;}
-.sc-neutral {background:var(--gray-100);color:var(--gray-500);}
+.sc-mixed{background:#fef9c3;color:#713f12;}
+.sc-neutral{background:var(--gray-100);color:var(--gray-500);}
 .attr-card-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
 .attr-row{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;}
 .attr-row-icon{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0;margin-top:1px;}
 .ari-role{background:#fef9c3;color:#713f12;}
-.ari-rel {background:#e0f2fe;color:#075985;}
-.ari-loc {background:#dcfce7;color:#14532d;}
+.ari-rel{background:#e0f2fe;color:#075985;}
+.ari-loc{background:#dcfce7;color:#14532d;}
 .attr-row-label{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.04em;width:70px;flex-shrink:0;padding-top:2px;}
 .attr-row-value{color:var(--gray-700);line-height:1.5;flex:1;}
 .rel-item{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
 .rel-verb{font-size:10px;font-weight:700;color:var(--gray-400);background:var(--gray-100);padding:1px 7px;border-radius:4px;white-space:nowrap;}
 .rel-target{font-weight:600;color:var(--gray-700);}
 .arrow{color:var(--gray-300);}
-/* Empty/loading */
 .empty-state{text-align:center;padding:60px 24px;color:var(--gray-400);}
 .empty-state i{font-size:3rem;color:var(--gray-200);display:block;margin-bottom:14px;}
 .empty-state h3{font-size:16px;font-weight:700;color:var(--gray-500);margin-bottom:6px;}
@@ -125,8 +119,8 @@ textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.
 <body>
 <div class="page-wrap">
 <section class="tool-hero">
-  <h1><i class="fas fa-tags" style="margin-right:10px;opacity:.9;"></i> Entity & Attributes Finder</h1>
-  <p>NLP extracts people, organisations, places, brands & concepts — plus role, relationships, location and sentiment for each entity</p>
+  <h1><i class="fas fa-tags" style="margin-right:10px;opacity:.9;"></i> Entity &amp; Attributes Finder</h1>
+  <p>NLP extracts people, organisations, places, brands &amp; concepts — plus role, relationships, location and sentiment for each entity</p>
   <a href="tools.html" class="tool-back"><i class="fas fa-arrow-left"></i> All Tools</a>
 </section>
 
@@ -146,7 +140,7 @@ Today, Apple operates more than 500 retail stores in 25 countries, including fla
 In recent years, Apple has focused on services and wearables, launching Apple Pay in 2014, Apple Watch in 2015, and AirPods in 2016. The company's revenue reached $394.3 billion in 2022, with a market capitalization exceeding $2.5 trillion, making it the world's most valuable company.</textarea>
   <div class="char-counter" id="charCounter">0 words</div>
   <div class="btn-row">
-    <button class="btn btn-primary" onclick="runEntityFinder()"><i class="fas fa-magic"></i> Extract Entities & Attributes</button>
+    <button class="btn btn-primary" onclick="runEntityFinder()"><i class="fas fa-magic"></i> Extract Entities &amp; Attributes</button>
     <button class="btn btn-secondary" onclick="clearTool()"><i class="fas fa-redo"></i> Clear</button>
     <button class="btn btn-secondary" id="btnExport" style="display:none;" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
   </div>
@@ -154,7 +148,7 @@ In recent years, Apple has focused on services and wearables, launching Apple Pa
     <div class="empty-state">
       <i class="fas fa-tags"></i>
       <h3>No entities extracted yet</h3>
-      <p>Paste text above and click <strong>Extract Entities & Attributes</strong></p>
+      <p>Paste text above and click <strong>Extract Entities &amp; Attributes</strong></p>
     </div>
   </div>
 </div>
@@ -171,77 +165,91 @@ let lastData    = null;
 let activeView   = 'entities';
 let activeFilter = 'all';
 
+// Store entity names globally for safe onclick handling
+window._entityTags = {};
+
 window.addEventListener('DOMContentLoaded', updateCounter);
 
 function updateCounter() {
   const val = document.getElementById('entityInput').value.trim();
-  const words = val ? val.split(/\s+/).filter(w=>w.length>0).length : 0;
-  document.getElementById('charCounter').textContent = words.toLocaleString()+' words · '+val.length.toLocaleString()+' characters';
+  const words = val ? val.split(/\s+/).filter(w => w.length > 0).length : 0;
+  document.getElementById('charCounter').textContent = words.toLocaleString() + ' words · ' + val.length.toLocaleString() + ' characters';
 }
 
 async function runEntityFinder() {
   const text = document.getElementById('entityInput').value.trim();
-  if (!text || text.split(/\s+/).length < 10) { alert('Please paste at least a few sentences of text.'); return; }
+  if (!text || text.split(/\s+/).length < 10) {
+    alert('Please paste at least a few sentences of text.');
+    return;
+  }
 
   document.getElementById('results').innerHTML =
     '<div class="empty-state"><div class="spin"></div><p style="margin-top:14px;color:var(--gray-400);">Analysing with NLP engine...</p></div>';
   document.getElementById('btnExport').style.display = 'none';
 
   try {
-    const res  = await fetch(API+'/api/extract-entities', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text})
+    const res = await fetch(API + '/api/groq-entity-extract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
     });
     const data = await res.json();
-    if (!data.success) throw new Error(data.error||'API error');
+    if (!data.success) throw new Error(data.error || 'API error');
     lastData     = data;
     activeView   = 'entities';
     activeFilter = 'all';
     renderResults(data);
-    document.getElementById('btnExport').style.display = 'flex';
-  } catch(err) {
+document.getElementById('btnExport').style.display = 'flex';
+document.getElementById('results').scrollIntoView({behavior: 'smooth', block: 'start'});
+  } catch (err) {
     document.getElementById('results').innerHTML =
-      '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red);"></i>'+
-      '<h3>Error</h3><p>'+escH(err.message)+'</p></div>';
+      '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:var(--red);"></i>' +
+      '<h3>Error</h3><p>' + escH(err.message) + '</p></div>';
   }
 }
 
 function renderResults(data) {
-  const e      = data.entities      || {};
-  const attrs  = data.attributes    || {};
-  const det    = data.entityDetails || {};
-  const stats  = data.stats         || {};
-  const total  = Object.values(e).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0);
+  const e         = data.entities      || {};
+  const attrs     = data.attributes    || {};
+  const det       = data.entityDetails || {};
+  const stats     = data.stats         || {};
+  const total     = Object.values(e).reduce((s, a) => s + (Array.isArray(a) ? a.length : 0), 0);
   const attrCount = Object.keys(attrs).length;
-  const method    = stats.method||'regex-fallback';
+  const method    = stats.method || 'regex-fallback';
 
-  if (total===0) {
+  // Reset global tag store
+  window._entityTags = {};
+
+  if (total === 0) {
     document.getElementById('results').innerHTML =
-      '<div class="empty-state"><i class="fas fa-search"></i><h3>No entities found</h3>'+
+      '<div class="empty-state"><i class="fas fa-search"></i><h3>No entities found</h3>' +
       '<p>Try longer structured text with proper capitalisation.</p></div>';
     return;
   }
 
   let html = '';
 
-  // Info bar
+  // ── Info bar ──
   html += `<div class="info-bar">
     <i class="fas fa-check-circle" style="color:var(--purple);flex-shrink:0;"></i>
-    <span>Found <strong>${total} entities</strong> · <strong>${attrCount} with attributes</strong> from <strong>${(stats.wordCount||0).toLocaleString()} words</strong>.</span>
-    <span class="method-pill ${method==='huggingface'?'mp-hf':'mp-regex'}">${method==='huggingface'?'<i class="fas fa-brain"></i> HF NLP':'<i class="fas fa-code"></i> Regex'}</span>
+    <span>Found <strong>${total} entities</strong> · <strong>${attrCount} with attributes</strong> from <strong>${(stats.wordCount || 0).toLocaleString()} words</strong>.</span>
+    <span class="method-pill ${method === 'huggingface' ? 'mp-hf' : 'mp-regex'}">
+      ${method === 'huggingface' ? '<i class="fas fa-brain"></i> HF NLP' : '<i class="fas fa-code"></i> Regex'}
+    </span>
   </div>`;
 
-  // Stat grid
+  // ── Stat grid ──
   const statCfg = [
-    {key:'people',        label:'People',        color:'#92400e', bg:'#fef3c7', bc:'rgba(245,158,11,.2)',  icon:'fa-user'},
-    {key:'organizations', label:'Organisations',  color:'#075985', bg:'#e0f2fe', bc:'rgba(14,165,233,.2)', icon:'fa-building'},
-    {key:'places',        label:'Places',         color:'#14532d', bg:'#dcfce7', bc:'rgba(34,197,94,.2)',  icon:'fa-map-marker-alt'},
-    {key:'brands',        label:'Brands',         color:'#5b21b6', bg:'#ede9fe', bc:'rgba(124,58,237,.2)',icon:'fa-trademark'},
-    {key:'concepts',      label:'Concepts',       color:'#475569', bg:'#f1f5f9', bc:'#e2e8f0',             icon:'fa-lightbulb'},
-    {key:'_attrs',        label:'With Attrs',     color:'#7c3aed', bg:'#f5f3ff', bc:'rgba(124,58,237,.2)',icon:'fa-id-card'},
+    { key:'people',        label:'People',       color:'#92400e', bg:'#fef3c7', bc:'rgba(245,158,11,.2)',  icon:'fa-user' },
+    { key:'organizations', label:'Organisations', color:'#075985', bg:'#e0f2fe', bc:'rgba(14,165,233,.2)', icon:'fa-building' },
+    { key:'places',        label:'Places',        color:'#14532d', bg:'#dcfce7', bc:'rgba(34,197,94,.2)',  icon:'fa-map-marker-alt' },
+    { key:'brands',        label:'Brands',        color:'#5b21b6', bg:'#ede9fe', bc:'rgba(124,58,237,.2)', icon:'fa-trademark' },
+    { key:'concepts',      label:'Concepts',      color:'#475569', bg:'#f1f5f9', bc:'#e2e8f0',             icon:'fa-lightbulb' },
+    { key:'_attrs',        label:'With Attrs',    color:'#7c3aed', bg:'#f5f3ff', bc:'rgba(124,58,237,.2)', icon:'fa-id-card' },
   ];
   html += '<div class="stat-grid">';
-  statCfg.forEach(s=>{
-    const num = s.key==='_attrs' ? attrCount : (e[s.key]||[]).length;
+  statCfg.forEach(s => {
+    const num = s.key === '_attrs' ? attrCount : (e[s.key] || []).length;
     html += `<div class="stat-box" style="background:${s.bg};border-color:${s.bc};">
       <i class="fas ${s.icon} stat-icon" style="color:${s.color};"></i>
       <div class="stat-num" style="color:${s.color};">${num}</div>
@@ -250,84 +258,127 @@ function renderResults(data) {
   });
   html += '</div>';
 
-  // View toggle
+  // ── View toggle ──
   html += `<div class="view-toggle">
-    <button class="vt-btn ${activeView==='entities'?'active':''}" onclick="switchView('entities')"><i class="fas fa-tags"></i> Entities View</button>
-    <button class="vt-btn ${activeView==='attributes'?'active':''}" onclick="switchView('attributes')" ${attrCount===0?'disabled':''}><i class="fas fa-id-card"></i> Attributes View${attrCount>0?' ('+attrCount+')':''}</button>
+    <button class="vt-btn ${activeView === 'entities' ? 'active' : ''}" onclick="switchView('entities')">
+      <i class="fas fa-tags"></i> Entities View
+    </button>
+    <button class="vt-btn ${activeView === 'attributes' ? 'active' : ''}" onclick="switchView('attributes')" ${attrCount === 0 ? 'disabled' : ''}>
+      <i class="fas fa-id-card"></i> Attributes View${attrCount > 0 ? ' (' + attrCount + ')' : ''}
+    </button>
   </div>`;
 
-  // ── ENTITIES VIEW ──
-  html += `<div id="viewEntities" style="display:${activeView==='entities'?'block':'none'};">`;
-  html += '<div class="tips-bar"><strong>💡 Tip:</strong> Click any tag to copy it. Switch to <strong>Attributes View</strong> to see roles, relationships, locations & sentiment per entity.</div>';
+  // ══════════════════════════════════════════
+  // ENTITIES VIEW
+  // ══════════════════════════════════════════
+  html += `<div id="viewEntities" style="display:${activeView === 'entities' ? 'block' : 'none'};">`;
+  html += '<div class="tips-bar"><strong>💡 Tip:</strong> Click any tag to copy it. Switch to <strong>Attributes View</strong> to see roles, relationships, locations &amp; sentiment per entity.</div>';
 
   const catCfg = [
-    {key:'people',        detKey:'people',        icon:'fa-user',           cls:'t-person', label:'People',            color:'#92400e', desc:'Named individuals detected by title, role or context.'},
-    {key:'organizations', detKey:'organizations',  icon:'fa-building',       cls:'t-org',    label:'Organisations',     color:'#0369a1', desc:'Companies, institutions, agencies & NGOs.'},
-    {key:'places',        detKey:'places',         icon:'fa-map-marker-alt', cls:'t-place',  label:'Places',            color:'#14532d', desc:'Countries, cities and geographic locations.'},
-    {key:'brands',        detKey:'brands',         icon:'fa-trademark',      cls:'t-brand',  label:'Brands & Products', color:'#5b21b6', desc:'Product names, software tools and brand identifiers.'},
-    {key:'concepts',      detKey:'concepts',       icon:'fa-lightbulb',      cls:'t-concept',label:'Key Concepts',      color:'#475569', desc:'High-frequency thematic terms from the text.'},
+    { key:'people',        detKey:'people',        icon:'fa-user',           cls:'t-person',  label:'People',            color:'#92400e', desc:'Named individuals detected by title, role or context.' },
+    { key:'organizations', detKey:'organizations',  icon:'fa-building',       cls:'t-org',     label:'Organisations',     color:'#0369a1', desc:'Companies, institutions, agencies & NGOs.' },
+    { key:'places',        detKey:'places',         icon:'fa-map-marker-alt', cls:'t-place',   label:'Places',            color:'#14532d', desc:'Countries, cities and geographic locations.' },
+    { key:'brands',        detKey:'brands',         icon:'fa-trademark',      cls:'t-brand',   label:'Brands & Products', color:'#5b21b6', desc:'Product names, software tools and brand identifiers.' },
+    { key:'concepts',      detKey:'concepts',       icon:'fa-lightbulb',      cls:'t-concept', label:'Key Concepts',      color:'#475569', desc:'High-frequency thematic terms from the text.' },
   ];
-  catCfg.forEach(cat=>{
-    const items = e[cat.key]||[];
+
+  catCfg.forEach(cat => {
+    const rawItems = e[cat.key] || [];
+
+    // ── KEY FIX: Safely normalize items whether they are strings or objects ──
+    const items = rawItems.map(i => {
+      if (typeof i === 'string') return i;
+      if (typeof i === 'object' && i !== null) return i.name || i.text || i.value || JSON.stringify(i);
+      return String(i);
+    }).filter(i => i && i.trim().length > 0);
+
     if (!items.length) return;
-    const detItems = det[cat.detKey]||[];
+
+    const detItems = det[cat.detKey] || [];
+
     html += `<div class="entity-section">
       <div class="ent-head">
-        <h3 style="color:${cat.color};"><i class="fas ${cat.icon}"></i> ${cat.label}<span class="ent-count">${items.length}</span></h3>
+        <h3 style="color:${cat.color};">
+          <i class="fas ${cat.icon}"></i> ${cat.label}
+          <span class="ent-count">${items.length}</span>
+        </h3>
         <span class="ent-desc">${cat.desc}</span>
       </div>
       <div class="ent-body"><div class="tag-cloud">`;
-    items.forEach(item=>{
-      const d = detItems.find(x=>x.name===item);
-      const mentions = d?d.mentions:1;
-      const clean = item.replace(/\s*\(\d+x\)$/,'');
-      const badge = (cat.key!=='concepts'&&mentions>1)?` <span class="tag-mentions">×${mentions}</span>`:'';
-      html += `<span class="tag ${cat.cls}" title="Click to copy" onclick="copyTag(this,'${clean.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}'">${escH(clean)}${badge}</span>`;
+
+    items.forEach((item, idx) => {
+      const clean = item.replace(/\s*\(\d+x\)$/, '').trim();
+      if (!clean) return;
+
+      // ── KEY FIX: Store entity text in global map, use safe ID in onclick ──
+      const tagId = `tag_${cat.key}_${idx}`;
+      window._entityTags[tagId] = clean;
+
+      const d = detItems.find(x => {
+        const xName = typeof x === 'object' ? (x.name || '') : String(x);
+        return xName.toLowerCase() === clean.toLowerCase();
+      });
+      const mentions = d && typeof d === 'object' ? (d.mentions || 1) : 1;
+      const badge = (cat.key !== 'concepts' && mentions > 1)
+        ? `<span class="tag-mentions">×${mentions}</span>` : '';
+
+      html += `<span class="tag ${cat.cls}" title="Click to copy" onclick="copyEntityTag('${tagId}')">${escH(clean)}${badge}</span>`;
     });
-    html += '</div></div></div>';
+
+    html += `</div></div></div>`;
   });
-  html += '</div>'; // viewEntities
 
-  // ── ATTRIBUTES VIEW ──
-  html += `<div id="viewAttributes" style="display:${activeView==='attributes'?'block':'none'};">`;
+  html += `</div>`; // end viewEntities
 
-  if (attrCount===0) {
+  // ══════════════════════════════════════════
+  // ATTRIBUTES VIEW
+  // ══════════════════════════════════════════
+  html += `<div id="viewAttributes" style="display:${activeView === 'attributes' ? 'block' : 'none'};">`;
+
+  if (attrCount === 0) {
     html += '<div class="empty-state"><i class="fas fa-id-card"></i><h3>No attributes found</h3><p>Try longer text with clear role/relationship descriptions.</p></div>';
   } else {
-    // Count sentiments for filter bar
     const sentCounts = {};
-    Object.values(attrs).forEach(a=>{ const l=(a.sentiment?.label||'Neutral'); sentCounts[l]=(sentCounts[l]||0)+1; });
-    const hasRole = Object.values(attrs).filter(a=>a.role).length;
-    const hasRel  = Object.values(attrs).filter(a=>a.relationships?.length).length;
-    const hasLoc  = Object.values(attrs).filter(a=>a.location).length;
+    Object.values(attrs).forEach(a => {
+      const l = a.sentiment?.label || 'Neutral';
+      sentCounts[l] = (sentCounts[l] || 0) + 1;
+    });
+    const hasRole = Object.values(attrs).filter(a => a.role).length;
+    const hasRel  = Object.values(attrs).filter(a => a.relationships?.length).length;
+    const hasLoc  = Object.values(attrs).filter(a => a.location).length;
 
     html += '<div class="filter-bar"><span class="filter-lbl">Filter:</span>';
-    html += `<button class="filter-btn ${activeFilter==='all'?'active':''}" onclick="setFilter('all')">All (${attrCount})</button>`;
-    if(sentCounts.Positive) html += `<button class="filter-btn ${activeFilter==='Positive'?'active':''}" onclick="setFilter('Positive')">😊 Positive (${sentCounts.Positive})</button>`;
-    if(sentCounts.Negative) html += `<button class="filter-btn ${activeFilter==='Negative'?'active':''}" onclick="setFilter('Negative')">😟 Negative (${sentCounts.Negative})</button>`;
-    if(sentCounts.Mixed)    html += `<button class="filter-btn ${activeFilter==='Mixed'?'active':''}" onclick="setFilter('Mixed')">😐 Mixed (${sentCounts.Mixed})</button>`;
-    if(hasRole) html += `<button class="filter-btn ${activeFilter==='role'?'active':''}" onclick="setFilter('role')">🎭 Has Role (${hasRole})</button>`;
-    if(hasRel)  html += `<button class="filter-btn ${activeFilter==='rel'?'active':''}" onclick="setFilter('rel')">🔗 Has Relationship (${hasRel})</button>`;
-    if(hasLoc)  html += `<button class="filter-btn ${activeFilter==='loc'?'active':''}" onclick="setFilter('loc')">📍 Has Location (${hasLoc})</button>`;
+    html += `<button class="filter-btn ${activeFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">All (${attrCount})</button>`;
+    if (sentCounts.Positive) html += `<button class="filter-btn ${activeFilter === 'Positive' ? 'active' : ''}" onclick="setFilter('Positive')">😊 Positive (${sentCounts.Positive})</button>`;
+    if (sentCounts.Negative) html += `<button class="filter-btn ${activeFilter === 'Negative' ? 'active' : ''}" onclick="setFilter('Negative')">😟 Negative (${sentCounts.Negative})</button>`;
+    if (sentCounts.Mixed)    html += `<button class="filter-btn ${activeFilter === 'Mixed' ? 'active' : ''}" onclick="setFilter('Mixed')">😐 Mixed (${sentCounts.Mixed})</button>`;
+    if (hasRole) html += `<button class="filter-btn ${activeFilter === 'role' ? 'active' : ''}" onclick="setFilter('role')">🎭 Has Role (${hasRole})</button>`;
+    if (hasRel)  html += `<button class="filter-btn ${activeFilter === 'rel' ? 'active' : ''}" onclick="setFilter('rel')">🔗 Has Relationship (${hasRel})</button>`;
+    if (hasLoc)  html += `<button class="filter-btn ${activeFilter === 'loc' ? 'active' : ''}" onclick="setFilter('loc')">📍 Has Location (${hasLoc})</button>`;
     html += '</div>';
 
     html += '<div class="attr-grid">';
-    Object.entries(attrs).forEach(([name, attr])=>{
-      // Filter
-      const sent = attr.sentiment||{label:'Neutral',color:'#64748b'};
-      const match = activeFilter==='all'
-        || activeFilter===sent.label
-        || (activeFilter==='role' && attr.role)
-        || (activeFilter==='rel'  && attr.relationships?.length)
-        || (activeFilter==='loc'  && attr.location);
+
+    // ── KEY FIX: Normalize entity name lookup for type detection ──
+    const peopleSet = new Set((e.people || []).map(x => (typeof x === 'object' ? x.name : x) || '').map(x => x.toLowerCase()));
+    const orgSet    = new Set((e.organizations || []).map(x => (typeof x === 'object' ? x.name : x) || '').map(x => x.toLowerCase()));
+
+    Object.entries(attrs).forEach(([name, attr]) => {
+      const sent  = attr.sentiment || { label: 'Neutral' };
+      const match = activeFilter === 'all'
+        || activeFilter === sent.label
+        || (activeFilter === 'role' && attr.role)
+        || (activeFilter === 'rel'  && attr.relationships?.length)
+        || (activeFilter === 'loc'  && attr.location);
       if (!match) return;
 
-      const type   = (e.people||[]).includes(name)?'person':(e.organizations||[]).includes(name)?'org':'brand';
-      const icons  = {person:'fa-user',org:'fa-building',brand:'fa-trademark'};
-      const iCls   = {person:'ati-person',org:'ati-org',brand:'ati-brand'};
-      const tLabel = {person:'Person',org:'Organisation',brand:'Brand'};
-      const sCls   = {Positive:'sc-positive',Negative:'sc-negative',Mixed:'sc-mixed',Neutral:'sc-neutral'}[sent.label]||'sc-neutral';
-      const sEmoji = {Positive:'😊',Negative:'😟',Mixed:'😐',Neutral:'😶'}[sent.label]||'😶';
+      const nameLower = name.toLowerCase();
+      const type   = peopleSet.has(nameLower) ? 'person' : orgSet.has(nameLower) ? 'org' : 'brand';
+      const icons  = { person:'fa-user', org:'fa-building', brand:'fa-trademark' };
+      const iCls   = { person:'ati-person', org:'ati-org', brand:'ati-brand' };
+      const tLabel = { person:'Person', org:'Organisation', brand:'Brand' };
+      const sCls   = { Positive:'sc-positive', Negative:'sc-negative', Mixed:'sc-mixed', Neutral:'sc-neutral' }[sent.label] || 'sc-neutral';
+      const sEmoji = { Positive:'😊', Negative:'😟', Mixed:'😐', Neutral:'😶' }[sent.label] || '😶';
 
       html += `<div class="attr-card">
         <div class="attr-card-head">
@@ -359,8 +410,12 @@ function renderResults(data) {
           <div class="attr-row-icon ari-rel"><i class="fas fa-project-diagram"></i></div>
           <div class="attr-row-label">Relations</div>
           <div class="attr-row-value">`;
-        attr.relationships.slice(0,4).forEach(r=>{
-          html += `<div class="rel-item"><span class="rel-verb">${escH(r.rel)}</span><span class="arrow"> → </span><span class="rel-target">${escH(r.target)}</span></div>`;
+        attr.relationships.slice(0, 4).forEach(r => {
+          html += `<div class="rel-item">
+            <span class="rel-verb">${escH(r.rel)}</span>
+            <span class="arrow"> → </span>
+            <span class="rel-target">${escH(r.target)}</span>
+          </div>`;
         });
         html += `</div></div>`;
       }
@@ -370,68 +425,99 @@ function renderResults(data) {
 
       html += `</div></div>`; // attr-card-body + attr-card
     });
+
     html += '</div>'; // attr-grid
   }
+
   html += '</div>'; // viewAttributes
 
   document.getElementById('results').innerHTML = html;
 }
 
+// ── Safe copy using global tag store ──
+function copyEntityTag(tagId) {
+  const text = window._entityTags[tagId] || '';
+  if (!text) return;
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('Copied: ' + text))
+    .catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta); showToast('Copied: ' + text);
+    });
+}
+
 function switchView(view) {
   activeView = view;
-  document.querySelectorAll('.vt-btn').forEach((b,i)=>{
-    b.classList.toggle('active',(i===0&&view==='entities')||(i===1&&view==='attributes'));
+  document.querySelectorAll('.vt-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && view === 'entities') || (i === 1 && view === 'attributes'));
   });
   const ve = document.getElementById('viewEntities');
   const va = document.getElementById('viewAttributes');
-  if(ve) ve.style.display = view==='entities'?'block':'none';
-  if(va) va.style.display = view==='attributes'?'block':'none';
+  if (ve) ve.style.display = view === 'entities' ? 'block' : 'none';
+  if (va) va.style.display = view === 'attributes' ? 'block' : 'none';
 }
 
 function setFilter(f) {
   activeFilter = f;
-  if (lastData) { renderResults(lastData); setTimeout(()=>switchView('attributes'),10); }
+  if (lastData) { renderResults(lastData); setTimeout(() => switchView('attributes'), 10); }
 }
 
-function copyTag(el, text) {
-  navigator.clipboard.writeText(text).then(()=>showToast('Copied: '+text)).catch(()=>{
-    const ta=document.createElement('textarea'); ta.value=text;
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta); showToast('Copied: '+text);
-  });
-}
 function showToast(msg) {
-  const t=document.getElementById('copyToast');
-  document.getElementById('copyToastText').textContent=msg.length>40?msg.slice(0,40)+'…':msg;
+  const t = document.getElementById('copyToast');
+  document.getElementById('copyToastText').textContent = msg.length > 40 ? msg.slice(0, 40) + '…' : msg;
   t.classList.add('show'); clearTimeout(window._tt);
-  window._tt=setTimeout(()=>t.classList.remove('show'),1800);
+  window._tt = setTimeout(() => t.classList.remove('show'), 1800);
 }
+
 function clearTool() {
-  document.getElementById('entityInput').value='';
-  document.getElementById('charCounter').textContent='0 words';
-  document.getElementById('results').innerHTML='<div class="empty-state"><i class="fas fa-tags"></i><h3>No entities extracted yet</h3><p>Paste text above and click <strong>Extract Entities & Attributes</strong></p></div>';
-  document.getElementById('btnExport').style.display='none';
-  lastData=null;
+  document.getElementById('entityInput').value = '';
+  document.getElementById('charCounter').textContent = '0 words';
+  document.getElementById('results').innerHTML =
+    '<div class="empty-state"><i class="fas fa-tags"></i><h3>No entities extracted yet</h3>' +
+    '<p>Paste text above and click <strong>Extract Entities &amp; Attributes</strong></p></div>';
+  document.getElementById('btnExport').style.display = 'none';
+  lastData = null;
+  window._entityTags = {};
 }
+
 function exportCSV() {
   if (!lastData) return;
-  const rows=['Entity,Type,Mentions,Role,Location,Relationships,Sentiment'];
-  const e=lastData.entities, det=lastData.entityDetails||{}, attrs=lastData.attributes||{};
-  const typeMap={people:'Person',organizations:'Organisation',places:'Place',brands:'Brand',concepts:'Concept'};
-  Object.entries(typeMap).forEach(([key,type])=>{
-    (e[key]||[]).forEach(item=>{
-      const clean=item.replace(/\s*\(\d+x\)$/,'').trim();
-      const d=(det[key]||[]).find(x=>x.name===item)||{};
-      const a=attrs[clean]||{};
-      const rels=(a.relationships||[]).map(r=>r.rel+' '+r.target).join(' | ');
-      rows.push(`"${clean.replace(/"/g,'""')}","${type}",${d.mentions||1},"${(a.role||'').replace(/"/g,'""')}","${(a.location||'').replace(/"/g,'""')}","${rels.replace(/"/g,'""')}","${a.sentiment?a.sentiment.label:''}"`);
+  const rows = ['Entity,Type,Mentions,Role,Location,Relationships,Sentiment'];
+  const e    = lastData.entities;
+  const det  = lastData.entityDetails || {};
+  const attrs= lastData.attributes || {};
+  const typeMap = { people:'Person', organizations:'Organisation', places:'Place', brands:'Brand', concepts:'Concept' };
+
+  Object.entries(typeMap).forEach(([key, type]) => {
+    (e[key] || []).forEach(rawItem => {
+      const item  = typeof rawItem === 'object' ? (rawItem.name || '') : String(rawItem);
+      const clean = item.replace(/\s*\(\d+x\)$/, '').trim();
+      const d     = (det[key] || []).find(x => (typeof x === 'object' ? x.name : x) === item) || {};
+      const a     = attrs[clean] || {};
+      const rels  = (a.relationships || []).map(r => r.rel + ' ' + r.target).join(' | ');
+      rows.push([
+        '"' + clean.replace(/"/g, '""') + '"',
+        type,
+        typeof d === 'object' ? (d.mentions || 1) : 1,
+        '"' + (a.role || '').replace(/"/g, '""') + '"',
+        '"' + (a.location || '').replace(/"/g, '""') + '"',
+        '"' + rels.replace(/"/g, '""') + '"',
+        a.sentiment ? a.sentiment.label : ''
+      ].join(','));
     });
   });
-  dlCSV(rows.join('\n'),'entities-'+today()+'.csv');
+
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type: 'text/csv' }));
+  a.download = 'entities-' + new Date().toISOString().split('T')[0] + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
-function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function today(){return new Date().toISOString().split('T')[0];}
-function dlCSV(c,f){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));a.download=f;document.body.appendChild(a);a.click();document.body.removeChild(a);}
+
+function escH(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 </script>
 </body>
 </html>

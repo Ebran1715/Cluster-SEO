@@ -1173,6 +1173,184 @@ app.get('/api/pagespeed', async (req,res)=>{
 });
 
 /* ================================================================
+   API — ENTITY & ATTRIBUTES FINDER (AI-powered via Groq — FREE)
+   Add this route to your server.js
+   Uses same GROQ_API_KEY already in your .env
+================================================================ */
+
+app.post('/api/groq-entity-extract', async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || text.trim().split(/\s+/).length < 10) {
+      return res.status(400).json({ success: false, error: 'Please provide at least a few sentences of text.' });
+    }
+
+    const wordCount = text.trim().split(/\s+/).length;
+
+    const prompt = `You are an expert NLP and entity extraction specialist. Analyse the following text and return ONLY a valid JSON object. No markdown, no explanation — pure JSON only.
+
+TEXT TO ANALYSE:
+${text.slice(0, 6000)}
+
+Return this exact JSON structure:
+{
+  "entities": {
+    "people": [],
+    "organizations": [],
+    "places": [],
+    "brands": [],
+    "concepts": []
+  },
+  "entityDetails": {
+    "people": [],
+    "organizations": [],
+    "places": [],
+    "brands": []
+  },
+  "attributes": {}
+}
+
+ENTITY EXTRACTION RULES:
+
+1. entities.people — Full names of real people mentioned (e.g. "Tim Cook", "Steve Jobs"). Max 20.
+
+2. entities.organizations — Companies, institutions, agencies, governments (e.g. "Apple Inc.", "NASA", "European Union"). Max 20.
+
+3. entities.places — Countries, cities, regions, geographic locations (e.g. "Cupertino", "California", "New York City"). Max 20.
+
+4. entities.brands — Product names, software, services, platforms (e.g. "iPhone", "iOS", "App Store", "iCloud"). Separate from organizations. Max 20.
+
+5. entities.concepts — Key thematic terms and topics that appear frequently or are central to the text (e.g. "artificial intelligence", "machine learning", "climate change"). Extract 5-15 meaningful concepts only — no generic words.
+
+ENTITY DETAILS RULES:
+For entityDetails, each category is an array of objects:
+{
+  "name": "exact entity name",
+  "mentions": <number of times mentioned in text>,
+  "context": "brief context about this entity from the text"
+}
+
+ATTRIBUTES RULES:
+For each person, organization, and brand found, add an entry in "attributes" keyed by the entity name:
+{
+  "EntityName": {
+    "role": "their role or title as described in the text (e.g. CEO, Co-founder, President)",
+    "location": "their associated location if mentioned",
+    "sentiment": {
+      "label": "Positive|Negative|Mixed|Neutral",
+      "reason": "one sentence explaining why"
+    },
+    "relationships": [
+      { "rel": "verb/relationship type", "target": "related entity name" }
+    ]
+  }
+}
+
+RELATIONSHIP RULES:
+- Use short verb phrases for rel: "founded", "leads", "acquired", "partnered with", "competed with", "invested in", "works at", "located in", "owns", "created"
+- target must be another entity from the text
+- Max 4 relationships per entity
+- Only include relationships explicitly stated or strongly implied in the text
+
+SENTIMENT RULES:
+- Positive = entity is described favorably, achieved success, praised
+- Negative = entity is described critically, failed, involved in controversy
+- Mixed = both positive and negative aspects mentioned
+- Neutral = factual mention only, no clear positive or negative framing
+
+CONCEPT RULES:
+- Extract recurring themes and key topics central to the text
+- Must be meaningful multi-word phrases or specific single terms
+- No generic words like "company", "year", "people"
+- Examples: "machine learning", "renewable energy", "supply chain", "market capitalization"`;
+
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+        max_tokens: 2500,
+        response_format: { type: 'json_object' }
+      })
+    });
+
+    const groqData = await groqRes.json();
+    if (groqData.error) {
+      return res.status(500).json({ success: false, error: `Groq error: ${groqData.error.message}` });
+    }
+
+    const raw = groqData?.choices?.[0]?.message?.content || '';
+    if (!raw) return res.status(500).json({ success: false, error: 'AI returned empty response.' });
+
+    let parsed;
+    try {
+      const clean = raw.replace(/```json\s*|```\s*/g, '').trim();
+      const match = clean.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('No JSON found');
+      parsed = JSON.parse(match[0]);
+    } catch (e) {
+      return res.status(500).json({ success: false, error: 'AI returned invalid JSON. Try again.' });
+    }
+
+    // Sanitize and cap all arrays
+    const entities = {
+      people:        (parsed.entities?.people        || []).slice(0, 20),
+      organizations: (parsed.entities?.organizations || []).slice(0, 20),
+      places:        (parsed.entities?.places        || []).slice(0, 20),
+      brands:        (parsed.entities?.brands        || []).slice(0, 20),
+      concepts:      (parsed.entities?.concepts      || []).slice(0, 15),
+    };
+
+    const entityDetails = {
+      people:        (parsed.entityDetails?.people        || []).slice(0, 20),
+      organizations: (parsed.entityDetails?.organizations || []).slice(0, 20),
+      places:        (parsed.entityDetails?.places        || []).slice(0, 20),
+      brands:        (parsed.entityDetails?.brands        || []).slice(0, 20),
+    };
+
+    // Sanitize attributes — ensure relationships is always an array
+    const attributes = {};
+    Object.entries(parsed.attributes || {}).forEach(([name, attr]) => {
+      attributes[name] = {
+        role:          attr.role || '',
+        location:      attr.location || '',
+        sentiment: {
+          label:  attr.sentiment?.label  || 'Neutral',
+          reason: attr.sentiment?.reason || '',
+        },
+        relationships: (attr.relationships || []).slice(0, 4).map(r => ({
+          rel:    r.rel    || '',
+          target: r.target || '',
+        })),
+      };
+    });
+
+    const totalEntities = Object.values(entities).reduce((s, a) => s + a.length, 0);
+
+    res.json({
+      success: true,
+      entities,
+      entityDetails,
+      attributes,
+      stats: {
+        wordCount,
+        totalEntities,
+        method: 'huggingface', // tells frontend to show "AI-powered" badge
+      }
+    });
+
+  } catch (err) {
+    console.error('Entity extract error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/* ================================================================
    API 5 — SEO AUDIT — 22 checks
 ================================================================ */
 app.post('/api/seo-audit', (req,res)=>{
